@@ -553,8 +553,8 @@ function TaskCard({ task }: { task: Task }) {
   const navigate = useNavigate()
   const { sleepTask } = useWorkspace()
   const [flipped, setFlipped] = useState(false)
-  const [expandedArtifact, setExpandedArtifact] = useState<string | null>(
-    task.artifacts[0]?.id ?? null,
+  const [collapsedArtifacts, setCollapsedArtifacts] = useState<Set<string>>(
+    () => new Set(),
   )
 
   return (
@@ -614,17 +614,36 @@ function TaskCard({ task }: { task: Task }) {
             </div>
           </div>
 
-          <div className="artifact-stack">
+          <div
+            className="artifact-stack"
+            onWheel={(event) => {
+              const stack = event.currentTarget
+              const maxScroll = stack.scrollHeight - stack.clientHeight
+              const nextScrollTop = Math.min(
+                maxScroll,
+                Math.max(0, stack.scrollTop + event.deltaY),
+              )
+
+              if (nextScrollTop !== stack.scrollTop) {
+                event.preventDefault()
+                event.stopPropagation()
+                stack.scrollTop = nextScrollTop
+              }
+            }}
+          >
             {task.artifacts.map((artifact) => (
               <ArtifactPreview
                 key={artifact.id}
                 artifact={artifact}
-                expanded={expandedArtifact === artifact.id}
-                onToggle={() =>
-                  setExpandedArtifact((current) =>
-                    current === artifact.id ? null : artifact.id,
-                  )
-                }
+                expanded={!collapsedArtifacts.has(artifact.id)}
+                onToggle={() => {
+                  setCollapsedArtifacts((current) => {
+                    const next = new Set(current)
+                    if (next.has(artifact.id)) next.delete(artifact.id)
+                    else next.add(artifact.id)
+                    return next
+                  })
+                }}
                 onMaximize={() =>
                   navigate({
                     to: '/tasks/$taskId/artifacts/$artifactId',

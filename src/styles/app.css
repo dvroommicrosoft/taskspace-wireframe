@@ -807,6 +807,7 @@ button:disabled {
 .artifact-stack {
   min-height: 0;
   overflow-y: auto;
+  touch-action: pan-y;
   padding: 7px;
   scrollbar-width: thin;
   scrollbar-color: #272c31 transparent;
