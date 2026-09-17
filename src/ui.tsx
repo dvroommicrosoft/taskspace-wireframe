@@ -51,6 +51,7 @@ import {
 } from 'lucide-react'
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -605,60 +606,58 @@ function TaskCard({ task }: { task: Task }) {
   const [collapsedArtifacts, setCollapsedArtifacts] = useState<Set<string>>(
     () => new Set(),
   )
-  const cardRef = useRef<HTMLElement>(null)
-  const captureCardScroll = useRef(false)
-  const captureTimer = useRef<number | null>(null)
+  const artifactStackRef = useRef<HTMLDivElement>(null)
+  const [clippedArtifacts, setClippedArtifacts] = useState<Artifact[]>([])
 
   useEffect(() => {
-    const card = cardRef.current
-    if (!card) return
+    const stack = artifactStackRef.current
+    if (!stack) return
 
-    const handleWheel = (event: WheelEvent) => {
-      const grid = card.closest<HTMLElement>('.task-grid')
-      const stack = card.querySelector<HTMLElement>('.artifact-stack')
-      const target = captureCardScroll.current ? stack : grid
-      if (!target) return
-
-      event.preventDefault()
-      event.stopPropagation()
-      const maxScroll = Math.max(0, target.scrollHeight - target.clientHeight)
-      target.scrollTop = Math.min(
-        maxScroll,
-        Math.max(0, target.scrollTop + event.deltaY),
+    const updateClippedArtifacts = () => {
+      const visibleBottom = stack.getBoundingClientRect().bottom - 42
+      const clippedIds = Array.from(
+        stack.querySelectorAll<HTMLElement>('[data-artifact-id]'),
       )
+        .filter((preview) => {
+          const header = preview.querySelector(':scope > header')
+          return header && header.getBoundingClientRect().bottom > visibleBottom
+        })
+        .map((preview) => preview.dataset.artifactId)
+
+      const next = task.artifacts.filter((artifact) =>
+        clippedIds.includes(artifact.id),
+      )
+      setClippedArtifacts((current) => {
+        if (
+          current.length === next.length &&
+          current.every((artifact, index) => artifact.id === next[index]?.id)
+        ) {
+          return current
+        }
+        return next
+      })
     }
 
-    card.addEventListener('wheel', handleWheel, { passive: false })
+    const observer = new ResizeObserver(updateClippedArtifacts)
+    observer.observe(stack)
+    stack
+      .querySelectorAll<HTMLElement>('[data-artifact-id]')
+      .forEach((preview) => observer.observe(preview))
+    updateClippedArtifacts()
+
     return () => {
-      card.removeEventListener('wheel', handleWheel)
-      if (captureTimer.current !== null) {
-        window.clearTimeout(captureTimer.current)
-      }
+      observer.disconnect()
     }
-  }, [])
+  }, [task.artifacts, collapsedArtifacts])
+
+  const explodeTask = () => {
+    navigate({ to: '/tasks/$taskId', params: { taskId: task.id } })
+  }
 
   return (
     <motion.article
-      ref={cardRef}
       layout
       className={`task-card ${flipped ? 'is-flipped' : ''}`}
-      onMouseEnter={() => {
-        captureCardScroll.current = false
-        if (captureTimer.current !== null) {
-          window.clearTimeout(captureTimer.current)
-        }
-        captureTimer.current = window.setTimeout(() => {
-          captureCardScroll.current = true
-          captureTimer.current = null
-        }, 1000)
-      }}
-      onMouseLeave={() => {
-        captureCardScroll.current = false
-        if (captureTimer.current !== null) {
-          window.clearTimeout(captureTimer.current)
-          captureTimer.current = null
-        }
-      }}
       initial={{ opacity: 0, scale: 0.96, y: 18 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.94, y: -12 }}
@@ -677,9 +676,7 @@ function TaskCard({ task }: { task: Task }) {
             <button
               className="card-control explode"
               aria-label={`Open ${task.title}`}
-              onClick={() =>
-                navigate({ to: '/tasks/$taskId', params: { taskId: task.id } })
-              }
+              onClick={explodeTask}
             >
               <Expand size={15} />
             </button>
@@ -712,7 +709,7 @@ function TaskCard({ task }: { task: Task }) {
             </div>
           </div>
 
-          <div className="artifact-stack">
+          <div className="artifact-stack" ref={artifactStackRef}>
             {task.artifacts.map((artifact) => (
               <ArtifactPreview
                 key={artifact.id}
@@ -735,6 +732,13 @@ function TaskCard({ task }: { task: Task }) {
               />
             ))}
           </div>
+
+          {clippedArtifacts.length > 0 && (
+            <ClippedArtifactSummary
+              artifacts={clippedArtifacts}
+              onClick={explodeTask}
+            />
+          )}
         </div>
 
         <div className="task-card-face task-back">
@@ -750,6 +754,74 @@ function TaskCard({ task }: { task: Task }) {
         </div>
       </motion.div>
     </motion.article>
+  )
+}
+
+function ClippedArtifactSummary({
+  artifacts,
+  onClick,
+}: {
+  artifacts: Artifact[]
+  onClick: () => void
+}) {
+  const labelsRef = useRef<HTMLSpanElement>(null)
+  const [visibleCount, setVisibleCount] = useState(artifacts.length)
+
+  useLayoutEffect(() => {
+    const labels = labelsRef.current
+    if (!labels) return
+
+    const updateVisibleCount = () => {
+      const context = document.createElement('canvas').getContext('2d')
+      if (!context) return
+
+      const styles = window.getComputedStyle(labels)
+      context.font = styles.font
+      const gap = 8
+      let nextCount = 0
+
+      for (let count = artifacts.length; count >= 0; count -= 1) {
+        const hiddenCount = artifacts.length - count
+        const labelWidths = artifacts
+          .slice(0, count)
+          .map((artifact) => context.measureText(artifact.title).width)
+        if (hiddenCount > 0) {
+          labelWidths.push(context.measureText(`+${hiddenCount} more`).width)
+        }
+        const totalWidth =
+          labelWidths.reduce((total, width) => total + width, 0) +
+          Math.max(0, labelWidths.length - 1) * gap
+        if (totalWidth <= labels.clientWidth) {
+          nextCount = count
+          break
+        }
+      }
+      setVisibleCount(nextCount)
+    }
+
+    const observer = new ResizeObserver(updateVisibleCount)
+    observer.observe(labels)
+    updateVisibleCount()
+    return () => observer.disconnect()
+  }, [artifacts])
+
+  const hiddenCount = artifacts.length - visibleCount
+
+  return (
+    <button
+      className="clipped-artifact-summary"
+      onClick={onClick}
+      aria-label="Open task to view clipped artifacts"
+    >
+      <ChevronsUp size={14} />
+      <span className="clipped-artifact-labels" ref={labelsRef}>
+        {artifacts.slice(0, visibleCount).map((artifact) => (
+          <span key={artifact.id}>{artifact.title}</span>
+        ))}
+        {hiddenCount > 0 && <strong>+{hiddenCount} more</strong>}
+      </span>
+      <Expand size={14} />
+    </button>
   )
 }
 
@@ -824,7 +896,11 @@ function ArtifactPreview({
         : FileImage
 
   return (
-    <motion.section layout className={`artifact-preview ${expanded ? 'open' : ''}`}>
+    <motion.section
+      layout
+      data-artifact-id={artifact.id}
+      className={`artifact-preview ${expanded ? 'open' : ''}`}
+    >
       <header>
         <Icon size={14} />
         <strong>{artifact.title}</strong>

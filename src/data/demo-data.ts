@@ -1,4 +1,4 @@
-import type { AgentSession, Task } from '../types'
+import type { AgentSession, Artifact, Task } from '../types'
 
 const now = Date.now()
 const minutes = (value: number) => now - value * 60_000
@@ -421,6 +421,27 @@ function makeGeneratedTask(
   }
 }
 
+function makeOverflowArtifacts(
+  taskId: string,
+  startMinutesAgo: number,
+  titles: string[],
+): Artifact[] {
+  return titles.map((title, index) => {
+    const kind = index % 2 === 0 ? 'markdown' : 'html'
+    const subject = title.replace(/\.(md|html)$/, '')
+    return {
+      id: `${taskId}-${subject.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      title,
+      kind,
+      updatedAt: minutes(startMinutesAgo + index * 7),
+      content:
+        kind === 'markdown'
+          ? `# ${subject}\n\nThis working artifact captures the current evidence, decisions, and open questions for ${subject.toLowerCase()}.\n\n- Confirm the strongest signal\n- Preserve the supporting context\n- Identify the next review decision`
+          : `<div class="mini-page"><span class="eyebrow">Working artifact</span><h2>${subject}</h2><p>Current evidence and decisions are organized for focused review.</p><div class="mini-stat"><b>${index + 2}</b><span>signals synthesized</span></div></div>`,
+    }
+  })
+}
+
 const allDemoTasks: Task[] = [
   {
     id: 'launch-narrative',
@@ -456,6 +477,14 @@ const allDemoTasks: Task[] = [
         imageUrl:
           'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=80',
       },
+      ...makeOverflowArtifacts('launch-narrative', 72, [
+        'Audience evidence.md',
+        'Competitive framing.html',
+        'Proof point inventory.md',
+        'Launch sequence.html',
+        'Reviewer annotations.md',
+        'Executive summary.html',
+      ]),
     ],
     session: {
       status: 'review',
@@ -500,6 +529,12 @@ const allDemoTasks: Task[] = [
         content:
           '<div class="journey"><span>Prompt</span><i></i><span>Work</span><i></i><span class="hot">Result</span><i></i><span>Review</span></div>',
       },
+      ...makeOverflowArtifacts('onboarding-study', 58, [
+        'Interview excerpts.md',
+        'Confidence gaps.html',
+        'First-run observations.md',
+        'Opportunity map.html',
+      ]),
     ],
     session: {
       status: 'thinking',
@@ -539,6 +574,13 @@ const allDemoTasks: Task[] = [
         imageUrl:
           'https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1000&q=80',
       },
+      ...makeOverflowArtifacts('design-system-audit', 96, [
+        'Control taxonomy.md',
+        'Hover states.html',
+        'Motion inventory.md',
+        'Density variants.html',
+        'Accessibility notes.md',
+      ]),
     ],
     session: {
       status: 'thinking',

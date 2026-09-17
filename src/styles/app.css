@@ -817,11 +817,61 @@ button:disabled {
 
 .artifact-stack {
   min-height: 0;
-  overflow-y: auto;
-  touch-action: pan-y;
+  overflow: hidden;
   padding: 7px;
-  scrollbar-width: thin;
-  scrollbar-color: #272c31 transparent;
+}
+
+.clipped-artifact-summary {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  left: 7px;
+  z-index: 4;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  color: var(--muted);
+  background: rgba(12, 14, 16, 0.9);
+  box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.clipped-artifact-summary:hover {
+  color: var(--text);
+  border-color: rgba(142, 158, 123, 0.45);
+  background: rgba(20, 23, 24, 0.96);
+}
+
+.clipped-artifact-labels {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  font: 8px 'DM Mono', monospace;
+  white-space: nowrap;
+}
+
+.clipped-artifact-labels > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clipped-artifact-labels strong {
+  flex: none;
+  color: var(--accent);
+  font-weight: 500;
 }
 
 .artifact-preview {
