@@ -661,16 +661,16 @@ button:disabled {
 }
 
 .task-card-bar {
+  position: relative;
   min-height: 47px;
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  padding: 6px 10px;
   border-bottom: 1px solid var(--line);
 }
 
 .task-title-block {
+  width: 100%;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -678,17 +678,31 @@ button:disabled {
 }
 
 .task-title-block h2 {
+  display: -webkit-box;
   overflow: hidden;
+  line-height: 1.25;
   margin: 0;
   font-size: 12px;
   font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .card-controls {
+  position: absolute;
+  top: 9px;
+  right: 8px;
+  z-index: 2;
   display: flex;
   gap: 2px;
+}
+
+.card-control.explode {
+  position: absolute;
+  top: 9px;
+  left: 8px;
+  z-index: 2;
 }
 
 .card-control {
@@ -700,7 +714,9 @@ button:disabled {
   border: 0;
   border-radius: 7px;
   color: var(--muted);
-  background: transparent;
+  background: rgba(12, 14, 16, 0.88);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(8px);
   opacity: 0;
   transform: translateY(2px);
   transition:
@@ -712,7 +728,7 @@ button:disabled {
 }
 
 .task-card:hover .card-control,
-.task-card:focus-within .card-control {
+.card-control:focus-visible {
   opacity: 1;
   transform: translateY(0);
 }
