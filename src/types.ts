@@ -2,6 +2,7 @@ export type ArtifactKind = 'markdown' | 'html' | 'image'
 export type TaskState = 'working' | 'review' | 'idle' | 'sleeping'
 export type FilterId = 'active' | 'review' | 'working' | 'sleeping' | 'all'
 export type ViewMode = 'cards' | 'table'
+export type CardSize = 'normal' | 'large'
 
 export interface Artifact {
   id: string

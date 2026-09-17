@@ -61,6 +61,7 @@ import { useWorkspace, type DemoEvent } from './app/store'
 import type {
   AgentSession,
   Artifact,
+  CardSize,
   FilterId,
   Task,
   ViewMode,
@@ -107,8 +108,16 @@ function stateLabel(state: Task['state']) {
 }
 
 export function WorkspaceShell({ children }: PropsWithChildren) {
-  const { tasks, rootSession, filter, taskView, setFilter, setTaskView } =
-    useWorkspace()
+  const {
+    tasks,
+    rootSession,
+    filter,
+    taskView,
+    cardSize,
+    setFilter,
+    setTaskView,
+    setCardSize,
+  } = useWorkspace()
   const { runDemoEvent } = useWorkspace()
   const location = useRouterState({ select: (state) => state.location })
   const taskMatch = location.pathname.match(/^\/tasks\/([^/]+)/)
@@ -203,6 +212,10 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
               <div className="drawer-section">
                 <span className="overline">Presentation</span>
                 <SegmentedControl value={taskView} onChange={setTaskView} />
+                <div className="drawer-subsection">
+                  <span className="overline">Card size</span>
+                  <CardSizeControl value={cardSize} onChange={setCardSize} />
+                </div>
               </div>
             )}
 
@@ -319,6 +332,33 @@ function SegmentedControl({
       >
         <List size={15} />
         Table
+      </button>
+    </div>
+  )
+}
+
+function CardSizeControl({
+  value,
+  onChange,
+}: {
+  value: CardSize
+  onChange: (value: CardSize) => void
+}) {
+  return (
+    <div className="segmented">
+      <button
+        className={value === 'normal' ? 'selected' : ''}
+        onClick={() => onChange('normal')}
+      >
+        <Minimize2 size={15} />
+        Normal
+      </button>
+      <button
+        className={value === 'large' ? 'selected' : ''}
+        onClick={() => onChange('large')}
+      >
+        <Maximize2 size={15} />
+        Large
       </button>
     </div>
   )
@@ -445,7 +485,7 @@ function filterTasks(tasks: Task[], filter: FilterId) {
 }
 
 export function WorkspaceRoute() {
-  const { tasks, filter, taskView } = useWorkspace()
+  const { tasks, filter, taskView, cardSize } = useWorkspace()
   const isMobile = useMediaQuery('(max-width: 860px)')
   const visibleTasks = useMemo(
     () => filterTasks(tasks, filter),
@@ -468,7 +508,7 @@ export function WorkspaceRoute() {
             transition={{ duration: 0.18 }}
           >
             {effectiveView === 'cards' ? (
-              <TaskGrid tasks={visibleTasks} />
+              <TaskGrid tasks={visibleTasks} cardSize={cardSize} />
             ) : (
               <TaskTable tasks={visibleTasks} />
             )}
@@ -537,9 +577,18 @@ function EmptyState({ filter }: { filter: FilterId }) {
   )
 }
 
-function TaskGrid({ tasks }: { tasks: Task[] }) {
+function TaskGrid({
+  tasks,
+  cardSize,
+}: {
+  tasks: Task[]
+  cardSize: CardSize
+}) {
   return (
-    <motion.div className="task-grid" layout>
+    <motion.div
+      className={`task-grid ${cardSize === 'large' ? 'large-cards' : ''}`}
+      layout
+    >
       <AnimatePresence initial={false}>
         {tasks.map((task) => (
           <TaskCard key={task.id} task={task} />
@@ -556,11 +605,60 @@ function TaskCard({ task }: { task: Task }) {
   const [collapsedArtifacts, setCollapsedArtifacts] = useState<Set<string>>(
     () => new Set(),
   )
+  const cardRef = useRef<HTMLElement>(null)
+  const captureCardScroll = useRef(false)
+  const captureTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    const card = cardRef.current
+    if (!card) return
+
+    const handleWheel = (event: WheelEvent) => {
+      const grid = card.closest<HTMLElement>('.task-grid')
+      const stack = card.querySelector<HTMLElement>('.artifact-stack')
+      const target = captureCardScroll.current ? stack : grid
+      if (!target) return
+
+      event.preventDefault()
+      event.stopPropagation()
+      const maxScroll = Math.max(0, target.scrollHeight - target.clientHeight)
+      target.scrollTop = Math.min(
+        maxScroll,
+        Math.max(0, target.scrollTop + event.deltaY),
+      )
+    }
+
+    card.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      card.removeEventListener('wheel', handleWheel)
+      if (captureTimer.current !== null) {
+        window.clearTimeout(captureTimer.current)
+      }
+    }
+  }, [])
 
   return (
     <motion.article
+      ref={cardRef}
       layout
       className={`task-card ${flipped ? 'is-flipped' : ''}`}
+      onMouseEnter={() => {
+        captureCardScroll.current = false
+        if (captureTimer.current !== null) {
+          window.clearTimeout(captureTimer.current)
+        }
+        captureTimer.current = window.setTimeout(() => {
+          captureCardScroll.current = true
+          captureTimer.current = null
+        }, 1000)
+      }}
+      onMouseLeave={() => {
+        captureCardScroll.current = false
+        if (captureTimer.current !== null) {
+          window.clearTimeout(captureTimer.current)
+          captureTimer.current = null
+        }
+      }}
       initial={{ opacity: 0, scale: 0.96, y: 18 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.94, y: -12 }}
@@ -614,23 +712,7 @@ function TaskCard({ task }: { task: Task }) {
             </div>
           </div>
 
-          <div
-            className="artifact-stack"
-            onWheel={(event) => {
-              const stack = event.currentTarget
-              const maxScroll = stack.scrollHeight - stack.clientHeight
-              const nextScrollTop = Math.min(
-                maxScroll,
-                Math.max(0, stack.scrollTop + event.deltaY),
-              )
-
-              if (nextScrollTop !== stack.scrollTop) {
-                event.preventDefault()
-                event.stopPropagation()
-                stack.scrollTop = nextScrollTop
-              }
-            }}
-          >
+          <div className="artifact-stack">
             {task.artifacts.map((artifact) => (
               <ArtifactPreview
                 key={artifact.id}

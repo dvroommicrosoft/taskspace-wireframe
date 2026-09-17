@@ -10,6 +10,7 @@ import {
 import { demoTasks, rootSession as initialRootSession } from '../data/demo-data'
 import type {
   AgentSession,
+  CardSize,
   ChatMessage,
   FilterId,
   Task,
@@ -22,10 +23,12 @@ interface WorkspaceContextValue {
   tasks: Task[]
   filter: FilterId
   taskView: ViewMode
+  cardSize: CardSize
   artifactView: ViewMode
   rootSession: AgentSession
   setFilter: (filter: FilterId) => void
   setTaskView: (view: ViewMode) => void
+  setCardSize: (size: CardSize) => void
   setArtifactView: (view: ViewMode) => void
   sleepTask: (taskId: string) => void
   sendMessage: (taskId: string | null, body: string) => void
@@ -45,6 +48,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
   const [rootSession, setRootSession] = useState(initialRootSession)
   const [filter, setFilter] = useState<FilterId>('active')
   const [taskView, setTaskView] = useState<ViewMode>('cards')
+  const [cardSize, setCardSize] = useState<CardSize>('normal')
   const [artifactView, setArtifactView] = useState<ViewMode>('cards')
   const replyIndex = useRef(0)
 
@@ -243,10 +247,12 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       tasks,
       filter,
       taskView,
+      cardSize,
       artifactView,
       rootSession,
       setFilter,
       setTaskView,
+      setCardSize,
       setArtifactView,
       sleepTask,
       sendMessage,
@@ -256,6 +262,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       tasks,
       filter,
       taskView,
+      cardSize,
       artifactView,
       rootSession,
       sleepTask,

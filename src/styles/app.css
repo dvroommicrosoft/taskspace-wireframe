@@ -269,6 +269,12 @@ button:disabled {
   border-top: 1px solid var(--line);
 }
 
+.drawer-subsection {
+  display: grid;
+  gap: 7px;
+  margin-top: 2px;
+}
+
 .segmented {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -594,9 +600,10 @@ button:disabled {
 
 .task-grid {
   --row-peek: clamp(24px, 5vh, 48px);
+  --task-card-width: 230px;
   height: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, 230px);
+  grid-template-columns: repeat(auto-fit, var(--task-card-width));
   grid-auto-rows: auto;
   align-content: start;
   justify-content: center;
@@ -607,6 +614,10 @@ button:disabled {
   scroll-snap-type: y mandatory;
   scrollbar-width: none;
   perspective: 1200px;
+}
+
+.task-grid.large-cards {
+  --task-card-width: 460px;
 }
 
 .task-grid::-webkit-scrollbar {
@@ -1548,10 +1559,6 @@ button:disabled {
 }
 
 @media (max-width: 1180px) {
-  .task-grid {
-    grid-template-columns: repeat(3, minmax(205px, 1fr));
-  }
-
   .artifact-grid {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
   }
