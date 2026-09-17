@@ -588,6 +588,13 @@ function TaskCard({ task }: { task: Task }) {
             <div className="task-title-block">
               <span className={`status-dot ${task.session.status}`} />
               <h2>{task.title}</h2>
+              <div className="task-card-status-flyout">
+                <span className={`task-state state-${task.state}`}>
+                  {stateLabel(task.state)}
+                </span>
+                <span>{timeAgo(task.updatedAt)}</span>
+                {task.unread && <i className="unread-dot" />}
+              </div>
             </div>
             <div className="card-controls">
               <button
@@ -605,14 +612,6 @@ function TaskCard({ task }: { task: Task }) {
                 <RotateCcw size={15} />
               </button>
             </div>
-          </div>
-
-          <div className="task-card-context">
-            <span className={`task-state state-${task.state}`}>
-              {stateLabel(task.state)}
-            </span>
-            <span>{timeAgo(task.updatedAt)}</span>
-            {task.unread && <i className="unread-dot" />}
           </div>
 
           <div className="artifact-stack">

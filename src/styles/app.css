@@ -649,7 +649,7 @@ button:disabled {
 
 .task-front {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .task-back {
@@ -670,6 +670,7 @@ button:disabled {
 }
 
 .task-title-block {
+  position: relative;
   width: 100%;
   min-width: 0;
   display: flex;
@@ -738,15 +739,35 @@ button:disabled {
   background: rgba(255, 255, 255, 0.06);
 }
 
-.task-card-context {
-  min-height: 34px;
+.task-card-status-flyout {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 0;
+  z-index: 3;
+  min-height: 32px;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 11px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
   color: var(--subtle);
   font: 8px 'DM Mono', monospace;
-  border-bottom: 1px solid var(--line);
+  background: rgba(12, 14, 16, 0.92);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  white-space: nowrap;
+}
+
+.task-title-block:hover .task-card-status-flyout {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .task-state {
