@@ -203,8 +203,10 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
             <nav className="titlebar-icon-group" aria-label="Task filters">
               {filters.map(({ id, label, owner, avatar }) => {
                 const count = tasks.filter((item) => {
-                  if (id === 'sleeping') return item.state === 'sleeping'
-                  return item.owner === owner && item.state !== 'sleeping'
+                  if (id === 'sleeping') {
+                    return item.owner === 'You' && item.state === 'sleeping'
+                  }
+                  return item.owner === owner
                 }).length
                 return (
                   <button
@@ -553,7 +555,9 @@ function AgentPanel({
 function tasksForFilter(tasks: Task[], filter: FilterId) {
   if (filter === 'sleeping') {
     return {
-      active: tasks.filter((task) => task.state === 'sleeping'),
+      active: tasks.filter(
+        (task) => task.owner === 'You' && task.state === 'sleeping',
+      ),
       archived: [],
     }
   }
@@ -564,7 +568,9 @@ function tasksForFilter(tasks: Task[], filter: FilterId) {
     active: owned.filter(
       (task) => task.state !== 'archived' && task.state !== 'sleeping',
     ),
-    archived: owned.filter((task) => task.state === 'archived'),
+    archived: owned.filter(
+      (task) => task.state === 'archived' || task.state === 'sleeping',
+    ),
   }
 }
 
@@ -807,7 +813,7 @@ function ArchiveBoundary({
           : { top, left: left - 16, width: 32, height }
       }
       onClick={onToggle}
-      aria-label={`${expanded ? 'Hide' : 'Show'} ${count} archived tasks`}
+      aria-label={`${expanded ? 'Hide' : 'Show'} ${count} other tasks`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -1363,7 +1369,7 @@ function TaskTable({
                   <button
                     type="button"
                     onClick={onToggleArchive}
-                    aria-label={`${archiveExpanded ? 'Hide' : 'Show'} ${archivedTasks.length} archived tasks`}
+                    aria-label={`${archiveExpanded ? 'Hide' : 'Show'} ${archivedTasks.length} other tasks`}
                   >
                     <span className="archive-wave" />
                     <span className="archive-boundary-icon">
