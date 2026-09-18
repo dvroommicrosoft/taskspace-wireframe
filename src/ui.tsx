@@ -426,6 +426,8 @@ function AgentGutterTranscript({ session }: { session: AgentSession }) {
             transition={{ duration: 1.4, repeat: Infinity }}
           />
         )}
+      </span>
+      <span className="gutter-composer-slot">
         {session.status !== 'thinking' && (
           <motion.span
             className="gutter-user-turn-marker"
