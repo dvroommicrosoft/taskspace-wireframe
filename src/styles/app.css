@@ -1655,15 +1655,23 @@ button:disabled {
 .artifact-document.documint-artifact {
   min-width: 0;
   min-height: 0;
+  display: grid;
+  place-items: stretch center;
   overflow: hidden;
-  padding: 0;
-  background: #0b0c0e;
+  padding: clamp(16px, 3vh, 28px) clamp(18px, 4vw, 48px);
+  background: #070809;
 }
 
 .documint-editor {
+  width: min(100%, 850px);
   min-width: 0;
   min-height: 0;
   height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #0b0c0e;
+  box-shadow: 0 20px 65px rgba(0, 0, 0, 0.38);
 }
 
 .artifact-document.kind-html {
