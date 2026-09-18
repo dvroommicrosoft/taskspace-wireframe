@@ -1930,6 +1930,11 @@ button:disabled {
     box-shadow 150ms ease;
 }
 
+.artifact-card.kind-markdown {
+  width: min(100%, calc((100vh - 124px) * 8.5 / 11));
+  justify-self: center;
+}
+
 .artifact-card:hover,
 .artifact-card:focus-visible {
   outline: none;

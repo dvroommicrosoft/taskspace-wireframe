@@ -1577,7 +1577,7 @@ export function TaskRoute() {
               {task.artifacts.map((artifact) => (
                 <motion.article
                   layout
-                  className="artifact-card"
+                  className={`artifact-card kind-${artifact.kind}`}
                   key={artifact.id}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
