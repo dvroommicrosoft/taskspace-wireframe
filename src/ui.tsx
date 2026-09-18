@@ -155,6 +155,7 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
   const [agentPinned, setAgentPinned] = useState(false)
   const [demoOpen, setDemoOpen] = useState(false)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const selectedFilter = filters.find((item) => item.id === filter)
 
   const closeTransientDrawers = () => {
     setTopOpen(false)
@@ -179,12 +180,37 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
       }}
     >
       <button
-        className={`edge edge-top filter-${filter}`}
+        className="edge edge-top"
         aria-label="Open task controls"
         onClick={() => setTopOpen(true)}
         onMouseEnter={() => setTopOpen(true)}
       >
-        <span className="edge-active-mark" />
+        <span className="edge-filter-guide" aria-hidden="true">
+          <strong>On Deck</strong>
+          <span className="titlebar-divider" />
+          <span className="edge-filter-slots">
+            {filters.map(({ id }) => (
+              <span className="edge-filter-slot" key={id}>
+                {id === filter && (
+                  <>
+                    <span className="edge-active-mark" />
+                    <span className="edge-filter-tab">
+                      {selectedFilter?.avatar ? (
+                        <img
+                          className="filter-avatar"
+                          src={selectedFilter.avatar}
+                          alt=""
+                        />
+                      ) : (
+                        <Moon size={15} />
+                      )}
+                    </span>
+                  </>
+                )}
+              </span>
+            ))}
+          </span>
+        </span>
       </button>
 
       <AnimatePresence>

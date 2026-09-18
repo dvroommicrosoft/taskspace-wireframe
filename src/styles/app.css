@@ -132,24 +132,77 @@ button:disabled {
   transition: left 180ms ease;
 }
 
-.edge-top.filter-you .edge-active-mark {
-  left: 104px;
+.edge-filter-guide {
+  position: fixed;
+  top: 2px;
+  right: 12px;
+  left: 12px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  pointer-events: none;
 }
 
-.edge-top.filter-mira .edge-active-mark {
-  left: 142px;
+.edge-filter-guide > strong {
+  flex: none;
+  margin: 0 7px 0 3px;
+  visibility: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
-.edge-top.filter-theo .edge-active-mark {
-  left: 180px;
+.edge-filter-guide > .titlebar-divider {
+  visibility: hidden;
 }
 
-.edge-top.filter-inez .edge-active-mark {
-  left: 218px;
+.edge-filter-slots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.edge-top.filter-sleeping .edge-active-mark {
-  left: 256px;
+.edge-filter-slot {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: block;
+  flex: none;
+}
+
+.edge-filter-slot .edge-active-mark {
+  top: -11px;
+  left: 5px;
+}
+
+.edge-filter-tab {
+  position: absolute;
+  top: -9px;
+  left: 3px;
+  width: 28px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-top: 0;
+  border-radius: 0 0 9px 9px;
+  color: var(--muted);
+  background: rgba(15, 17, 20, 0.96);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.edge-filter-tab .filter-avatar {
+  width: 20px;
+  height: 20px;
+  border-color: rgba(182, 255, 87, 0.5);
+  box-shadow: 0 0 8px rgba(182, 255, 87, 0.12);
 }
 
 .agent-gutter-shell {
@@ -2024,6 +2077,12 @@ button:disabled {
 
   .floating-titlebar {
     top: 2px;
+    right: 8px;
+    left: 8px;
+    padding: 0 9px;
+  }
+
+  .edge-filter-guide {
     right: 8px;
     left: 8px;
     padding: 0 9px;
