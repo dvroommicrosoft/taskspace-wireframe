@@ -97,6 +97,7 @@ button:disabled {
   right: 0;
   bottom: 0;
   width: 11px;
+  overflow: hidden;
 }
 
 .edge-top::after {
@@ -148,35 +149,83 @@ button:disabled {
   left: 256px;
 }
 
-.agent-pulse {
+.agent-gutter-shell {
   position: absolute;
+  top: 12px;
   right: 0;
-  top: 22%;
-  width: 3px;
-  height: 34px;
+  bottom: 12px;
+  width: var(--drawer-width);
+  display: block;
+  pointer-events: none;
+}
+
+.agent-gutter-messages {
+  position: absolute;
+  top: 101px;
+  right: 1px;
+  bottom: 101px;
+  left: 1px;
+  display: block;
+  overflow: hidden;
+  padding: 17px 15px;
+  text-align: left;
+}
+
+.gutter-message-row {
+  position: relative;
+  width: 100%;
+  display: block;
+  margin-bottom: 14px;
+}
+
+.gutter-message-copy {
+  max-width: 88%;
+  display: block;
+  visibility: hidden;
+}
+
+.gutter-message-row.user .gutter-message-copy {
+  margin-left: auto;
+}
+
+.gutter-message-role {
+  display: block;
+  margin: 0 0 5px 2px;
+  font: 8px 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gutter-message-body {
+  display: block;
+  padding: 9px 11px;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: normal;
+}
+
+.gutter-message-marker {
+  position: absolute;
+  top: 15px;
+  right: -15px;
+  bottom: 0;
+  width: 4px;
   border-radius: 4px 0 0 4px;
-  background: #707780;
+  background: rgba(255, 255, 255, 0.045);
 }
 
-.agent-thinking .agent-pulse {
+.gutter-message-row.user .gutter-message-marker {
+  background: #22262b;
+}
+
+.gutter-typing-marker {
+  width: 4px;
+  height: 18px;
+  display: block;
+  margin-left: auto;
+  border-radius: 4px 0 0 4px;
   background: var(--accent);
-  animation: edgePulse 1.8s ease-in-out infinite;
-}
-
-.agent-review .agent-pulse {
-  background: var(--review);
-  height: 48px;
-}
-
-@keyframes edgePulse {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 16px rgba(182, 255, 87, 0.45);
-  }
+  box-shadow: 0 0 12px rgba(182, 255, 87, 0.35);
 }
 
 .floating-drawer {

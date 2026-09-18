@@ -264,7 +264,7 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
         onClick={() => setRightOpen(true)}
         onMouseEnter={() => setRightOpen(true)}
       >
-        <span className="agent-pulse" />
+        <AgentGutterTranscript session={session} />
       </button>
 
       <AnimatePresence>
@@ -334,6 +334,48 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
         </button>
       </div>
     </div>
+  )
+}
+
+function AgentGutterTranscript({ session }: { session: AgentSession }) {
+  const scroller = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    scroller.current?.scrollTo({
+      top: scroller.current.scrollHeight,
+      behavior: 'smooth',
+    })
+  }, [session.messages, session.status])
+
+  return (
+    <span className="agent-gutter-shell" aria-hidden="true">
+      <span className="agent-gutter-messages" ref={scroller}>
+        {session.messages.map((item) => (
+          <motion.span
+            layout
+            key={item.id}
+            className={`gutter-message-row ${item.role}`}
+            initial={{ opacity: 0, x: 4 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <span className="gutter-message-copy">
+              <span className="gutter-message-role">
+                {item.role === 'agent' ? 'Agent' : 'You'}
+              </span>
+              <span className="gutter-message-body">{item.body}</span>
+            </span>
+            <span className="gutter-message-marker" />
+          </motion.span>
+        ))}
+        {session.status === 'thinking' && (
+          <motion.span
+            className="gutter-typing-marker"
+            animate={{ opacity: [0.35, 1, 0.35] }}
+            transition={{ duration: 1.4, repeat: Infinity }}
+          />
+        )}
+      </span>
+    </span>
   )
 }
 
