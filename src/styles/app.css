@@ -763,9 +763,25 @@ button:disabled {
     linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 24%),
     var(--surface);
   backface-visibility: hidden;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
-.task-card:hover .task-card-face {
+.task-card:hover .task-front,
+.task-front:focus-visible {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 87, 0.2),
+    0 0 24px rgba(182, 255, 87, 0.18),
+    0 18px 44px rgba(0, 0, 0, 0.24);
+  outline: none;
+}
+
+.task-card:has(.artifact-preview:hover) .task-front,
+.task-card:has(.artifact-preview:focus-visible) .task-front,
+.task-card:has(.clipped-artifact-summary:hover) .task-front,
+.task-card:has(.clipped-artifact-summary:focus-visible) .task-front {
   border-color: var(--line-strong);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
 }
@@ -773,6 +789,7 @@ button:disabled {
 .task-front {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  cursor: pointer;
 }
 
 .task-back {
@@ -820,13 +837,6 @@ button:disabled {
   z-index: 2;
   display: flex;
   gap: 2px;
-}
-
-.card-control.explode {
-  position: absolute;
-  top: 9px;
-  left: 8px;
-  z-index: 2;
 }
 
 .card-control {
@@ -959,10 +969,16 @@ button:disabled {
     background 150ms ease;
 }
 
-.clipped-artifact-summary:hover {
+.clipped-artifact-summary:hover,
+.clipped-artifact-summary:focus-visible {
   color: var(--text);
-  border-color: rgba(142, 158, 123, 0.45);
+  border-color: var(--accent);
   background: rgba(20, 23, 24, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 87, 0.2),
+    0 0 24px rgba(182, 255, 87, 0.18),
+    0 -10px 24px rgba(0, 0, 0, 0.34);
+  outline: none;
 }
 
 .clipped-artifact-labels {
@@ -993,12 +1009,26 @@ button:disabled {
   border: 1px solid transparent;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.026);
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
 }
 
-.artifact-preview:hover,
 .artifact-preview.open {
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.035);
+}
+
+.artifact-preview:hover,
+.artifact-preview:focus-visible {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 87, 0.2),
+    0 0 24px rgba(182, 255, 87, 0.18);
+  outline: none;
 }
 
 .artifact-preview > header {
@@ -1435,6 +1465,19 @@ button:disabled {
   border-radius: var(--radius);
   background: var(--surface);
   scroll-snap-align: start;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.artifact-card:hover,
+.artifact-card:focus-visible {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 87, 0.2),
+    0 0 24px rgba(182, 255, 87, 0.18);
+  outline: none;
 }
 
 .artifact-card > header,
@@ -1464,23 +1507,6 @@ button:disabled {
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.artifact-card > header button {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 7px;
-  color: var(--muted);
-  background: transparent;
-  cursor: pointer;
-}
-
-.artifact-card > header button:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .artifact-card-body {
@@ -1537,8 +1563,11 @@ button:disabled {
 }
 
 .artifact-list > button:hover {
-  border-color: var(--line);
+  border-color: var(--accent);
   background: rgba(255, 255, 255, 0.025);
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 87, 0.2),
+    0 0 24px rgba(182, 255, 87, 0.18);
 }
 
 .artifact-list > button > span {

@@ -8,6 +8,7 @@ import {
   Link,
   useNavigate,
   useParams,
+  useRouter,
   useRouterState,
 } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
@@ -641,7 +642,7 @@ function TaskCard({ task }: { task: Task }) {
     }
   }, [task.artifacts, collapsedArtifacts])
 
-  const explodeTask = () => {
+  const openTask = () => {
     navigate({ to: '/tasks/$taskId', params: { taskId: task.id } })
   }
 
@@ -662,15 +663,20 @@ function TaskCard({ task }: { task: Task }) {
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ type: 'spring', stiffness: 240, damping: 26 }}
       >
-        <div className="task-card-face task-front">
+        <div
+          className="task-card-face task-front"
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${task.title}`}
+          onClick={openTask}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              openTask()
+            }
+          }}
+        >
           <div className="task-card-bar">
-            <button
-              className="card-control explode"
-              aria-label={`Open ${task.title}`}
-              onClick={explodeTask}
-            >
-              <Expand size={15} />
-            </button>
             <div className="task-title-block">
               <span className={`status-dot ${task.session.status}`} />
               <h2>{task.title}</h2>
@@ -686,14 +692,22 @@ function TaskCard({ task }: { task: Task }) {
               <button
                 className="card-control"
                 aria-label={`Sleep ${task.title}`}
-                onClick={() => sleepTask(task.id)}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  sleepTask(task.id)
+                }}
+                onKeyDown={(event) => event.stopPropagation()}
               >
                 <Moon size={15} />
               </button>
               <button
                 className="card-control"
                 aria-label={`Show agent for ${task.title}`}
-                onClick={() => setFlipped(true)}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setFlipped(true)
+                }}
+                onKeyDown={(event) => event.stopPropagation()}
               >
                 <RotateCcw size={15} />
               </button>
@@ -727,7 +741,7 @@ function TaskCard({ task }: { task: Task }) {
           {clippedArtifacts.length > 0 && (
             <ClippedArtifactSummary
               artifacts={clippedArtifacts}
-              onClick={explodeTask}
+              onClick={openTask}
             />
           )}
         </div>
@@ -801,7 +815,11 @@ function ClippedArtifactSummary({
   return (
     <button
       className="clipped-artifact-summary"
-      onClick={onClick}
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick()
+      }}
+      onKeyDown={(event) => event.stopPropagation()}
       aria-label="Open task to view clipped artifacts"
     >
       <ChevronsUp size={14} />
@@ -891,17 +909,35 @@ function ArtifactPreview({
       layout
       data-artifact-id={artifact.id}
       className={`artifact-preview ${expanded ? 'open' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-label={`Maximize ${artifact.title}`}
+      onClick={(event) => {
+        event.stopPropagation()
+        onMaximize()
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          event.stopPropagation()
+          onMaximize()
+        }
+      }}
     >
       <header>
         <Icon size={14} />
         <strong>{artifact.title}</strong>
         <span>{timeAgo(artifact.updatedAt)}</span>
         <div className="artifact-controls">
-          <button onClick={onToggle} aria-label={expanded ? 'Collapse' : 'Expand'}>
+          <button
+            onClick={(event) => {
+              event.stopPropagation()
+              onToggle()
+            }}
+            onKeyDown={(event) => event.stopPropagation()}
+            aria-label={expanded ? 'Collapse' : 'Expand'}
+          >
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </button>
-          <button onClick={onMaximize} aria-label="Maximize artifact">
-            <Maximize2 size={13} />
           </button>
         </div>
       </header>
@@ -1086,11 +1122,7 @@ export function TaskRoute() {
         eyebrow="Task"
         title={task.title}
         meta={`${task.artifacts.length} artifacts`}
-        leading={
-          <Link className="back-button" to="/" aria-label="Back to tasks">
-            <ArrowLeft size={17} />
-          </Link>
-        }
+        leading={<HistoryBackButton />}
         trailing={
           <div className="header-actions desktop-only">
             <SegmentedControl value={artifactView} onChange={setArtifactView} />
@@ -1113,6 +1145,24 @@ export function TaskRoute() {
                   layout
                   className="artifact-card"
                   key={artifact.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Maximize ${artifact.title}`}
+                  onClick={() =>
+                    navigate({
+                      to: '/tasks/$taskId/artifacts/$artifactId',
+                      params: { taskId, artifactId: artifact.id },
+                    })
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      navigate({
+                        to: '/tasks/$taskId/artifacts/$artifactId',
+                        params: { taskId, artifactId: artifact.id },
+                      })
+                    }
+                  }}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -1121,17 +1171,6 @@ export function TaskRoute() {
                       <ArtifactIcon kind={artifact.kind} />
                       <strong>{artifact.title}</strong>
                     </div>
-                    <button
-                      onClick={() =>
-                        navigate({
-                          to: '/tasks/$taskId/artifacts/$artifactId',
-                          params: { taskId, artifactId: artifact.id },
-                        })
-                      }
-                      aria-label={`Maximize ${artifact.title}`}
-                    >
-                      <Maximize2 size={15} />
-                    </button>
                   </header>
                   <div className="artifact-card-body">
                     <ArtifactContent artifact={artifact} />
@@ -1199,14 +1238,7 @@ export function ArtifactRoute() {
   return (
     <section className="single-artifact-mode">
       <header className="artifact-document-header">
-        <Link
-          className="back-button"
-          to="/tasks/$taskId"
-          params={{ taskId }}
-          aria-label={`Back to ${task.title}`}
-        >
-          <ArrowLeft size={17} />
-        </Link>
+        <HistoryBackButton />
         <div>
           <span className="overline">{task.title}</span>
           <h1>{artifact.title}</h1>
@@ -1226,6 +1258,20 @@ export function ArtifactRoute() {
         <ArtifactContent artifact={artifact} />
       </motion.div>
     </section>
+  )
+}
+
+function HistoryBackButton() {
+  const router = useRouter()
+
+  return (
+    <button
+      className="back-button"
+      onClick={() => router.history.back()}
+      aria-label="Go back"
+    >
+      <ArrowLeft size={17} />
+    </button>
   )
 }
 
