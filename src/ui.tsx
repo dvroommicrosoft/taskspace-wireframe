@@ -40,11 +40,11 @@ import {
   MoreHorizontal,
   PanelRightClose,
   PanelRightOpen,
+  PanelTop,
   Pin,
   PinOff,
   Play,
   Plus,
-  RotateCcw,
   Send,
   type LucideIcon,
   X,
@@ -716,7 +716,7 @@ function TaskCard({ task }: { task: Task }) {
                 }}
                 onKeyDown={(event) => event.stopPropagation()}
               >
-                <RotateCcw size={15} />
+                <MessageSquare size={15} />
               </button>
             </div>
           </div>
@@ -754,14 +754,25 @@ function TaskCard({ task }: { task: Task }) {
         </div>
 
         <div className="task-card-face task-back">
-          <button
-            className="flip-back"
-            onClick={() => setFlipped(false)}
-            aria-label="Return to task artifacts"
-          >
-            <RotateCcw size={15} />
-            Artifacts
-          </button>
+          <div className="card-controls task-back-controls">
+            <button
+              className="card-control"
+              aria-label={`Sleep ${task.title}`}
+              onClick={(event) => {
+                event.stopPropagation()
+                sleepTask(task.id)
+              }}
+            >
+              <Moon size={15} />
+            </button>
+            <button
+              className="card-control"
+              aria-label={`Show artifacts for ${task.title}`}
+              onClick={() => setFlipped(false)}
+            >
+              <PanelTop size={15} />
+            </button>
+          </div>
           <CompactAgent task={task} />
         </div>
       </motion.div>
