@@ -79,49 +79,73 @@ button:disabled {
 .edge {
   position: fixed;
   z-index: 50;
-  top: 0;
-  bottom: 0;
-  width: 11px;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
 }
 
-.edge-left {
+.edge-top {
+  top: 0;
   left: 0;
+  right: 11px;
+  height: 10px;
 }
 
 .edge-right {
+  top: 0;
   right: 0;
+  bottom: 0;
+  width: 11px;
 }
 
-.edge::after {
+.edge-top::after {
   content: '';
   position: absolute;
   top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.edge-right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
   bottom: 0;
   width: 1px;
   background: rgba(255, 255, 255, 0.035);
 }
 
-.edge-left::after {
-  left: 0;
-}
-
-.edge-right::after {
-  right: 0;
-}
-
-.edge-active-mark {
+.edge-top::before {
+  content: '';
   position: absolute;
-  left: 0;
-  top: 18%;
-  width: 3px;
-  height: 64px;
-  border-radius: 0 4px 4px 0;
+  top: 0;
+  left: 104px;
+  width: 24px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
   background: var(--accent);
   box-shadow: 0 0 16px rgba(182, 255, 87, 0.35);
+  transition: left 180ms ease;
+}
+
+.edge-top.filter-review::before {
+  left: 142px;
+}
+
+.edge-top.filter-working::before {
+  left: 180px;
+}
+
+.edge-top.filter-sleeping::before {
+  left: 218px;
+}
+
+.edge-top.filter-all::before {
+  left: 256px;
 }
 
 .agent-pulse {
@@ -168,11 +192,100 @@ button:disabled {
   backdrop-filter: blur(18px);
 }
 
-.filter-drawer {
+.floating-titlebar {
+  position: fixed;
+  z-index: 60;
+  top: 2px;
   left: 12px;
+  right: 12px;
+  height: 52px;
   display: flex;
-  flex-direction: column;
-  padding: 14px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: rgba(15, 17, 20, 0.92);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px);
+}
+
+.floating-titlebar > strong {
+  flex: none;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.titlebar-divider,
+.titlebar-mini-divider {
+  width: 1px;
+  height: 24px;
+  flex: none;
+  margin: 0 3px;
+  background: var(--line-strong);
+}
+
+.titlebar-mini-divider {
+  height: 18px;
+  margin: 0 1px;
+}
+
+.titlebar-controls,
+.titlebar-presentation {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.titlebar-controls button,
+.titlebar-close {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.titlebar-controls button {
+  display: grid;
+}
+
+.titlebar-controls button:hover,
+.titlebar-close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.titlebar-controls button.selected {
+  color: var(--text);
+}
+
+.titlebar-controls button.selected::after {
+  content: '';
+  position: absolute;
+  right: 11px;
+  bottom: 2px;
+  left: 11px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.titlebar-spacer {
+  flex: 1;
+}
+
+.titlebar-close {
+  align-items: center;
+  justify-content: center;
 }
 
 .agent-drawer {
@@ -1640,17 +1753,17 @@ button:disabled {
     border-radius: 16px;
   }
 
-  .filter-drawer {
-    top: 8px;
+  .floating-titlebar {
+    top: 2px;
     left: 8px;
-    bottom: 8px;
+    right: 8px;
   }
 
   .mode-view {
     padding: 10px 15px 15px;
   }
 
-  .filter-drawer .drawer-section {
+  .titlebar-presentation {
     display: none;
   }
 

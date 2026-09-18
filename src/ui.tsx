@@ -44,7 +44,6 @@ import {
   Plus,
   RotateCcw,
   Send,
-  Sparkles,
   type LucideIcon,
   X,
   Zap,
@@ -125,14 +124,14 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
   const taskId = taskMatch?.[1] ?? null
   const task = tasks.find((item) => item.id === taskId)
   const session = task?.session ?? rootSession
-  const [leftOpen, setLeftOpen] = useState(false)
+  const [topOpen, setTopOpen] = useState(false)
   const [rightOpen, setRightOpen] = useState(false)
   const [agentPinned, setAgentPinned] = useState(false)
   const [demoOpen, setDemoOpen] = useState(false)
-  const touchStart = useRef<number | null>(null)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const closeTransientDrawers = () => {
-    setLeftOpen(false)
+    setTopOpen(false)
     if (!agentPinned) setRightOpen(false)
   }
 
@@ -140,52 +139,40 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
     <div
       className={`workspace-shell ${agentPinned ? 'agent-is-pinned' : ''}`}
       onTouchStart={(event) => {
-        touchStart.current = event.touches[0]?.clientX ?? null
+        const touch = event.touches[0]
+        touchStart.current = touch ? { x: touch.clientX, y: touch.clientY } : null
       }}
       onTouchEnd={(event) => {
         const start = touchStart.current
-        const end = event.changedTouches[0]?.clientX
-        if (start === null || end === undefined) return
-        if (start < 24 && end - start > 52) setLeftOpen(true)
-        if (start > window.innerWidth - 24 && start - end > 52)
+        const touch = event.changedTouches[0]
+        if (start === null || !touch) return
+        if (start.y < 24 && touch.clientY - start.y > 52) setTopOpen(true)
+        if (start.x > window.innerWidth - 24 && start.x - touch.clientX > 52)
           setRightOpen(true)
         touchStart.current = null
       }}
     >
       <button
-        className="edge edge-left"
-        aria-label="Open filters"
-        onClick={() => setLeftOpen(true)}
-        onMouseEnter={() => setLeftOpen(true)}
-      >
-        <span className="edge-active-mark" />
-      </button>
+        className={`edge edge-top filter-${filter}`}
+        aria-label="Open task controls"
+        onClick={() => setTopOpen(true)}
+        onMouseEnter={() => setTopOpen(true)}
+      />
 
       <AnimatePresence>
-        {leftOpen && (
-          <motion.aside
-            className="floating-drawer filter-drawer"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+        {topOpen && (
+          <motion.header
+            className="floating-titlebar"
+            initial={{ opacity: 0, y: -18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -18 }}
             transition={{ duration: 0.2 }}
-            onMouseLeave={() => setLeftOpen(false)}
+            onMouseLeave={() => setTopOpen(false)}
           >
-            <div className="drawer-heading">
-              <div>
-                <span className="overline">Workspace</span>
-                <strong>On Deck</strong>
-              </div>
-              <button
-                className="icon-button mobile-only"
-                onClick={() => setLeftOpen(false)}
-                aria-label="Close filters"
-              >
-                <X size={17} />
-              </button>
-            </div>
+            <strong>On Deck</strong>
+            <span className="titlebar-divider" />
 
-            <nav className="filter-list" aria-label="Task filters">
+            <nav className="titlebar-controls" aria-label="Task filters">
               {filters.map(({ id, label, icon: Icon }) => {
                 const count = tasks.filter((item) => {
                   if (id === 'all') return true
@@ -196,35 +183,66 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
                   <button
                     key={id}
                     className={filter === id ? 'selected' : ''}
+                    aria-label={`${label}, ${count} tasks`}
                     onClick={() => {
                       setFilter(id)
-                      setLeftOpen(false)
+                      setTopOpen(false)
                     }}
                   >
                     <Icon size={17} />
-                    <span>{label}</span>
-                    <small>{count}</small>
                   </button>
                 )
               })}
             </nav>
 
             {location.pathname === '/' && (
-              <div className="drawer-section">
-                <span className="overline">Presentation</span>
-                <SegmentedControl value={taskView} onChange={setTaskView} />
-                <div className="drawer-subsection">
-                  <span className="overline">Card size</span>
-                  <CardSizeControl value={cardSize} onChange={setCardSize} />
+              <div className="titlebar-presentation">
+                <span className="titlebar-divider" />
+                <div className="titlebar-controls" aria-label="Presentation">
+                  <button
+                    className={taskView === 'cards' ? 'selected' : ''}
+                    aria-label="Card view"
+                    onClick={() => setTaskView('cards')}
+                  >
+                    <Grid2X2 size={17} />
+                  </button>
+                  <button
+                    className={taskView === 'table' ? 'selected' : ''}
+                    aria-label="Table view"
+                    onClick={() => setTaskView('table')}
+                  >
+                    <List size={17} />
+                  </button>
+                </div>
+                <span className="titlebar-mini-divider" />
+                <div className="titlebar-controls" aria-label="Card size">
+                  <button
+                    className={cardSize === 'normal' ? 'selected' : ''}
+                    aria-label="Normal cards"
+                    onClick={() => setCardSize('normal')}
+                  >
+                    <Columns3 size={17} />
+                  </button>
+                  <button
+                    className={cardSize === 'large' ? 'selected' : ''}
+                    aria-label="Large cards"
+                    onClick={() => setCardSize('large')}
+                  >
+                    <Maximize2 size={17} />
+                  </button>
                 </div>
               </div>
             )}
 
-            <div className="drawer-foot">
-              <Sparkles size={15} />
-              <span>Generated demo workspace</span>
-            </div>
-          </motion.aside>
+            <span className="titlebar-spacer" />
+            <button
+              className="titlebar-close mobile-only"
+              onClick={() => setTopOpen(false)}
+              aria-label="Close task controls"
+            >
+              <X size={17} />
+            </button>
+          </motion.header>
         )}
       </AnimatePresence>
 
@@ -333,33 +351,6 @@ function SegmentedControl({
       >
         <List size={15} />
         Table
-      </button>
-    </div>
-  )
-}
-
-function CardSizeControl({
-  value,
-  onChange,
-}: {
-  value: CardSize
-  onChange: (value: CardSize) => void
-}) {
-  return (
-    <div className="segmented">
-      <button
-        className={value === 'normal' ? 'selected' : ''}
-        onClick={() => onChange('normal')}
-      >
-        <Minimize2 size={15} />
-        Normal
-      </button>
-      <button
-        className={value === 'large' ? 'selected' : ''}
-        onClick={() => onChange('large')}
-      >
-        <Maximize2 size={15} />
-        Large
       </button>
     </div>
   )
