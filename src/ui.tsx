@@ -24,7 +24,6 @@ import {
   CircleDot,
   Clock3,
   Columns3,
-  Expand,
   Eye,
   FileCode2,
   FileImage,
@@ -889,7 +888,6 @@ function ClippedArtifactSummary({
         ))}
         {hiddenCount > 0 && <strong>+{hiddenCount} more</strong>}
       </span>
-      <Expand size={14} />
     </button>
   )
 }

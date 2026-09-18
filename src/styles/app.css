@@ -994,18 +994,18 @@ button:disabled {
 
 .clipped-artifact-summary {
   position: absolute;
-  right: 7px;
-  bottom: 7px;
-  left: 7px;
+  right: -1px;
+  bottom: -1px;
+  left: -1px;
   z-index: 4;
-  height: 35px;
+  height: 38px;
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 0 10px;
+  padding: 0 12px;
   border: 1px solid var(--line-strong);
-  border-radius: 9px;
+  border-radius: 0 0 var(--radius) var(--radius);
   color: var(--muted);
   background: rgba(12, 14, 16, 0.9);
   box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.34);
@@ -1047,7 +1047,7 @@ button:disabled {
 
 .clipped-artifact-labels strong {
   flex: none;
-  color: var(--accent);
+  color: var(--muted);
   font-weight: 500;
 }
 
