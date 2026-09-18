@@ -103,7 +103,7 @@ button:disabled {
 .new-task-edge {
   position: fixed;
   z-index: 49;
-  top: 50%;
+  top: clamp(24px, 5vh, 48px);
   left: 5px;
   width: 26px;
   height: 26px;
@@ -115,7 +115,6 @@ button:disabled {
   color: var(--accent);
   background: rgba(9, 10, 12, 0.86);
   box-shadow: 0 0 12px rgba(182, 255, 87, 0.12);
-  transform: translateY(-50%);
   cursor: pointer;
   transition:
     color 150ms ease,
@@ -128,7 +127,7 @@ button:disabled {
   color: #10120d;
   background: var(--accent);
   box-shadow: 0 0 18px rgba(182, 255, 87, 0.3);
-  transform: translateY(-50%) scale(1.05);
+  transform: scale(1.05);
 }
 
 .edge-top::after,
