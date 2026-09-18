@@ -100,6 +100,37 @@ button:disabled {
   overflow: hidden;
 }
 
+.new-task-edge {
+  position: fixed;
+  z-index: 49;
+  top: 50%;
+  left: 5px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  color: var(--accent);
+  background: rgba(9, 10, 12, 0.86);
+  box-shadow: 0 0 12px rgba(182, 255, 87, 0.12);
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.new-task-edge:hover {
+  color: #10120d;
+  background: var(--accent);
+  box-shadow: 0 0 18px rgba(182, 255, 87, 0.3);
+  transform: translateY(-50%) scale(1.05);
+}
+
 .edge-top::after,
 .edge-right::after {
   content: '';
@@ -1074,16 +1105,34 @@ button:disabled {
   gap: 8px;
 }
 
-.task-title-block h2 {
-  display: -webkit-box;
+.task-title-input {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
   overflow: hidden;
-  margin: 0;
+  resize: none;
+  padding: 0 76px 0 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--text);
   font-size: 12px;
   font-weight: 500;
   line-height: 1.25;
-  white-space: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  background: transparent;
+}
+
+.task-title-input::placeholder,
+.task-description-input::placeholder,
+.table-task-title::placeholder,
+.table-task-description::placeholder {
+  color: var(--subtle);
+}
+
+.task-title-input:focus,
+.task-description-input:focus,
+.table-task-title:focus,
+.table-task-description:focus {
+  outline: none;
 }
 
 .card-controls {
@@ -1217,11 +1266,17 @@ button:disabled {
   border-bottom: 1px solid var(--line);
 }
 
-.task-overview-description p {
-  margin: 0;
+.task-description-input {
+  width: 100%;
+  min-height: 58px;
+  resize: none;
+  padding: 0;
+  border: 0;
+  color: #c6cbd0;
   color: #c6cbd0;
   font-size: 12px;
   line-height: 1.55;
+  background: transparent;
 }
 
 .task-overview-progress {
@@ -1856,21 +1911,34 @@ button:disabled {
 }
 
 .table-primary strong,
-.table-primary span {
+.table-primary span,
+.table-task-title,
+.table-task-description {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.table-primary strong {
+.table-primary strong,
+.table-task-title {
   color: #d8dbde;
   font-size: 13px;
   font-weight: 500;
 }
 
-.table-primary span {
+.table-primary span,
+.table-task-description {
   color: var(--subtle);
   font-size: 11px;
+}
+
+.table-task-title,
+.table-task-description {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .empty-state,

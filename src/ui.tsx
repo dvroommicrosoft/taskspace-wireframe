@@ -149,6 +149,7 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
     setTaskView,
     setCardSize,
     setAllCardContentViews,
+    createTask,
   } = useWorkspace()
   const { runDemoEvent } = useWorkspace()
   const location = useRouterState({ select: (state) => state.location })
@@ -174,6 +175,22 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
   const closeTransientDrawers = () => {
     setTopOpen(false)
     if (!agentPinned) setRightOpen(false)
+  }
+
+  const addTask = () => {
+    const owner =
+      filter === 'sleeping' ? 'You' : selectedFilter?.owner ?? 'You'
+    if (filter === 'sleeping') setFilter('you')
+    const taskId = createTask(owner)
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector<HTMLTextAreaElement>(
+            `[data-task-title="${taskId}"]`,
+          )
+          ?.focus()
+      })
+    })
   }
 
   return (
@@ -341,6 +358,16 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
       <main className="main-frame" onClick={closeTransientDrawers}>
         {children}
       </main>
+
+      {location.pathname === '/' && (
+        <button
+          className="new-task-edge"
+          onClick={addTask}
+          aria-label="Create new task"
+        >
+          <Plus size={16} />
+        </button>
+      )}
 
       <button
         className={`edge edge-right agent-${session.status}`}
@@ -888,7 +915,12 @@ function ArchiveBoundary({
 
 function TaskCard({ task }: { task: Task }) {
   const navigate = useNavigate()
-  const { sleepTask, cardContentViews, toggleCardContentView } = useWorkspace()
+  const {
+    sleepTask,
+    cardContentViews,
+    toggleCardContentView,
+    updateTask,
+  } = useWorkspace()
   const [flipped, setFlipped] = useState(false)
   const frontView = cardContentViews[task.id] ?? 'overview'
   const artifactStackRef = useRef<HTMLDivElement | null>(null)
@@ -971,7 +1003,19 @@ function TaskCard({ task }: { task: Task }) {
           <div className="task-card-bar">
             <div className="task-title-block">
               <span className={`status-dot ${task.session.status}`} />
-              <h2>{task.title}</h2>
+              <textarea
+                className="task-title-input"
+                data-task-title={task.id}
+                value={task.title}
+                onChange={(event) =>
+                  updateTask(task.id, { title: event.target.value })
+                }
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+                placeholder="Untitled task"
+                aria-label="Task title"
+                rows={2}
+              />
               <div className="task-card-status-flyout">
                 <span className={`task-state state-${task.state}`}>
                   {stateLabel(task.state)}
@@ -1070,7 +1114,17 @@ function TaskCard({ task }: { task: Task }) {
                 >
                   <section className="task-overview-description">
                     <span className="overline">Description</span>
-                    <p>{task.summary}</p>
+                    <textarea
+                      className="task-description-input"
+                      value={task.summary}
+                      onChange={(event) =>
+                        updateTask(task.id, { summary: event.target.value })
+                      }
+                      onClick={(event) => event.stopPropagation()}
+                      onKeyDown={(event) => event.stopPropagation()}
+                      placeholder="Add a description"
+                      aria-label="Task description"
+                    />
                   </section>
                   <section className="task-overview-progress">
                     <header>
@@ -1416,6 +1470,7 @@ function TaskTable({
   onToggleArchive: () => void
 }) {
   const navigate = useNavigate()
+  const { updateTask } = useWorkspace()
   const tasks = archiveExpanded
     ? [...activeTasks, ...archivedTasks]
     : activeTasks
@@ -1428,8 +1483,29 @@ function TaskTable({
           <div className="table-primary">
             <span className={`status-dot ${row.original.session.status}`} />
             <div>
-              <strong>{row.original.title}</strong>
-              <span>{row.original.summary}</span>
+              <input
+                className="table-task-title"
+                data-task-title={row.original.id}
+                value={row.original.title}
+                onChange={(event) =>
+                  updateTask(row.original.id, { title: event.target.value })
+                }
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+                placeholder="Untitled task"
+                aria-label="Task title"
+              />
+              <input
+                className="table-task-description"
+                value={row.original.summary}
+                onChange={(event) =>
+                  updateTask(row.original.id, { summary: event.target.value })
+                }
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+                placeholder="Add a description"
+                aria-label="Task description"
+              />
             </div>
           </div>
         ),
@@ -1459,7 +1535,7 @@ function TaskTable({
         cell: ({ getValue }) => timeAgo(getValue<number>()),
       },
     ],
-    [],
+    [updateTask],
   )
   const table = useReactTable({
     data: tasks,

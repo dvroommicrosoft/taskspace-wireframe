@@ -33,6 +33,11 @@ interface WorkspaceContextValue {
   setCardSize: (size: CardSize) => void
   setAllCardContentViews: (view: CardContentView) => void
   toggleCardContentView: (taskId: string) => void
+  createTask: (owner: string) => string
+  updateTask: (
+    taskId: string,
+    patch: Partial<Pick<Task, 'title' | 'summary'>>,
+  ) => void
   setArtifactView: (view: ViewMode) => void
   updateArtifactContent: (
     taskId: string,
@@ -86,6 +91,45 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
           : 'overview',
     }))
   }, [])
+
+  const createTask = useCallback((owner: string) => {
+    const id = `new-task-${Date.now()}`
+    const created: Task = {
+      id,
+      title: '',
+      summary: '',
+      owner,
+      state: 'idle',
+      updatedAt: Date.now(),
+      unread: false,
+      checklist: [],
+      artifacts: [],
+      session: {
+        status: 'waiting',
+        messages: [],
+      },
+    }
+    setTasks((current) => [created, ...current])
+    setCardContentViews((current) => ({
+      ...current,
+      [id]: 'overview',
+    }))
+    return id
+  }, [])
+
+  const updateTask = useCallback(
+    (
+      taskId: string,
+      patch: Partial<Pick<Task, 'title' | 'summary'>>,
+    ) => {
+      setTasks((current) =>
+        current.map((task) =>
+          task.id === taskId ? { ...task, ...patch } : task,
+        ),
+      )
+    },
+    [],
+  )
 
   const updateArtifactContent = useCallback(
     (taskId: string, artifactId: string, content: string) => {
@@ -362,6 +406,8 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       setCardSize,
       setAllCardContentViews,
       toggleCardContentView,
+      createTask,
+      updateTask,
       setArtifactView,
       updateArtifactContent,
       sleepTask,
@@ -378,6 +424,8 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       rootSession,
       setAllCardContentViews,
       toggleCardContentView,
+      createTask,
+      updateTask,
       updateArtifactContent,
       sleepTask,
       sendMessage,
