@@ -31,6 +31,11 @@ interface WorkspaceContextValue {
   setCardSize: (size: CardSize) => void
   setArtifactView: (view: ViewMode) => void
   sleepTask: (taskId: string) => void
+  updateArtifactContent: (
+    taskId: string,
+    artifactId: string,
+    content: string,
+  ) => void
   sendMessage: (taskId: string | null, body: string) => void
   runDemoEvent: (event: DemoEvent) => void
 }
@@ -61,6 +66,28 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       ),
     )
   }, [])
+
+  const updateArtifactContent = useCallback(
+    (taskId: string, artifactId: string, content: string) => {
+      setTasks((current) =>
+        current.map((task) => {
+          if (task.id !== taskId) return task
+          const artifact = task.artifacts.find((item) => item.id === artifactId)
+          if (!artifact || artifact.content === content) return task
+
+          const updatedAt = Date.now()
+          return {
+            ...task,
+            updatedAt,
+            artifacts: task.artifacts.map((item) =>
+              item.id === artifactId ? { ...item, content, updatedAt } : item,
+            ),
+          }
+        }),
+      )
+    },
+    [],
+  )
 
   const sendMessage = useCallback((taskId: string | null, body: string) => {
     const userMessage: ChatMessage = {
@@ -255,6 +282,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       setCardSize,
       setArtifactView,
       sleepTask,
+      updateArtifactContent,
       sendMessage,
       runDemoEvent,
     }),
@@ -266,6 +294,7 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       artifactView,
       rootSession,
       sleepTask,
+      updateArtifactContent,
       sendMessage,
       runDemoEvent,
     ],

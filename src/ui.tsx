@@ -11,6 +11,7 @@ import {
   useRouter,
   useRouterState,
 } from '@tanstack/react-router'
+import { Documint, darkTheme } from '@lostintangent/documint'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   Activity,
@@ -79,6 +80,12 @@ const filters: Array<{
   { id: 'sleeping', label: 'Sleeping', icon: Moon },
   { id: 'all', label: 'All tasks', icon: GalleryVerticalEnd },
 ]
+
+const onDeckDocumintTheme = {
+  ...darkTheme,
+  accent: '#b6ff57',
+  background: '#0b0c0e',
+}
 
 const demoEvents: Array<{
   id: DemoEvent
@@ -1229,7 +1236,7 @@ export function ArtifactRoute() {
   const { taskId, artifactId } = useParams({
     from: '/tasks/$taskId/artifacts/$artifactId',
   })
-  const { tasks } = useWorkspace()
+  const { tasks, updateArtifactContent } = useWorkspace()
   const task = tasks.find((item) => item.id === taskId)
   const artifact = task?.artifacts.find((item) => item.id === artifactId)
 
@@ -1249,14 +1256,32 @@ export function ArtifactRoute() {
           <span>{timeAgo(artifact.updatedAt)} ago</span>
         </div>
       </header>
-      <motion.div
-        className={`artifact-document kind-${artifact.kind}`}
-        initial={{ opacity: 0, scale: 0.992 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.25 }}
-      >
-        <ArtifactContent artifact={artifact} />
-      </motion.div>
+      {artifact.kind === 'markdown' ? (
+        <motion.div
+          className="artifact-document kind-markdown documint-artifact"
+          initial={{ opacity: 0, scale: 0.992 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.25 }}
+        >
+          <Documint
+            className="documint-editor"
+            content={artifact.content}
+            onContentChanged={(content) =>
+              updateArtifactContent(task.id, artifact.id, content)
+            }
+            theme={onDeckDocumintTheme}
+          />
+        </motion.div>
+      ) : (
+        <motion.div
+          className={`artifact-document kind-${artifact.kind}`}
+          initial={{ opacity: 0, scale: 0.992 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.25 }}
+        >
+          <ArtifactContent artifact={artifact} />
+        </motion.div>
+      )}
     </section>
   )
 }
