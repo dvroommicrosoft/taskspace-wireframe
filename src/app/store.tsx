@@ -174,6 +174,28 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
           state: 'working',
           updatedAt: Date.now(),
           unread: true,
+          checklist: [
+            {
+              id: `accessibility-scope-${Date.now()}`,
+              label: 'Confirm the review scope',
+              state: 'done',
+            },
+            {
+              id: `accessibility-focus-${Date.now()}`,
+              label: 'Inspect keyboard focus',
+              state: 'working',
+            },
+            {
+              id: `accessibility-motion-${Date.now()}`,
+              label: 'Check reduced-motion behavior',
+              state: 'todo',
+            },
+            {
+              id: `accessibility-handoff-${Date.now()}`,
+              label: 'Prepare the findings handoff',
+              state: 'todo',
+            },
+          ],
           artifacts: [
             {
               id: `checklist-${Date.now()}`,

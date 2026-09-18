@@ -26,8 +26,10 @@ import {
   FileCode2,
   FileImage,
   FileText,
+  Files,
   Grid2X2,
   List,
+  ListChecks,
   Maximize2,
   MessageSquare,
   Minimize2,
@@ -857,6 +859,9 @@ function TaskCard({ task }: { task: Task }) {
   const navigate = useNavigate()
   const { sleepTask } = useWorkspace()
   const [flipped, setFlipped] = useState(false)
+  const [frontView, setFrontView] = useState<'artifacts' | 'overview'>(
+    'artifacts',
+  )
   const artifactStackRef = useRef<HTMLDivElement | null>(null)
   const [clippedArtifacts, setClippedArtifacts] = useState<Artifact[]>([])
   const [collapsedArtifacts, setCollapsedArtifacts] = useState<Set<string>>(
@@ -899,7 +904,7 @@ function TaskCard({ task }: { task: Task }) {
       observer.disconnect()
       window.cancelAnimationFrame(frame)
     }
-  }, [task.artifacts])
+  }, [task.artifacts, frontView])
 
   return (
     <motion.article
@@ -959,6 +964,26 @@ function TaskCard({ task }: { task: Task }) {
               </button>
               <button
                 className="card-control"
+                aria-label={
+                  frontView === 'artifacts'
+                    ? `Show overview for ${task.title}`
+                    : `Show artifacts for ${task.title}`
+                }
+                onClick={(event) => {
+                  event.stopPropagation()
+                  setFrontView((current) =>
+                    current === 'artifacts' ? 'overview' : 'artifacts',
+                  )
+                }}
+              >
+                {frontView === 'artifacts' ? (
+                  <ListChecks size={15} />
+                ) : (
+                  <Files size={15} />
+                )}
+              </button>
+              <button
+                className="card-control"
                 aria-label={`Show agent for ${task.title}`}
                 onClick={(event) => {
                   event.stopPropagation()
@@ -970,33 +995,89 @@ function TaskCard({ task }: { task: Task }) {
             </div>
           </div>
 
-          <div ref={artifactStackRef} className="artifact-stack">
-            {task.artifacts.map((artifact) => (
-              <ArtifactPreview
-                key={artifact.id}
-                artifact={artifact}
-                expanded={!collapsedArtifacts.has(artifact.id)}
-                onToggle={() =>
-                  setCollapsedArtifacts((current) => {
-                    const next = new Set(current)
-                    if (next.has(artifact.id)) {
-                      next.delete(artifact.id)
-                    } else {
-                      next.add(artifact.id)
-                    }
-                    return next
-                  })
-                }
-                onMaximize={() =>
-                  navigate({
-                    to: '/tasks/$taskId/artifacts/$artifactId',
-                    params: { taskId: task.id, artifactId: artifact.id },
-                  })
-                }
-              />
-            ))}
+          <div className="task-front-carousel">
+            <AnimatePresence initial={false}>
+              {frontView === 'artifacts' ? (
+                <motion.div
+                  key="artifacts"
+                  ref={artifactStackRef}
+                  className="task-carousel-panel artifact-stack"
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '100%', opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+                >
+                  {task.artifacts.map((artifact) => (
+                    <ArtifactPreview
+                      key={artifact.id}
+                      artifact={artifact}
+                      expanded={!collapsedArtifacts.has(artifact.id)}
+                      onToggle={() =>
+                        setCollapsedArtifacts((current) => {
+                          const next = new Set(current)
+                          if (next.has(artifact.id)) {
+                            next.delete(artifact.id)
+                          } else {
+                            next.add(artifact.id)
+                          }
+                          return next
+                        })
+                      }
+                      onMaximize={() =>
+                        navigate({
+                          to: '/tasks/$taskId/artifacts/$artifactId',
+                          params: { taskId: task.id, artifactId: artifact.id },
+                        })
+                      }
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="overview"
+                  className="task-carousel-panel task-overview"
+                  initial={{ x: '-100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '-100%', opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+                >
+                  <section className="task-overview-description">
+                    <span className="overline">Description</span>
+                    <p>{task.summary}</p>
+                  </section>
+                  <section className="task-overview-progress">
+                    <header>
+                      <span className="overline">Status</span>
+                      <span className={`task-state state-${task.state}`}>
+                        {stateLabel(task.state)}
+                      </span>
+                    </header>
+                    <div className="task-checklist">
+                      {task.checklist.map((item) => (
+                        <div
+                          className={`task-checklist-item ${item.state}`}
+                          key={item.id}
+                        >
+                          <span className="checklist-marker" />
+                          <span>{item.label}</span>
+                          <small>
+                            {item.state === 'done'
+                              ? 'Done'
+                              : item.state === 'working'
+                                ? 'Doing'
+                                : item.state === 'blocked'
+                                  ? 'Blocked'
+                                  : 'Todo'}
+                          </small>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          {clippedArtifacts.length > 0 && (
+          {frontView === 'artifacts' && clippedArtifacts.length > 0 && (
             <ClippedArtifactSummary
               artifacts={clippedArtifacts}
               onClick={openTask}

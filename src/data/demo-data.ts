@@ -1,7 +1,8 @@
-import type { AgentSession, Artifact, Task } from '../types'
+import type { AgentSession, Artifact, ChecklistItem, Task } from '../types'
 
 const now = Date.now()
 const minutes = (value: number) => now - value * 60_000
+type TaskSeed = Omit<Task, 'checklist'>
 
 export const rootSession: AgentSession = {
   status: 'waiting',
@@ -371,7 +372,7 @@ const generatedTaskSpecs: Array<{
 
 function makeGeneratedTask(
   spec: (typeof generatedTaskSpecs)[number],
-): Task {
+): TaskSeed {
   const updatedAt = minutes(spec.minutesAgo)
   const sessionStatus =
     spec.state === 'working'
@@ -441,7 +442,7 @@ function makeOverflowArtifacts(
   })
 }
 
-const allDemoTasks: Task[] = [
+const allDemoTasks: TaskSeed[] = [
   {
     id: 'launch-narrative',
     title: 'Shape the launch narrative',
@@ -795,26 +796,92 @@ const allDemoTasks: Task[] = [
 
 const userNames = ['You', 'Mira Chen', 'Theo Grant', 'Inez Silva'] as const
 
-export const demoTasks = allDemoTasks.map((task, index) => {
+const checklistSets = [
+  [
+    'Confirm the outcome',
+    'Collect the strongest evidence',
+    'Draft the primary direction',
+    'Resolve open questions',
+    'Prepare the review handoff',
+  ],
+  [
+    'Frame the user problem',
+    'Compare current patterns',
+    'Build the working version',
+    'Check narrow-screen behavior',
+    'Summarize the decision',
+  ],
+  [
+    'Define the success signal',
+    'Gather source material',
+    'Test the clearest approach',
+    'Address edge cases',
+    'Package the result',
+  ],
+] as const
+
+function makeChecklist(task: TaskSeed, index: number): ChecklistItem[] {
+  const labels = checklistSets[index % checklistSets.length]
+  const workingIndex =
+    task.state === 'working' ? 2 : task.state === 'review' ? 4 : -1
+  const completedThrough =
+    task.state === 'archived'
+      ? 4
+      : task.state === 'review'
+        ? 3
+        : task.state === 'working'
+          ? 1
+          : task.state === 'idle'
+            ? 2
+            : index % 3
+  const blockedIndex =
+    task.state !== 'archived' && index % 5 === 0 ? 3 : -1
+
+  return labels.map((label, itemIndex) => ({
+    id: `${task.id}-todo-${itemIndex}`,
+    label,
+    state:
+      itemIndex === blockedIndex
+        ? ('blocked' as const)
+        : itemIndex === workingIndex
+          ? ('working' as const)
+          : itemIndex <= completedThrough
+            ? ('done' as const)
+            : ('todo' as const),
+  }))
+}
+
+export const demoTasks: Task[] = allDemoTasks.map((task, index) => {
   const owner = userNames.includes(task.owner as (typeof userNames)[number])
     ? task.owner
     : userNames[index % userNames.length]
 
-  if (index < 12) return { ...task, owner }
+  if (index < 12) {
+    const activeTask = { ...task, owner }
+    return { ...activeTask, checklist: makeChecklist(activeTask, index) }
+  }
   if (index < 24) {
-    return {
+    const archivedTask = {
       ...task,
       owner,
       state: 'archived' as const,
       unread: false,
       session: { ...task.session, status: 'waiting' as const },
     }
+    return {
+      ...archivedTask,
+      checklist: makeChecklist(archivedTask, index),
+    }
   }
-  return {
+  const sleepingTask = {
     ...task,
     owner,
     state: 'sleeping' as const,
     unread: false,
     session: { ...task.session, status: 'waiting' as const },
+  }
+  return {
+    ...sleepingTask,
+    checklist: makeChecklist(sleepingTask, index),
   }
 })
