@@ -30,12 +30,12 @@ interface WorkspaceContextValue {
   setTaskView: (view: ViewMode) => void
   setCardSize: (size: CardSize) => void
   setArtifactView: (view: ViewMode) => void
-  sleepTask: (taskId: string) => void
   updateArtifactContent: (
     taskId: string,
     artifactId: string,
     content: string,
   ) => void
+  sleepTask: (taskId: string) => void
   sendMessage: (taskId: string | null, body: string) => void
   runDemoEvent: (event: DemoEvent) => void
 }
@@ -51,21 +51,11 @@ const scriptedReplies = [
 export function WorkspaceProvider({ children }: PropsWithChildren) {
   const [tasks, setTasks] = useState(demoTasks)
   const [rootSession, setRootSession] = useState(initialRootSession)
-  const [filter, setFilter] = useState<FilterId>('active')
+  const [filter, setFilter] = useState<FilterId>('you')
   const [taskView, setTaskView] = useState<ViewMode>('cards')
   const [cardSize, setCardSize] = useState<CardSize>('normal')
   const [artifactView, setArtifactView] = useState<ViewMode>('cards')
   const replyIndex = useRef(0)
-
-  const sleepTask = useCallback((taskId: string) => {
-    setTasks((current) =>
-      current.map((task) =>
-        task.id === taskId
-          ? { ...task, state: 'sleeping', unread: false, updatedAt: Date.now() }
-          : task,
-      ),
-    )
-  }, [])
 
   const updateArtifactContent = useCallback(
     (taskId: string, artifactId: string, content: string) => {
@@ -74,7 +64,6 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
           if (task.id !== taskId) return task
           const artifact = task.artifacts.find((item) => item.id === artifactId)
           if (!artifact || artifact.content === content) return task
-
           const updatedAt = Date.now()
           return {
             ...task,
@@ -88,6 +77,16 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
     },
     [],
   )
+
+  const sleepTask = useCallback((taskId: string) => {
+    setTasks((current) =>
+      current.map((task) =>
+        task.id === taskId
+          ? { ...task, state: 'sleeping', unread: false, updatedAt: Date.now() }
+          : task,
+      ),
+    )
+  }, [])
 
   const sendMessage = useCallback((taskId: string | null, body: string) => {
     const userMessage: ChatMessage = {
@@ -251,7 +250,23 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       }
 
       if (event === 'archive') {
-        return current.length > 1 ? current.slice(0, -1) : current
+        const target = [...current]
+          .reverse()
+          .find(
+            (task) =>
+              task.state !== 'sleeping' && task.state !== 'archived',
+          )
+        if (!target) return current
+        return current.map((task) =>
+          task.id === target.id
+            ? {
+                ...task,
+                state: 'archived' as const,
+                unread: false,
+                updatedAt: Date.now(),
+              }
+            : task,
+        )
       }
 
       const index = current.findIndex((task) => task.state === 'sleeping')
@@ -281,8 +296,8 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       setTaskView,
       setCardSize,
       setArtifactView,
-      sleepTask,
       updateArtifactContent,
+      sleepTask,
       sendMessage,
       runDemoEvent,
     }),
@@ -293,8 +308,8 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       cardSize,
       artifactView,
       rootSession,
-      sleepTask,
       updateArtifactContent,
+      sleepTask,
       sendMessage,
       runDemoEvent,
     ],

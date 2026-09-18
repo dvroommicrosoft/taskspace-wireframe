@@ -428,16 +428,15 @@ function makeOverflowArtifacts(
 ): Artifact[] {
   return titles.map((title, index) => {
     const kind = index % 2 === 0 ? 'markdown' : 'html'
-    const subject = title.replace(/\.(md|html)$/, '')
     return {
-      id: `${taskId}-${subject.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      id: `${taskId}-overflow-${index}`,
       title,
       kind,
       updatedAt: minutes(startMinutesAgo + index * 7),
       content:
         kind === 'markdown'
-          ? `# ${subject}\n\nThis working artifact captures the current evidence, decisions, and open questions for ${subject.toLowerCase()}.\n\n- Confirm the strongest signal\n- Preserve the supporting context\n- Identify the next review decision`
-          : `<div class="mini-page"><span class="eyebrow">Working artifact</span><h2>${subject}</h2><p>Current evidence and decisions are organized for focused review.</p><div class="mini-stat"><b>${index + 2}</b><span>signals synthesized</span></div></div>`,
+          ? `# ${title.replace(/\\.[^.]+$/, '')}\n\nGenerated working material for this active task. It stays expanded in the card so overflow behavior is visible.`
+          : `<div class="mini-page"><span class="eyebrow">Working file</span><h2>${title.replace(/\\.[^.]+$/, '')}</h2><p>Generated exploration attached to this active task.</p></div>`,
     }
   })
 }
@@ -477,7 +476,7 @@ const allDemoTasks: Task[] = [
         imageUrl:
           'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=80',
       },
-      ...makeOverflowArtifacts('launch-narrative', 72, [
+      ...makeOverflowArtifacts('launch-narrative', 76, [
         'Audience evidence.md',
         'Competitive framing.html',
         'Proof point inventory.md',
@@ -574,7 +573,7 @@ const allDemoTasks: Task[] = [
         imageUrl:
           'https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=1000&q=80',
       },
-      ...makeOverflowArtifacts('design-system-audit', 96, [
+      ...makeOverflowArtifacts('design-system-audit', 102, [
         'Control taxonomy.md',
         'Hover states.html',
         'Motion inventory.md',
@@ -701,16 +700,121 @@ const allDemoTasks: Task[] = [
       ],
     },
   },
+  {
+    id: 'mira-release-proof',
+    title: 'Assemble release proof',
+    summary: 'Turn the latest product changes into a reviewable evidence set.',
+    owner: 'Mira Chen',
+    state: 'review',
+    updatedAt: minutes(119),
+    unread: true,
+    artifacts: [
+      {
+        id: 'mira-release-checklist',
+        title: 'Release proof.md',
+        kind: 'markdown',
+        updatedAt: minutes(119),
+        content:
+          '# Release proof\n\nPair each product claim with one visible behavior and one artifact a reviewer can inspect.',
+      },
+    ],
+    session: {
+      status: 'review',
+      messages: [
+        {
+          id: 'mira-release-1',
+          role: 'agent',
+          body: 'The release proof is grouped by the decisions Mira needs to make.',
+          createdAt: minutes(119),
+        },
+      ],
+    },
+  },
+  {
+    id: 'theo-feedback-loop',
+    title: 'Shorten the feedback loop',
+    summary: 'Make review comments feel connected to the work they change.',
+    owner: 'Theo Grant',
+    state: 'working',
+    updatedAt: minutes(128),
+    unread: false,
+    artifacts: [
+      {
+        id: 'theo-feedback-map',
+        title: 'Feedback loop.md',
+        kind: 'markdown',
+        updatedAt: minutes(128),
+        content:
+          '# Feedback loop\n\nKeep the artifact, comment, and resulting agent action in one visible chain.',
+      },
+    ],
+    session: {
+      status: 'thinking',
+      messages: [
+        {
+          id: 'theo-feedback-1',
+          role: 'agent',
+          body: 'I am comparing three ways to keep feedback anchored to the changed artifact.',
+          createdAt: minutes(128),
+        },
+      ],
+    },
+  },
+  {
+    id: 'inez-launch-risks',
+    title: 'Surface launch risks',
+    summary: 'Separate actionable launch blockers from background uncertainty.',
+    owner: 'Inez Silva',
+    state: 'idle',
+    updatedAt: minutes(136),
+    unread: false,
+    artifacts: [
+      {
+        id: 'inez-risk-register',
+        title: 'Launch risks.md',
+        kind: 'markdown',
+        updatedAt: minutes(136),
+        content:
+          '# Launch risks\n\nShow only risks that change the next action, owner, or expected launch outcome.',
+      },
+    ],
+    session: {
+      status: 'waiting',
+      messages: [
+        {
+          id: 'inez-launch-1',
+          role: 'agent',
+          body: 'The launch risks are ranked and ready for Inez to inspect.',
+          createdAt: minutes(136),
+        },
+      ],
+    },
+  },
   ...generatedTaskSpecs.map(makeGeneratedTask),
 ]
 
-export const demoTasks = allDemoTasks.map((task, index) =>
-  index < 9
-    ? task
-    : {
-        ...task,
-        state: 'sleeping' as const,
-        unread: false,
-        session: { ...task.session, status: 'waiting' as const },
-      },
-)
+const userNames = ['You', 'Mira Chen', 'Theo Grant', 'Inez Silva'] as const
+
+export const demoTasks = allDemoTasks.map((task, index) => {
+  const owner = userNames.includes(task.owner as (typeof userNames)[number])
+    ? task.owner
+    : userNames[index % userNames.length]
+
+  if (index < 12) return { ...task, owner }
+  if (index < 24) {
+    return {
+      ...task,
+      owner,
+      state: 'archived' as const,
+      unread: false,
+      session: { ...task.session, status: 'waiting' as const },
+    }
+  }
+  return {
+    ...task,
+    owner,
+    state: 'sleeping' as const,
+    unread: false,
+    session: { ...task.session, status: 'waiting' as const },
+  }
+})

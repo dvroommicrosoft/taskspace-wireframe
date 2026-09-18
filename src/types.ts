@@ -1,6 +1,6 @@
 export type ArtifactKind = 'markdown' | 'html' | 'image'
-export type TaskState = 'working' | 'review' | 'idle' | 'sleeping'
-export type FilterId = 'active' | 'review' | 'working' | 'sleeping' | 'all'
+export type TaskState = 'working' | 'review' | 'idle' | 'sleeping' | 'archived'
+export type FilterId = 'you' | 'mira' | 'theo' | 'inez' | 'sleeping'
 export type ViewMode = 'cards' | 'table'
 export type CardSize = 'normal' | 'large'
 

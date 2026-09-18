@@ -4,6 +4,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from '@tanstack/react-table'
+import { Documint, darkTheme } from '@lostintangent/documint'
 import {
   Link,
   useNavigate,
@@ -11,25 +12,20 @@ import {
   useRouter,
   useRouterState,
 } from '@tanstack/react-router'
-import { Documint, darkTheme } from '@lostintangent/documint'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  Activity,
   Archive,
   ArrowLeft,
   Bot,
   ChevronDown,
   ChevronRight,
   ChevronsUp,
-  CircleDot,
   Clock3,
   Columns3,
   Eye,
   FileCode2,
   FileImage,
   FileText,
-  Filter,
-  GalleryVerticalEnd,
   Grid2X2,
   List,
   Maximize2,
@@ -37,9 +33,9 @@ import {
   Minimize2,
   Moon,
   MoreHorizontal,
+  PanelTop,
   PanelRightClose,
   PanelRightOpen,
-  PanelTop,
   Pin,
   PinOff,
   Play,
@@ -50,6 +46,7 @@ import {
   Zap,
 } from 'lucide-react'
 import {
+  Fragment,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -71,20 +68,35 @@ import type {
 const filters: Array<{
   id: FilterId
   label: string
-  icon: LucideIcon
+  owner?: string
+  avatar?: string
 }> = [
-  { id: 'active', label: 'My active tasks', icon: CircleDot },
-  { id: 'review', label: 'Needs review', icon: Eye },
-  { id: 'working', label: 'Agent working', icon: Activity },
-  { id: 'sleeping', label: 'Sleeping', icon: Moon },
-  { id: 'all', label: 'All tasks', icon: GalleryVerticalEnd },
+  {
+    id: 'you',
+    label: 'Your tasks',
+    owner: 'You',
+    avatar: `${import.meta.env.BASE_URL}avatar-you.svg`,
+  },
+  {
+    id: 'mira',
+    label: "Mira Chen's tasks",
+    owner: 'Mira Chen',
+    avatar: `${import.meta.env.BASE_URL}avatar-mira.svg`,
+  },
+  {
+    id: 'theo',
+    label: "Theo Grant's tasks",
+    owner: 'Theo Grant',
+    avatar: `${import.meta.env.BASE_URL}avatar-theo.svg`,
+  },
+  {
+    id: 'inez',
+    label: "Inez Silva's tasks",
+    owner: 'Inez Silva',
+    avatar: `${import.meta.env.BASE_URL}avatar-inez.svg`,
+  },
+  { id: 'sleeping', label: 'Sleeping tasks' },
 ]
-
-const onDeckDocumintTheme = {
-  ...darkTheme,
-  accent: '#b6ff57',
-  background: '#0b0c0e',
-}
 
 const demoEvents: Array<{
   id: DemoEvent
@@ -99,6 +111,12 @@ const demoEvents: Array<{
   { id: 'archive', label: 'Archive last task', icon: Archive },
 ]
 
+const onDeckDocumintTheme = {
+  ...darkTheme,
+  accent: '#b6ff57',
+  background: '#0b0c0e',
+}
+
 function timeAgo(timestamp: number) {
   const minutes = Math.max(1, Math.floor((Date.now() - timestamp) / 60_000))
   if (minutes < 60) return `${minutes}m`
@@ -111,6 +129,7 @@ function stateLabel(state: Task['state']) {
   if (state === 'review') return 'Needs review'
   if (state === 'working') return 'Agent working'
   if (state === 'sleeping') return 'Sleeping'
+  if (state === 'archived') return 'Archived'
   return 'Quiet'
 }
 
@@ -151,10 +170,10 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
       }}
       onTouchEnd={(event) => {
         const start = touchStart.current
-        const touch = event.changedTouches[0]
-        if (start === null || !touch) return
-        if (start.y < 24 && touch.clientY - start.y > 52) setTopOpen(true)
-        if (start.x > window.innerWidth - 24 && start.x - touch.clientX > 52)
+        const end = event.changedTouches[0]
+        if (!start || !end) return
+        if (start.y < 24 && end.clientY - start.y > 52) setTopOpen(true)
+        if (start.x > window.innerWidth - 24 && start.x - end.clientX > 52)
           setRightOpen(true)
         touchStart.current = null
       }}
@@ -164,7 +183,9 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
         aria-label="Open task controls"
         onClick={() => setTopOpen(true)}
         onMouseEnter={() => setTopOpen(true)}
-      />
+      >
+        <span className="edge-active-mark" />
+      </button>
 
       <AnimatePresence>
         {topOpen && (
@@ -179,69 +200,72 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
             <strong>On Deck</strong>
             <span className="titlebar-divider" />
 
-            <nav className="titlebar-controls" aria-label="Task filters">
-              {filters.map(({ id, label, icon: Icon }) => {
+            <nav className="titlebar-icon-group" aria-label="Task filters">
+              {filters.map(({ id, label, owner, avatar }) => {
                 const count = tasks.filter((item) => {
-                  if (id === 'all') return true
-                  if (id === 'active') return item.state !== 'sleeping'
-                  return item.state === id
+                  if (id === 'sleeping') return item.state === 'sleeping'
+                  return item.owner === owner && item.state !== 'sleeping'
                 }).length
                 return (
                   <button
                     key={id}
                     className={filter === id ? 'selected' : ''}
-                    aria-label={`${label}, ${count} tasks`}
                     onClick={() => {
                       setFilter(id)
                       setTopOpen(false)
                     }}
+                    aria-label={`${label}, ${count} tasks`}
                   >
-                    <Icon size={17} />
+                    {avatar ? (
+                      <img className="filter-avatar" src={avatar} alt="" />
+                    ) : (
+                      <Moon size={17} />
+                    )}
                   </button>
                 )
               })}
             </nav>
 
             {location.pathname === '/' && (
-              <div className="titlebar-presentation">
-                <span className="titlebar-divider" />
-                <div className="titlebar-controls" aria-label="Presentation">
+              <>
+                <span className="titlebar-divider titlebar-presentation-divider" />
+                <div
+                  className="titlebar-icon-group"
+                  aria-label="Task presentation"
+                >
                   <button
                     className={taskView === 'cards' ? 'selected' : ''}
-                    aria-label="Card view"
                     onClick={() => setTaskView('cards')}
+                    aria-label="Card view"
                   >
                     <Grid2X2 size={17} />
                   </button>
                   <button
                     className={taskView === 'table' ? 'selected' : ''}
-                    aria-label="Table view"
                     onClick={() => setTaskView('table')}
+                    aria-label="Table view"
                   >
                     <List size={17} />
                   </button>
-                </div>
-                <span className="titlebar-mini-divider" />
-                <div className="titlebar-controls" aria-label="Card size">
+                  <span className="titlebar-mini-divider" />
                   <button
                     className={cardSize === 'normal' ? 'selected' : ''}
-                    aria-label="Normal cards"
                     onClick={() => setCardSize('normal')}
+                    aria-label="Normal cards"
                   >
                     <Columns3 size={17} />
                   </button>
                   <button
                     className={cardSize === 'large' ? 'selected' : ''}
-                    aria-label="Large cards"
                     onClick={() => setCardSize('large')}
+                    aria-label="Large cards"
                   >
                     <Maximize2 size={17} />
                   </button>
                 </div>
-              </div>
+              </>
             )}
 
-            <span className="titlebar-spacer" />
             <button
               className="titlebar-close mobile-only"
               onClick={() => setTopOpen(false)}
@@ -369,6 +393,7 @@ function AgentGutterTranscript({ session }: { session: AgentSession }) {
         {session.status === 'thinking' && (
           <motion.span
             className="gutter-typing-marker"
+            initial={{ opacity: 0 }}
             animate={{ opacity: [0.35, 1, 0.35] }}
             transition={{ duration: 1.4, repeat: Infinity }}
           />
@@ -525,27 +550,42 @@ function AgentPanel({
   )
 }
 
-function filterTasks(tasks: Task[], filter: FilterId) {
-  return tasks.filter((task) => {
-    if (filter === 'all') return true
-    if (filter === 'active') return task.state !== 'sleeping'
-    return task.state === filter
-  })
+function tasksForFilter(tasks: Task[], filter: FilterId) {
+  if (filter === 'sleeping') {
+    return {
+      active: tasks.filter((task) => task.state === 'sleeping'),
+      archived: [],
+    }
+  }
+
+  const owner = filters.find((item) => item.id === filter)?.owner
+  const owned = tasks.filter((task) => task.owner === owner)
+  return {
+    active: owned.filter(
+      (task) => task.state !== 'archived' && task.state !== 'sleeping',
+    ),
+    archived: owned.filter((task) => task.state === 'archived'),
+  }
 }
 
 export function WorkspaceRoute() {
   const { tasks, filter, taskView, cardSize } = useWorkspace()
   const isMobile = useMediaQuery('(max-width: 860px)')
-  const visibleTasks = useMemo(
-    () => filterTasks(tasks, filter),
+  const [archiveExpanded, setArchiveExpanded] = useState(false)
+  const filteredTasks = useMemo(
+    () => tasksForFilter(tasks, filter),
     [tasks, filter],
   )
   const effectiveView = isMobile ? 'table' : taskView
+  const hasTasks =
+    filteredTasks.active.length > 0 || filteredTasks.archived.length > 0
+
+  useEffect(() => setArchiveExpanded(false), [filter])
 
   return (
     <section className="mode-view task-mode">
       <AnimatePresence mode="wait">
-        {visibleTasks.length === 0 ? (
+        {!hasTasks ? (
           <EmptyState key="empty" filter={filter} />
         ) : (
           <motion.div
@@ -557,9 +597,20 @@ export function WorkspaceRoute() {
             transition={{ duration: 0.18 }}
           >
             {effectiveView === 'cards' ? (
-              <TaskGrid tasks={visibleTasks} cardSize={cardSize} />
+              <TaskGrid
+                activeTasks={filteredTasks.active}
+                archivedTasks={filteredTasks.archived}
+                archiveExpanded={archiveExpanded}
+                cardSize={cardSize}
+                onToggleArchive={() => setArchiveExpanded((value) => !value)}
+              />
             ) : (
-              <TaskTable tasks={visibleTasks} />
+              <TaskTable
+                activeTasks={filteredTasks.active}
+                archivedTasks={filteredTasks.archived}
+                archiveExpanded={archiveExpanded}
+                onToggleArchive={() => setArchiveExpanded((value) => !value)}
+              />
             )}
           </motion.div>
         )}
@@ -627,14 +678,86 @@ function EmptyState({ filter }: { filter: FilterId }) {
 }
 
 function TaskGrid({
-  tasks,
+  activeTasks,
+  archivedTasks,
+  archiveExpanded,
   cardSize,
+  onToggleArchive,
 }: {
-  tasks: Task[]
+  activeTasks: Task[]
+  archivedTasks: Task[]
+  archiveExpanded: boolean
   cardSize: CardSize
+  onToggleArchive: () => void
 }) {
+  const gridRef = useRef<HTMLDivElement | null>(null)
+  const [boundary, setBoundary] = useState<{
+    orientation: 'horizontal' | 'vertical'
+    top: number
+    left: number
+    width: number
+    height: number
+  } | null>(null)
+  const tasks = archiveExpanded
+    ? [...activeTasks, ...archivedTasks]
+    : activeTasks
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current
+    if (!grid || activeTasks.length === 0 || archivedTasks.length === 0) {
+      setBoundary(null)
+      return
+    }
+
+    const update = () => {
+      const cards = Array.from(
+        grid.querySelectorAll<HTMLElement>('.task-card'),
+      )
+      const first = cards[0]
+      const lastActive = cards[activeTasks.length - 1]
+      if (!first || !lastActive) return
+
+      const styles = window.getComputedStyle(grid)
+      const columns = styles.gridTemplateColumns
+        .split(' ')
+        .filter(Boolean).length
+      const gap = Number.parseFloat(styles.columnGap) || 17
+      const rowIsComplete = activeTasks.length % columns === 0
+
+      if (rowIsComplete) {
+        setBoundary({
+          orientation: 'horizontal',
+          top: lastActive.offsetTop + lastActive.offsetHeight + gap / 2,
+          left: first.offsetLeft,
+          width:
+            first.offsetWidth * columns + gap * Math.max(0, columns - 1),
+          height: 1,
+        })
+      } else {
+        setBoundary({
+          orientation: 'vertical',
+          top: lastActive.offsetTop,
+          left: lastActive.offsetLeft + lastActive.offsetWidth + gap / 2,
+          width: 1,
+          height: lastActive.offsetHeight,
+        })
+      }
+    }
+
+    const observer = new ResizeObserver(update)
+    observer.observe(grid)
+    const cards = grid.querySelectorAll<HTMLElement>('.task-card')
+    cards.forEach((card) => observer.observe(card))
+    const frame = window.requestAnimationFrame(update)
+    return () => {
+      observer.disconnect()
+      window.cancelAnimationFrame(frame)
+    }
+  }, [activeTasks.length, archivedTasks.length, archiveExpanded, cardSize])
+
   return (
     <motion.div
+      ref={gridRef}
       className={`task-grid ${cardSize === 'large' ? 'large-cards' : ''}`}
       layout
     >
@@ -643,7 +766,56 @@ function TaskGrid({
           <TaskCard key={task.id} task={task} />
         ))}
       </AnimatePresence>
+      {boundary && (
+        <ArchiveBoundary
+          {...boundary}
+          expanded={archiveExpanded}
+          count={archivedTasks.length}
+          onToggle={onToggleArchive}
+        />
+      )}
     </motion.div>
+  )
+}
+
+function ArchiveBoundary({
+  orientation,
+  top,
+  left,
+  width,
+  height,
+  expanded,
+  count,
+  onToggle,
+}: {
+  orientation: 'horizontal' | 'vertical'
+  top: number
+  left: number
+  width: number
+  height: number
+  expanded: boolean
+  count: number
+  onToggle: () => void
+}) {
+  return (
+    <motion.button
+      type="button"
+      className={`archive-boundary ${orientation}`}
+      style={
+        orientation === 'horizontal'
+          ? { top: top - 16, left, width, height: 32 }
+          : { top, left: left - 16, width: 32, height }
+      }
+      onClick={onToggle}
+      aria-label={`${expanded ? 'Hide' : 'Show'} ${count} archived tasks`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <span className="archive-wave" />
+      <span className="archive-boundary-icon">
+        <Archive size={15} />
+      </span>
+    </motion.button>
   )
 }
 
@@ -651,11 +823,13 @@ function TaskCard({ task }: { task: Task }) {
   const navigate = useNavigate()
   const { sleepTask } = useWorkspace()
   const [flipped, setFlipped] = useState(false)
+  const artifactStackRef = useRef<HTMLDivElement | null>(null)
+  const [clippedArtifacts, setClippedArtifacts] = useState<Artifact[]>([])
   const [collapsedArtifacts, setCollapsedArtifacts] = useState<Set<string>>(
     () => new Set(),
   )
-  const artifactStackRef = useRef<HTMLDivElement>(null)
-  const [clippedArtifacts, setClippedArtifacts] = useState<Artifact[]>([])
+  const openTask = () =>
+    navigate({ to: '/tasks/$taskId', params: { taskId: task.id } })
 
   useEffect(() => {
     const stack = artifactStackRef.current
@@ -664,43 +838,34 @@ function TaskCard({ task }: { task: Task }) {
     const updateClippedArtifacts = () => {
       const visibleBottom = stack.getBoundingClientRect().bottom - 42
       const clippedIds = Array.from(
-        stack.querySelectorAll<HTMLElement>('[data-artifact-id]'),
+        stack.querySelectorAll<HTMLElement>('[data-artifact-id] > header'),
       )
-        .filter((preview) => {
-          const header = preview.querySelector(':scope > header')
-          return header && header.getBoundingClientRect().bottom > visibleBottom
-        })
-        .map((preview) => preview.dataset.artifactId)
+        .filter((header) => header.getBoundingClientRect().bottom > visibleBottom)
+        .map((header) => header.parentElement?.dataset.artifactId)
 
       const next = task.artifacts.filter((artifact) =>
         clippedIds.includes(artifact.id),
       )
-      setClippedArtifacts((current) => {
-        if (
-          current.length === next.length &&
-          current.every((artifact, index) => artifact.id === next[index]?.id)
-        ) {
-          return current
-        }
-        return next
-      })
+      setClippedArtifacts((current) =>
+        current.length === next.length &&
+        current.every((artifact, index) => artifact.id === next[index]?.id)
+          ? current
+          : next,
+      )
     }
 
     const observer = new ResizeObserver(updateClippedArtifacts)
     observer.observe(stack)
     stack
       .querySelectorAll<HTMLElement>('[data-artifact-id]')
-      .forEach((preview) => observer.observe(preview))
-    updateClippedArtifacts()
+      .forEach((artifact) => observer.observe(artifact))
+    const frame = window.requestAnimationFrame(updateClippedArtifacts)
 
     return () => {
       observer.disconnect()
+      window.cancelAnimationFrame(frame)
     }
-  }, [task.artifacts, collapsedArtifacts])
-
-  const openTask = () => {
-    navigate({ to: '/tasks/$taskId', params: { taskId: task.id } })
-  }
+  }, [task.artifacts])
 
   return (
     <motion.article
@@ -726,7 +891,10 @@ function TaskCard({ task }: { task: Task }) {
           aria-label={`Open ${task.title}`}
           onClick={openTask}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
+            if (
+              event.target === event.currentTarget &&
+              (event.key === 'Enter' || event.key === ' ')
+            ) {
               event.preventDefault()
               openTask()
             }
@@ -752,7 +920,6 @@ function TaskCard({ task }: { task: Task }) {
                   event.stopPropagation()
                   sleepTask(task.id)
                 }}
-                onKeyDown={(event) => event.stopPropagation()}
               >
                 <Moon size={15} />
               </button>
@@ -763,27 +930,29 @@ function TaskCard({ task }: { task: Task }) {
                   event.stopPropagation()
                   setFlipped(true)
                 }}
-                onKeyDown={(event) => event.stopPropagation()}
               >
                 <MessageSquare size={15} />
               </button>
             </div>
           </div>
 
-          <div className="artifact-stack" ref={artifactStackRef}>
+          <div ref={artifactStackRef} className="artifact-stack">
             {task.artifacts.map((artifact) => (
               <ArtifactPreview
                 key={artifact.id}
                 artifact={artifact}
                 expanded={!collapsedArtifacts.has(artifact.id)}
-                onToggle={() => {
+                onToggle={() =>
                   setCollapsedArtifacts((current) => {
                     const next = new Set(current)
-                    if (next.has(artifact.id)) next.delete(artifact.id)
-                    else next.add(artifact.id)
+                    if (next.has(artifact.id)) {
+                      next.delete(artifact.id)
+                    } else {
+                      next.add(artifact.id)
+                    }
                     return next
                   })
-                }}
+                }
                 onMaximize={() =>
                   navigate({
                     to: '/tasks/$taskId/artifacts/$artifactId',
@@ -793,7 +962,6 @@ function TaskCard({ task }: { task: Task }) {
               />
             ))}
           </div>
-
           {clippedArtifacts.length > 0 && (
             <ClippedArtifactSummary
               artifacts={clippedArtifacts}
@@ -816,8 +984,8 @@ function TaskCard({ task }: { task: Task }) {
             </button>
             <button
               className="card-control"
-              aria-label={`Show artifacts for ${task.title}`}
               onClick={() => setFlipped(false)}
+              aria-label={`Show artifacts for ${task.title}`}
             >
               <PanelTop size={15} />
             </button>
@@ -836,7 +1004,7 @@ function ClippedArtifactSummary({
   artifacts: Artifact[]
   onClick: () => void
 }) {
-  const labelsRef = useRef<HTMLSpanElement>(null)
+  const labelsRef = useRef<HTMLSpanElement | null>(null)
   const [visibleCount, setVisibleCount] = useState(artifacts.length)
 
   useLayoutEffect(() => {
@@ -844,31 +1012,34 @@ function ClippedArtifactSummary({
     if (!labels) return
 
     const updateVisibleCount = () => {
-      const context = document.createElement('canvas').getContext('2d')
-      if (!context) return
-
       const styles = window.getComputedStyle(labels)
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      if (!context) return
       context.font = styles.font
-      const gap = 8
-      let nextCount = 0
 
+      const gap = 8
       for (let count = artifacts.length; count >= 0; count -= 1) {
         const hiddenCount = artifacts.length - count
-        const labelWidths = artifacts
+        const namesWidth = artifacts
           .slice(0, count)
-          .map((artifact) => context.measureText(artifact.title).width)
-        if (hiddenCount > 0) {
-          labelWidths.push(context.measureText(`+${hiddenCount} more`).width)
-        }
-        const totalWidth =
-          labelWidths.reduce((total, width) => total + width, 0) +
-          Math.max(0, labelWidths.length - 1) * gap
-        if (totalWidth <= labels.clientWidth) {
-          nextCount = count
-          break
+          .reduce(
+            (width, artifact) =>
+              width + context.measureText(artifact.title).width,
+            0,
+          )
+        const overflowWidth = hiddenCount
+          ? context.measureText(`+${hiddenCount} more`).width
+          : 0
+        const itemCount = count + (hiddenCount ? 1 : 0)
+        const requiredWidth =
+          namesWidth + overflowWidth + Math.max(0, itemCount - 1) * gap
+
+        if (requiredWidth <= labels.clientWidth) {
+          setVisibleCount(count)
+          return
         }
       }
-      setVisibleCount(nextCount)
     }
 
     const observer = new ResizeObserver(updateVisibleCount)
@@ -886,11 +1057,9 @@ function ClippedArtifactSummary({
         event.stopPropagation()
         onClick()
       }}
-      onKeyDown={(event) => event.stopPropagation()}
-      aria-label="Open task to view clipped artifacts"
     >
       <ChevronsUp size={14} />
-      <span className="clipped-artifact-labels" ref={labelsRef}>
+      <span ref={labelsRef} className="clipped-artifact-labels">
         {artifacts.slice(0, visibleCount).map((artifact) => (
           <span key={artifact.id}>{artifact.title}</span>
         ))}
@@ -983,7 +1152,10 @@ function ArtifactPreview({
         onMaximize()
       }}
       onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
+        if (
+          event.target === event.currentTarget &&
+          (event.key === 'Enter' || event.key === ' ')
+        ) {
           event.preventDefault()
           event.stopPropagation()
           onMaximize()
@@ -1000,7 +1172,6 @@ function ArtifactPreview({
               event.stopPropagation()
               onToggle()
             }}
-            onKeyDown={(event) => event.stopPropagation()}
             aria-label={expanded ? 'Collapse' : 'Expand'}
           >
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -1077,8 +1248,21 @@ function renderInline(line: string) {
   )
 }
 
-function TaskTable({ tasks }: { tasks: Task[] }) {
+function TaskTable({
+  activeTasks,
+  archivedTasks,
+  archiveExpanded,
+  onToggleArchive,
+}: {
+  activeTasks: Task[]
+  archivedTasks: Task[]
+  archiveExpanded: boolean
+  onToggleArchive: () => void
+}) {
   const navigate = useNavigate()
+  const tasks = archiveExpanded
+    ? [...activeTasks, ...archivedTasks]
+    : activeTasks
   const columns = useMemo<ColumnDef<Task>[]>(
     () => [
       {
@@ -1126,6 +1310,28 @@ function TaskTable({ tasks }: { tasks: Task[] }) {
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
+  const rows = table.getRowModel().rows
+  const renderRow = (row: (typeof rows)[number]) => (
+    <motion.tr
+      layout
+      key={row.original.id}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -18 }}
+      onClick={() =>
+        navigate({
+          to: '/tasks/$taskId',
+          params: { taskId: row.original.id },
+        })
+      }
+    >
+      {row.getVisibleCells().map((cell) => (
+        <td key={cell.id} data-label={String(cell.column.columnDef.header)}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </td>
+      ))}
+    </motion.tr>
+  )
 
   return (
     <motion.div className="table-wrap" layout>
@@ -1146,27 +1352,31 @@ function TaskTable({ tasks }: { tasks: Task[] }) {
         </thead>
         <tbody>
           <AnimatePresence initial={false}>
-            {table.getRowModel().rows.map((row) => (
+            {rows.slice(0, activeTasks.length).map(renderRow)}
+            {archivedTasks.length > 0 && (
               <motion.tr
                 layout
-                key={row.original.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -18 }}
-                onClick={() =>
-                  navigate({
-                    to: '/tasks/$taskId',
-                    params: { taskId: row.original.id },
-                  })
-                }
+                key="archive-boundary"
+                className="archive-table-boundary"
               >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} data-label={String(cell.column.columnDef.header)}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+                <td colSpan={5}>
+                  <button
+                    type="button"
+                    onClick={onToggleArchive}
+                    aria-label={`${archiveExpanded ? 'Hide' : 'Show'} ${archivedTasks.length} archived tasks`}
+                  >
+                    <span className="archive-wave" />
+                    <span className="archive-boundary-icon">
+                      <Archive size={15} />
+                    </span>
+                  </button>
+                </td>
               </motion.tr>
-            ))}
+            )}
+            {archiveExpanded &&
+              rows.slice(activeTasks.length).map((row) => (
+                <Fragment key={row.original.id}>{renderRow(row)}</Fragment>
+              ))}
           </AnimatePresence>
         </tbody>
       </table>
@@ -1188,7 +1398,9 @@ export function TaskRoute() {
         eyebrow="Task"
         title={task.title}
         meta={`${task.artifacts.length} artifacts`}
-        leading={<HistoryBackButton />}
+        leading={
+          <HistoryBackButton ariaLabel="Go back" />
+        }
         trailing={
           <div className="header-actions desktop-only">
             <SegmentedControl value={artifactView} onChange={setArtifactView} />
@@ -1211,6 +1423,8 @@ export function TaskRoute() {
                   layout
                   className="artifact-card"
                   key={artifact.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
                   role="button"
                   tabIndex={0}
                   aria-label={`Maximize ${artifact.title}`}
@@ -1229,8 +1443,6 @@ export function TaskRoute() {
                       })
                     }
                   }}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
                 >
                   <header>
                     <div>
@@ -1304,7 +1516,7 @@ export function ArtifactRoute() {
   return (
     <section className="single-artifact-mode">
       <header className="artifact-document-header">
-        <HistoryBackButton />
+        <HistoryBackButton ariaLabel="Go back" />
         <div>
           <span className="overline">{task.title}</span>
           <h1>{artifact.title}</h1>
@@ -1345,14 +1557,13 @@ export function ArtifactRoute() {
   )
 }
 
-function HistoryBackButton() {
+function HistoryBackButton({ ariaLabel }: { ariaLabel: string }) {
   const router = useRouter()
-
   return (
     <button
       className="back-button"
       onClick={() => router.history.back()}
-      aria-label="Go back"
+      aria-label={ariaLabel}
     >
       <ArrowLeft size={17} />
     </button>
