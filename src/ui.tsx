@@ -373,6 +373,14 @@ function AgentGutterTranscript({ session }: { session: AgentSession }) {
             transition={{ duration: 1.4, repeat: Infinity }}
           />
         )}
+        {session.status !== 'thinking' && (
+          <motion.span
+            className="gutter-user-turn-marker"
+            initial={{ opacity: 0, scaleY: 0.65 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
       </span>
     </span>
   )

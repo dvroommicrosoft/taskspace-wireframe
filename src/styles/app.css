@@ -222,10 +222,25 @@ button:disabled {
   width: 4px;
   height: 18px;
   display: block;
+  margin-right: -15px;
   margin-left: auto;
   border-radius: 4px 0 0 4px;
   background: var(--accent);
   box-shadow: 0 0 12px rgba(182, 255, 87, 0.35);
+}
+
+.gutter-user-turn-marker {
+  width: 4px;
+  height: 32px;
+  display: block;
+  margin-right: -15px;
+  margin-left: auto;
+  border-radius: 4px 0 0 4px;
+  background: var(--accent);
+  box-shadow:
+    0 0 0 1px rgba(182, 255, 87, 0.18),
+    0 0 14px rgba(182, 255, 87, 0.48);
+  transform-origin: top;
 }
 
 .floating-drawer {
