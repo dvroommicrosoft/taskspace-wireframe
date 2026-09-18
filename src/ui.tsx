@@ -174,7 +174,7 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
             <div className="drawer-heading">
               <div>
                 <span className="overline">Workspace</span>
-                <strong>Taskspace</strong>
+                <strong>On Deck</strong>
               </div>
               <button
                 className="icon-button mobile-only"

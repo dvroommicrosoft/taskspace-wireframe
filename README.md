@@ -1,6 +1,6 @@
-# Taskspace wireframe
+# On Deck
 
-Taskspace is a functional, dark-mode prototype for managing AI-assisted tasks, artifacts, and agent sessions. It demonstrates multi-task triage, focused task and artifact views, animated state changes, and responsive desktop/mobile behavior using generated in-memory data.
+On Deck is a functional, dark-mode prototype for managing AI-assisted tasks, artifacts, and agent sessions. It demonstrates multi-task triage, focused task and artifact views, animated state changes, and responsive desktop/mobile behavior using generated in-memory data.
 
 ## Run locally
 
