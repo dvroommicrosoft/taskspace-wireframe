@@ -10,6 +10,7 @@ import {
 import { demoTasks, rootSession as initialRootSession } from '../data/demo-data'
 import type {
   AgentSession,
+  CardContentView,
   CardSize,
   ChatMessage,
   FilterId,
@@ -24,11 +25,14 @@ interface WorkspaceContextValue {
   filter: FilterId
   taskView: ViewMode
   cardSize: CardSize
+  cardContentViews: Record<string, CardContentView>
   artifactView: ViewMode
   rootSession: AgentSession
   setFilter: (filter: FilterId) => void
   setTaskView: (view: ViewMode) => void
   setCardSize: (size: CardSize) => void
+  setAllCardContentViews: (view: CardContentView) => void
+  toggleCardContentView: (taskId: string) => void
   setArtifactView: (view: ViewMode) => void
   updateArtifactContent: (
     taskId: string,
@@ -54,8 +58,34 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
   const [filter, setFilter] = useState<FilterId>('you')
   const [taskView, setTaskView] = useState<ViewMode>('cards')
   const [cardSize, setCardSize] = useState<CardSize>('normal')
+  const [cardContentViews, setCardContentViews] = useState<
+    Record<string, CardContentView>
+  >(() =>
+    Object.fromEntries(
+      demoTasks.map((task) => [task.id, 'overview' as const]),
+    ),
+  )
   const [artifactView, setArtifactView] = useState<ViewMode>('cards')
   const replyIndex = useRef(0)
+
+  const setAllCardContentViews = useCallback(
+    (view: CardContentView) => {
+      setCardContentViews(
+        Object.fromEntries(tasks.map((task) => [task.id, view])),
+      )
+    },
+    [tasks],
+  )
+
+  const toggleCardContentView = useCallback((taskId: string) => {
+    setCardContentViews((current) => ({
+      ...current,
+      [taskId]:
+        (current[taskId] ?? 'overview') === 'overview'
+          ? 'artifacts'
+          : 'overview',
+    }))
+  }, [])
 
   const updateArtifactContent = useCallback(
     (taskId: string, artifactId: string, content: string) => {
@@ -184,6 +214,18 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
               id: `accessibility-focus-${Date.now()}`,
               label: 'Inspect keyboard focus',
               state: 'working',
+              children: [
+                {
+                  id: `accessibility-focus-visible-${Date.now()}`,
+                  label: 'Check visible focus rings',
+                  state: 'done',
+                },
+                {
+                  id: `accessibility-focus-order-${Date.now()}`,
+                  label: 'Confirm logical focus order',
+                  state: 'working',
+                },
+              ],
             },
             {
               id: `accessibility-motion-${Date.now()}`,
@@ -312,11 +354,14 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       filter,
       taskView,
       cardSize,
+      cardContentViews,
       artifactView,
       rootSession,
       setFilter,
       setTaskView,
       setCardSize,
+      setAllCardContentViews,
+      toggleCardContentView,
       setArtifactView,
       updateArtifactContent,
       sleepTask,
@@ -328,8 +373,11 @@ export function WorkspaceProvider({ children }: PropsWithChildren) {
       filter,
       taskView,
       cardSize,
+      cardContentViews,
       artifactView,
       rootSession,
+      setAllCardContentViews,
+      toggleCardContentView,
       updateArtifactContent,
       sleepTask,
       sendMessage,

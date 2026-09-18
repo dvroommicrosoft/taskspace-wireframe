@@ -3,6 +3,7 @@ export type TaskState = 'working' | 'review' | 'idle' | 'sleeping' | 'archived'
 export type FilterId = 'you' | 'mira' | 'theo' | 'inez' | 'sleeping'
 export type ViewMode = 'cards' | 'table'
 export type CardSize = 'normal' | 'large'
+export type CardContentView = 'overview' | 'artifacts'
 export type ChecklistItemState = 'done' | 'working' | 'todo' | 'blocked'
 
 export interface Artifact {
@@ -30,6 +31,7 @@ export interface ChecklistItem {
   id: string
   label: string
   state: ChecklistItemState
+  children?: ChecklistItem[]
 }
 
 export interface Task {

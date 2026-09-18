@@ -837,7 +837,7 @@ function makeChecklist(task: TaskSeed, index: number): ChecklistItem[] {
   const blockedIndex =
     task.state !== 'archived' && index % 5 === 0 ? 3 : -1
 
-  return labels.map((label, itemIndex) => ({
+  const items: ChecklistItem[] = labels.map((label, itemIndex) => ({
     id: `${task.id}-todo-${itemIndex}`,
     label,
     state:
@@ -849,6 +849,37 @@ function makeChecklist(task: TaskSeed, index: number): ChecklistItem[] {
             ? ('done' as const)
             : ('todo' as const),
   }))
+
+  if (index % 3 === 0) {
+    const parent = items[2]
+    const childStates =
+      parent.state === 'done'
+        ? (['done', 'done', 'done'] as const)
+        : parent.state === 'working'
+          ? (['done', 'working', 'todo'] as const)
+          : parent.state === 'blocked'
+            ? (['done', 'blocked', 'todo'] as const)
+            : (['todo', 'todo', 'todo'] as const)
+    parent.children = [
+      {
+        id: `${parent.id}-outline`,
+        label: 'Outline the key moments',
+        state: childStates[0],
+      },
+      {
+        id: `${parent.id}-evidence`,
+        label: 'Attach supporting evidence',
+        state: childStates[1],
+      },
+      {
+        id: `${parent.id}-review`,
+        label: 'Review the assembled direction',
+        state: childStates[2],
+      },
+    ]
+  }
+
+  return items
 }
 
 export const demoTasks: Task[] = allDemoTasks.map((task, index) => {

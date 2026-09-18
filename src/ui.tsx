@@ -17,6 +17,7 @@ import {
   Archive,
   ArrowLeft,
   Bot,
+  Check,
   ChevronDown,
   ChevronRight,
   ChevronsUp,
@@ -61,6 +62,7 @@ import { useWorkspace, type DemoEvent } from './app/store'
 import type {
   AgentSession,
   Artifact,
+  ChecklistItem,
   CardSize,
   FilterId,
   Task,
@@ -142,9 +144,11 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
     filter,
     taskView,
     cardSize,
+    cardContentViews,
     setFilter,
     setTaskView,
     setCardSize,
+    setAllCardContentViews,
   } = useWorkspace()
   const { runDemoEvent } = useWorkspace()
   const location = useRouterState({ select: (state) => state.location })
@@ -158,6 +162,14 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
   const [demoOpen, setDemoOpen] = useState(false)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
   const selectedFilter = filters.find((item) => item.id === filter)
+  const cardContentMode = useMemo(() => {
+    const views = tasks.map(
+      (item) => cardContentViews[item.id] ?? 'overview',
+    )
+    if (views.every((view) => view === 'overview')) return 'overview'
+    if (views.every((view) => view === 'artifacts')) return 'artifacts'
+    return 'mixed'
+  }, [cardContentViews, tasks])
 
   const closeTransientDrawers = () => {
     setTopOpen(false)
@@ -291,6 +303,25 @@ export function WorkspaceShell({ children }: PropsWithChildren) {
                     aria-label="Large cards"
                   >
                     <Maximize2 size={17} />
+                  </button>
+                  <span className="titlebar-mini-divider" />
+                  <button
+                    className={
+                      cardContentMode === 'overview' ? 'selected' : ''
+                    }
+                    onClick={() => setAllCardContentViews('overview')}
+                    aria-label="Show overview on all cards"
+                  >
+                    <ListChecks size={17} />
+                  </button>
+                  <button
+                    className={
+                      cardContentMode === 'artifacts' ? 'selected' : ''
+                    }
+                    onClick={() => setAllCardContentViews('artifacts')}
+                    aria-label="Show artifacts on all cards"
+                  >
+                    <Files size={17} />
                   </button>
                 </div>
               </>
@@ -857,11 +888,9 @@ function ArchiveBoundary({
 
 function TaskCard({ task }: { task: Task }) {
   const navigate = useNavigate()
-  const { sleepTask } = useWorkspace()
+  const { sleepTask, cardContentViews, toggleCardContentView } = useWorkspace()
   const [flipped, setFlipped] = useState(false)
-  const [frontView, setFrontView] = useState<'artifacts' | 'overview'>(
-    'artifacts',
-  )
+  const frontView = cardContentViews[task.id] ?? 'overview'
   const artifactStackRef = useRef<HTMLDivElement | null>(null)
   const [clippedArtifacts, setClippedArtifacts] = useState<Artifact[]>([])
   const [collapsedArtifacts, setCollapsedArtifacts] = useState<Set<string>>(
@@ -971,9 +1000,7 @@ function TaskCard({ task }: { task: Task }) {
                 }
                 onClick={(event) => {
                   event.stopPropagation()
-                  setFrontView((current) =>
-                    current === 'artifacts' ? 'overview' : 'artifacts',
-                  )
+                  toggleCardContentView(task.id)
                 }}
               >
                 {frontView === 'artifacts' ? (
@@ -1053,24 +1080,7 @@ function TaskCard({ task }: { task: Task }) {
                       </span>
                     </header>
                     <div className="task-checklist">
-                      {task.checklist.map((item) => (
-                        <div
-                          className={`task-checklist-item ${item.state}`}
-                          key={item.id}
-                        >
-                          <span className="checklist-marker" />
-                          <span>{item.label}</span>
-                          <small>
-                            {item.state === 'done'
-                              ? 'Done'
-                              : item.state === 'working'
-                                ? 'Doing'
-                                : item.state === 'blocked'
-                                  ? 'Blocked'
-                                  : 'Todo'}
-                          </small>
-                        </div>
-                      ))}
+                      <ChecklistTree items={task.checklist} />
                     </div>
                   </section>
                 </motion.div>
@@ -1109,6 +1119,37 @@ function TaskCard({ task }: { task: Task }) {
         </div>
       </motion.div>
     </motion.article>
+  )
+}
+
+function ChecklistTree({
+  items,
+  nested = false,
+}: {
+  items: ChecklistItem[]
+  nested?: boolean
+}) {
+  return (
+    <div className={`checklist-tree ${nested ? 'nested' : ''}`}>
+      {items.map((item) => (
+        <div
+          className={`checklist-branch ${item.state}`}
+          key={item.id}
+        >
+          <div className="task-checklist-item">
+            <span className="checklist-marker">
+              {item.state === 'done' && <Check size={9} strokeWidth={3} />}
+            </span>
+            <span>{item.label}</span>
+          </div>
+          {item.children && item.children.length > 0 && (
+            <div className="checklist-children">
+              <ChecklistTree items={item.children} nested />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
   )
 }
 
