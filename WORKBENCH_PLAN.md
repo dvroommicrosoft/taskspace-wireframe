@@ -401,8 +401,8 @@ This is a proposed mobile interaction design, chosen for this iteration:
   Each has a human action, visible result, and agent/system consequence.
 - Include an interactive shell study for normal columns, attachment preview,
   floating Agent Channel, expanded Artifact context, and maximized Items.
-  Start with the Agent Channel hidden, right preview empty, and Center at its
-  original width.
+  Start with the Agent Channel hidden, `project-brief.md` open in the right
+  preview, and Center at its original width.
 - Lightweight local interactions include expanding Comments, answering
   Questions, showing panels, toggling cards/table, selecting tabs, changing
   widget pin/order, previewing Attachments, entering sample descriptions,
