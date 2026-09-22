@@ -102,6 +102,7 @@ with it. Back from an Artifact restores its owner; Back from a Thread restores
 the Project; Back from a Project restores Top.
 Back is a larger floating control overlapping the gutter, with the icon of
 its Project/Thread destination, or a generic list icon when returning to Top.
+On mobile, Back uses only a chevron, without a destination icon.
 
 Navigation should retain relevant view state such as selection, scroll,
 pinned widgets, and panel preferences. The exact persistence scope is not yet
@@ -274,15 +275,18 @@ sleeping/waking, pinning, assignment, icon regeneration, Thread or artifact
 editing, comments, answers, invitations, or agent messages. Navigation,
 search, read access, view tabs, timeline exploration, and panel resizing are
 still available. Do not mark that member's updates read merely because the
-viewer opened them. The selected top-gutter mark becomes yellow; a thin yellow
-border sits inside the gutters and connects to that mark. A persistent banner
+viewer opened them. The selected top-gutter mark becomes yellow; a subtle yellow
+glow sits outside the frame and gutters, without an inner border or connector. A persistent banner
 explains the view. Selecting You restores normal assignment-based permissions.
 
 Shared updates still change that view without interaction. The explainer has
 explicit outside-the-UI demo event buttons for new shared work and satisfied
 requests, including wake-on-update. These are illustrative incoming events,
 not a way to edit through the read-only UI. Other members' private Agent
-Channels are never exposed; opening the right panel explains the boundary.
+Channels are never exposed. The right gutter is empty and the Agent Channel
+cannot open. Hovering, focusing, or clicking its trigger instead displays a
+separate floating message: "You can only use agents when in your own view."
+Returning to You restores the normal private channel.
 
 ### Element-aligned gutters
 
@@ -503,7 +507,8 @@ This is a proposed mobile interaction design, chosen for this iteration:
 
 - Default to **Work**, the full-width Center content. Use an always-visible
   compact header with Back, Project name, and an **Agent** activity button,
-  followed by a screen switcher: **Items / Work / Preview**. These map to the
+  followed by three thin gutter signals for **Items / Work / Preview**, with
+  no visible labels or icons. These map to the
   three content columns, not a bottom panel or bottom gutter.
 - Items maps to the left column. Select a Thread to open Work. Show member
   avatars here, with the owner separated from members and a + invite button.
@@ -511,7 +516,10 @@ This is a proposed mobile interaction design, chosen for this iteration:
   Preview displays the selected Attachment. Agent opens the user's private
   conversation in a floating, dismissible overlay above the current screen.
   There is no Agent tab or pinning.
-- Use text badges for pending Questions on Work and activity on the Agent button.
+- The selected screen's gutter signal is green. Work's signal is yellow when
+  a Question is pending and Work is not selected; other signals are unlit.
+  Accessible names identify the screens and pending Question. The Agent
+  button retains its activity indicator only in your own view.
   Background events never switch screens automatically.
 - Screen switching preserves the selected Thread, scroll position, pending
   answers, and Comment drafts. No hover, permanent drawers, or pinning is
@@ -523,7 +531,10 @@ This is a proposed mobile interaction design, chosen for this iteration:
 - At Top, Work shows project creation and existing Projects. Items exists
   only when there are System Messages; Preview and Agent are absent. At
   Project, all three content screens and the overlay are Project-scoped.
-- Use at least 44px interactive touch targets. File/photo pickers and pasted
+- Gutter navigation uses full-third-width, 24px-high targets around 3px signals,
+  keeping the entire switcher 28px high. Other controls retain at least 44px
+  touch targets. Back is a chevron only, without a destination icon.
+  File/photo pickers and pasted
   text replace reliance on drag-and-drop. A future explicit Mark region mode
   would distinguish annotation gestures from image scrolling/zooming; the
   current phone examples use a preselected region and expandable Comment.
@@ -627,8 +638,10 @@ settled implementation rules:
   floating Agent overlay, including Artifact ownership and answer records.
 - Thread lists use all four requested tabs, a global search override, and
   the selected member's creation/assignment/edit and personal sleep rules.
-- Another-member views are live, visibly yellow, and read-only; private
-  channels are not disclosed and read markers are not changed on their behalf.
+- Another-member views are live and read-only, with a yellow selected-member
+  mark and subtle glow outside the gutters. Their empty agent gutter shows
+  an own-view-only explanation instead of opening a channel; read markers
+  are not changed on their behalf.
 - Only the assignee can edit a Thread; assignment, promotion, icon generation,
   and pinning honor the read-only boundary.
 - Project Thread Attachments are newest-first, exclude ghosts, have a stale

@@ -14,7 +14,9 @@ window.WorkbenchConcept = (() => {
     ? `<img class="avatar" src="${id === 'you' ? 'workbench-avatar-you' : `avatar-${id}`}.svg" alt="${person(id).name}">`
     : `<span class="avatar initials-avatar" style="background:${person(id).color}" aria-label="${person(id).name}">${person(id).name[0]}</span>`;
   const svg = body => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
-  const pin = () => svg('<path d="m9 3 8 3-3 4 1 5-5-2-3 4-1-5-3-3 5-1Z"/><path d="m10 14-5 7"/>');
+  const pin = () => svg('<path d="M8 3h8l-1 7 3 3v2H6v-2l3-3-1-7Z"/><path d="M12 15v6"/>');
+  const chevron = () => svg('<path d="m6 9 6 6 6-6"/>');
+  const plus = () => svg('<path d="M12 5v14M5 12h14"/>');
   const gear = () => svg('<path d="m9 3 1-2h4l1 2 3 1 2 3-1 3 1 3-2 3-3 1-1 2h-4l-1-2-3-1-2-3 1-3-1-3 2-3Z" transform="translate(0 2)"/><circle cx="12" cy="12" r="5"/>');
   const listIcon = () => svg('<path d="M8 5h13M8 12h13M8 19h13"/><circle cx="3" cy="5" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="19" r="1"/>');
   const rank = () => svg('<path d="m5 12 7-6 7 6M5 18l7-6 7 6"/>');
@@ -125,6 +127,9 @@ window.WorkbenchConcept = (() => {
     state.showOlder = false;
     $('.thread-search',app) && ($('.thread-search',app).value = '');
     app.classList.toggle('viewing-other',user !== 'you');
+    app.classList.remove('channel-open');
+    const mobileAgent=$('.mobile-agent',app);
+    if (mobileAgent) mobileAgent.hidden=true;
     $$('.member-filter',app).forEach(button => button.setAttribute('aria-pressed',String(button.dataset.user === user)));
     renderThreads(app);
     updateAccess(app);
@@ -169,13 +174,19 @@ window.WorkbenchConcept = (() => {
         disabledBefore.delete(node);
       }
     });
-    let privacy = $('.channel-privacy',app);
-    const channel = $('.channel',app) || $('.mobile-agent',app);
-    if (channel && !privacy) {
-      privacy = document.createElement('p'); privacy.className='channel-privacy notice'; channel.append(privacy);
+    const agentTrigger=$('.right-edge',app) || $('.mobile-agent-trigger',app);
+    if (agentTrigger) {
+      agentTrigger.setAttribute('aria-label',state.user==='you' ? `Reveal your private ${app.dataset.scope} Agent Channel` : 'Agents are only available in your own view');
+      const indicator=$('.diff-add',agentTrigger);
+      if (indicator) indicator.hidden=state.user!=='you';
+      if (state.user!=='you') {
+        app.classList.remove('channel-open');
+        if (agentTrigger.matches('.right-edge')) agentTrigger.replaceChildren();
+        const mobileAgent=$('.mobile-agent',app);
+        if (mobileAgent) mobileAgent.hidden=true;
+        agentTrigger.setAttribute('aria-expanded','false');
+      }
     }
-    if (privacy) { privacy.textContent=`${person(state.user).name}'s Agent Channel is private. This read-only view shows shared work, not their messages.`; privacy.hidden=state.user==='you'; }
-    $$('.channel>*:not(.channel-privacy):not(.channel-head),.mobile-agent>*:not(.channel-privacy):not(.mobile-agent-close)',app).forEach(el=>el.classList.toggle('private-hidden',state.user!=='you'));
     const edgeNote=$('.edge-note',app);
     if (edgeNote && state.user!=='you') {
       state.privateEdgeNote ??= edgeNote.innerHTML;
@@ -362,7 +373,6 @@ window.WorkbenchConcept = (() => {
       top.innerHTML=members.map(button=>{
         const bounds=button.getBoundingClientRect(), user=button.dataset.user;
         const color=user===state.user ? (user==='you' ? 'green' : 'yellow') : (user==='you'||user==='mira' ? 'white' : 'gray');
-        if (user===state.user) app.style.setProperty('--selected-user-x',`${bounds.left-rect.left+bounds.width/2}px`);
         return `<span class="gutter-segment ${color}" data-user="${user}" style="left:${bounds.left-rect.left}px;width:${bounds.width}px"></span>`;
       }).join('');
     }
@@ -379,7 +389,7 @@ window.WorkbenchConcept = (() => {
     };
     const peers=app.classList.contains('artifact-expanded') ? $$('.artifact-peers [data-file]',app) : app.classList.contains('artifact') ? $$('.items .thread-card',app) : $$('.thread-results .concept-thread',app);
     segments($('.left-edge',app),peers,el=>el.dataset.signal || (state.filesRead[state.user].has(el.dataset.file || 'button-study.png') ? 'gray' : 'green'));
-    segments($('.right-edge',app),state.user==='you' ? $$('.channel .channel-message:not(.private-hidden),.channel>details,.channel-records details',app) : [],el=>el.classList.contains('user-message') || el.matches('details') ? 'white' : 'gray');
+    segments($('.right-edge',app),state.user==='you' ? $$('.channel .channel-message,.channel>details,.channel-records details',app) : [],el=>el.classList.contains('user-message') || el.matches('details') ? 'white' : 'gray');
   }
   function initializeApp(app,index) {
     app.id ||= `concept-app-${index}`;
@@ -399,7 +409,7 @@ window.WorkbenchConcept = (() => {
       items.innerHTML=`<div class="items-head"><strong>Threads</strong><input type="search" class="thread-search" placeholder="Search" aria-label="Search all Threads and descriptions">${controls}</div><div class="thread-tabs" role="tablist" aria-label="Thread views">${['Recent','Scheduled','Incomplete','Sleeping'].map(tab=>`<button role="tab" data-thread-tab="${tab}">${tab}</button>`).join('')}</div><p class="thread-filter-note"></p><div class="thread-results"></div><button class="older-threads"></button>`;
     }
     $$('.project-members',app).forEach(group=> {
-      group.innerHTML=`${['you','mira','theo'].map((id,i)=>`${i===1?'<span class="owner-divider" role="separator" aria-label="Owner and members"></span>':''}<button class="member-filter" data-user="${id}" aria-pressed="${id==='you'}" aria-label="View ${person(id).name}'s Threads">${avatar(id)}</button>`).join('')}<button class="member-invite" data-action="invite-members" aria-label="Invite project members">+</button>`;
+      group.innerHTML=`${['you','mira','theo'].map((id,i)=>`${i===1?'<span class="owner-divider" role="separator" aria-label="Owner and members"></span>':''}<button class="member-filter" data-user="${id}" aria-pressed="${id==='you'}" aria-label="View ${person(id).name}'s Threads">${avatar(id)}</button>`).join('')}<button class="member-invite" data-action="invite-members" aria-label="Invite project members">${plus()}</button>`;
     });
     const summary=$('.activity-summary',app); if (summary) summary.innerHTML=timelineSummary();
     const back=$('.back',app);
@@ -418,7 +428,6 @@ window.WorkbenchConcept = (() => {
     const channel=$('.channel',app);
     if (channel && $('.channel-message',channel)) channel.insertAdjacentHTML('afterbegin','<div class="channel-message user-message"><strong>You</strong>Use the shared context and move this work forward. Ask for decisions when needed.</div>');
     const feedback=document.createElement('span'); feedback.className='concept-feedback'; feedback.setAttribute('role','status'); app.append(feedback);
-    const connector=document.createElement('span'); connector.className='view-connector'; app.append(connector);
     app.addEventListener('workbench-layout',()=>{
       const opened=app.classList.contains('artifact-expanded') ? $('.artifact-peers [aria-pressed="true"]',app)?.dataset.file : $('.artifact-preview',app)?.dataset.file;
       if (opened && state.user==='you') state.filesRead.you.add(opened);
@@ -440,13 +449,27 @@ window.WorkbenchConcept = (() => {
     const threads=definitions.filter(t=>['design','research','access','offline'].includes(t.id)).map(t=>({...t,editors:[...t.editors],updated:now-t.hours*hour,woken:{},slept:Object.fromEntries((t.sleeping||[]).map(u=>[u,now])),read:Object.fromEntries(users.map(u=>[u.id,t.unread?0:now]))}));
     states.set(phone,{user:'you',tab:'Recent',threads,query:'',showOlder:false,selected:'design',promoted:new Set()});
     $('.mobile-thread-list',phone).innerHTML=`<h4>Threads</h4><input class="thread-search" type="search" aria-label="Search all Threads and descriptions" placeholder="Search all Threads"><div class="thread-tabs" role="tablist" aria-label="Thread views">${['Recent','Scheduled','Incomplete','Sleeping'].map(tab=>`<button role="tab" data-thread-tab="${tab}">${tab}</button>`).join('')}</div><p class="thread-filter-note"></p><div class="thread-results"></div><a class="secondary phone-action item-add" href="#step-17">+ New Thread</a><button class="older-threads">Show older Threads</button>`;
-    $('.project-members',phone).innerHTML=users.slice(0,3).map((user,i)=>`${i===1?'<span class="owner-divider" role="separator" aria-label="Owner and members"></span>':''}<button class="member-filter" data-user="${user.id}" aria-label="View ${user.name}'s Threads" aria-pressed="${user.id==='you'}">${avatar(user.id)}</button>`).join('')+'<button class="member-invite" data-action="invite-members" aria-label="Invite project members">+</button>';
+    $('.project-members',phone).innerHTML=users.slice(0,3).map((user,i)=>`${i===1?'<span class="owner-divider" role="separator" aria-label="Owner and members"></span>':''}<button class="member-filter" data-user="${user.id}" aria-label="View ${user.name}'s Threads" aria-pressed="${user.id==='you'}">${avatar(user.id)}</button>`).join('')+`<button class="member-invite" data-action="invite-members" aria-label="Invite project members">${plus()}</button>`;
     $('.mobile-presence+small',phone).textContent='Select a member · other-member views are read-only';
     $('.phone-header strong',phone).insertAdjacentHTML('afterbegin',icon(projectName));
-    $$('[data-pane="work"] h4,.mobile-artifact-back',phone).forEach(el=>el.insertAdjacentHTML('afterbegin',glyph(workName('design'))));
-    $('.mobile-project-back',phone).insertAdjacentHTML('beforeend',glyph(projectName));
+    $('[data-pane="work"] h4',phone).insertAdjacentHTML('afterbegin',glyph(workName('design')));
+    $$('.phone-nav button',phone).forEach(button=>{
+      [...button.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).forEach(node=>node.remove());
+      const marker=$('.mobile-unread',button);
+      if (marker) {marker.textContent='';marker.setAttribute('aria-hidden','true');}
+    });
+    updateMobileNav(phone);
     $('[data-pane="work"] h4',phone).insertAdjacentHTML('afterend','<button class="assignment-control" data-assignment></button>');
     renderThreads(phone);
+  }
+  function updateMobileNav(phone) {
+    $$('.phone-nav button',phone).forEach(button=>{
+      const waiting=button.dataset.mobileView==='work' && !!$('.mobile-question',phone);
+      const label={items:'Items',work:phone.dataset.artifact==='true' ? 'Artifact' : 'Work',preview:'Preview'}[button.dataset.mobileView];
+      const hint=waiting ? `${label} · question awaiting your answer` : label;
+      button.setAttribute('aria-label',hint);
+      button.title=hint;
+    });
   }
   function initialize() {
     $('.nav .wrap').insertAdjacentHTML('beforeend','<a href="#features">Feature explainers</a>');
@@ -479,6 +502,9 @@ window.WorkbenchConcept = (() => {
     document.addEventListener('click',event=>{
       const node=event.target.closest('button,a,summary');
       const app=node && appFor(node);
+      if (app && states.get(app)?.user!=='you' && node.matches('.right-edge,.mobile-agent-trigger')) {
+        event.preventDefault();event.stopImmediatePropagation();showAgentUnavailable(node,true);return;
+      }
       if (app && isEditControl(node) && (node.matches('[data-sleep-thread]') ? states.get(app).user!=='you' : !editingAllowed(app))) {
         event.preventDefault(); event.stopImmediatePropagation(); notify(app,'Read-only view. Only the assigned user can edit a Thread.');
       }
@@ -504,17 +530,18 @@ window.WorkbenchConcept = (() => {
     });
     document.addEventListener('pointerover',event=>{
       if (event.pointerType==='touch') return;
-      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar');
+      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar,.right-edge,.mobile-agent-trigger');
       if (!trigger || trigger.contains(event.relatedTarget)) return;
       showTrigger(trigger);
     });
     document.addEventListener('focusin',event=>{
       if (restoringFocus) return;
-      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar');
+      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar,.right-edge,.mobile-agent-trigger');
       if (trigger) showTrigger(trigger);
     });
     function showTrigger(trigger) {
       const app=appFor(trigger);
+      if (trigger.matches('.right-edge,.mobile-agent-trigger') && states.get(app)?.user!=='you') showAgentUnavailable(trigger);
       if (trigger.matches('.entity-icon')) {
         if (app && !editingAllowed(app)) return;
         floating(trigger,'icon',iconForm(trigger.dataset.iconName),{label:'Regenerate monochrome icon'});
@@ -524,6 +551,14 @@ window.WorkbenchConcept = (() => {
       if (trigger.matches('.activity-bar')) {
         const event=events.find(e=>e.id===trigger.dataset.event), panel=trigger.closest('.timeline-panel');
         floating(trigger,'activity-work',`<strong>${person(event.user).name} · ${event.ago.toFixed(1)}h ago</strong><p>All work in this activity bar</p><div class="bar-work-list">${[...new Set(event.works)].map(id=>`<button data-timeline-work="${id}" data-timeline-owner="${panel.id}">${glyph(workName(id))}${escape(workName(id))}</button>`).join('')}</div>`,{label:'Threads in this activity'});
+      }
+    }
+    function showAgentUnavailable(trigger,pinned=false) {
+      const panel=floating(trigger,'agent-unavailable','<strong>Agents unavailable</strong><p>You can only use agents when in your own view.</p>',{pinned,label:'Agents are only available in your own view'});
+      if (trigger.matches('.right-edge')) {
+        const bounds=trigger.getBoundingClientRect();
+        panel.style.left=`${Math.max(12,Math.min(bounds.left-panel.offsetWidth-8,innerWidth-panel.offsetWidth-12))}px`;
+        panel.style.top=`${Math.max(12,Math.min(bounds.top+48,innerHeight-panel.offsetHeight-12))}px`;
       }
     }
     document.addEventListener('click',event=>{
@@ -610,5 +645,5 @@ window.WorkbenchConcept = (() => {
     window.addEventListener('resize',()=>{closeFloats();$$('.app').forEach(queueGutters);});
   }
   document.addEventListener('DOMContentLoaded',initialize);
-  return {icon,glyph,pin,gear};
+  return {icon,glyph,pin,gear,chevron,updateMobileNav};
 })();

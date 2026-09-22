@@ -135,7 +135,7 @@
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
     @media print{.nav,.layout-toolbar,.widget-tools,.edge,.top-edge{display:none!important}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.wrap{width:100%}.step{break-inside:avoid}.stage-scroll{overflow:visible;box-shadow:none}.screen{min-width:0}.app{height:540px}.hero{padding:30px 0}.chapter{break-before:page}}
   </style>
-  <link rel="stylesheet" href="workbench-concepts.css">
+  <link rel="stylesheet" href="workbench-concepts.css?v=20260922-1">
 </head>
 <body>
   <header class="mast wrap"><a class="brand" href="#top" aria-label="Workbench"><img class="workbench-logo" src="workbench-logo.svg" alt=""></a><span class="muted">WORKBENCH / FORMAT + INFORMATION ARCHITECTURE</span></header>
@@ -167,14 +167,14 @@
     <section id="mobile" class="chapter wrap">
       <div class="chapter-head"><div><div class="eyebrow">07 / Mobile experience</div><h2>Three columns. Three screens.</h2></div><p>Items, Work, and Artifact preview become full-width screens. Your private Agent Channel floats above the current screen when you tap Agent.</p></div>
       <div class="mobile-flow"><span>Left → Items</span><span>Center → Work</span><span>Right → Preview</span><span>Agent → Floating conversation</span></div>
-      <p class="callout"><b>Touch replaces hover.</b> A compact header provides Back, the current Project, and an Agent button with activity. The screen switcher follows the three content columns. Opening an Attachment shows Preview; Expand enters Artifact context. The Agent Channel is never a pinned screen or column.</p>
+      <p class="callout"><b>Gutter navigation.</b> Three slim, unlabeled targets map left to Items, middle to Work, and right to Preview. Green marks the current screen; yellow marks an off-screen Question waiting on Work. The compact header keeps an icon-free Back arrow, the Project, and Agent access in your own view. Opening an Attachment shows Preview; Expand enters Artifact context.</p>
       <div id="mobile-examples" class="mobile-grid"></div>
-      <div class="notes"><div><b>Context travels with you</b>Switching screens preserves the selected Thread, scroll positions, answers, and drafts. Expanding a preview replaces Work with Artifact content and switches Items to peers. Back restores the Thread; dismissing Agent simply reveals the screen underneath.</div><div><b>Touch and keyboard</b>Controls have at least 44px touch targets. Pick files or photos rather than relying on drag-and-drop. Image selection would use an explicit Mark region mode; this study demonstrates a preselected region and expandable annotation.</div></div>
+      <div class="notes"><div><b>Context travels with you</b>Switching screens preserves the selected Thread, scroll positions, answers, and drafts. Expanding a preview replaces Work with Artifact content and switches Items to peers. Back restores the Thread; dismissing Agent simply reveals the screen underneath.</div><div><b>Touch and keyboard</b>The gutter targets are 24px high with full third-screen widths, accessible names, and visible keyboard focus. Other buttons retain 44px touch targets. Pick files or photos rather than relying on drag-and-drop; annotations use a preselected region in this study.</div></div>
       <div class="layers"><div><span class="eyebrow">Top / Project</span><br><br>Start on Work<small>At Top, Work contains New Project and existing Projects. Items is available only for System Messages; Preview and Agent are absent. Project Attachments open Preview.</small></div><div><span class="eyebrow">Thread / Artifact</span><br><br>Preview before navigating<small>Thread selection opens Work. Attachments open Preview; Expand opens Artifact context. The floating Agent always follows the owning Project or Thread.</small></div><div><span class="eyebrow">Presence / interruptions</span><br><br>Visible people, private conversations<small>Owner-separated avatars and + invites live in Items. Pending Questions badge Work; activity badges Agent. No automatic screen switching steals focus.</small></div></div>
     </section>
     <section id="features" class="chapter wrap">
       <div class="chapter-head"><div><div class="eyebrow">Feature explainers / Outside the journey</div><h2>More context. Less hunting.</h2></div><p>These are working feature studies, not later steps in the story. Floating surfaces are shown open below so the ideas are visible without discovering every hover.</p></div>
-      <div class="feature-copy"><h3>Your work, or a read-only view through someone else's eyes.</h3><p>Select a member to see the Threads they created, were assigned, or edited, using their own sleep preferences. Search overrides all filters. Other-member views are live and read-only, outlined in yellow. In your own view, only the assigned user can edit a Thread; new Threads are assigned to the owner.</p></div>
+      <div class="feature-copy"><h3>Your work, or a read-only view through someone else's eyes.</h3><p>Select a member to see the Threads they created, were assigned, or edited, using their own sleep preferences. Search overrides all filters. Other-member views are live and read-only, with a subtle yellow glow outside the gutters. Agent access is unavailable: the empty right edge explains that agents can only be used in your own view. Only the assigned user can edit a Thread.</p></div>
       <div id="feature-example"></div>
       <div class="feature-copy"><h3>Activity that you can follow into the work.</h3><p>The titlebar shows the busiest three members over 24 hours. The open vertical view below shows up to 15. Select a user, then a Thread icon; hover a white bar for the work behind that activity. Change the time span or go Back without losing your place.</p></div>
       <div id="timeline-explainer" class="feature-stage"></div>
@@ -186,7 +186,7 @@
   </main>
   <dialog id="invite-dialog" aria-labelledby="invite-title"><header><h2 id="invite-title">Invite to On Deck evolution</h2><button data-action="close-invite" aria-label="Close invitation preview">✕</button></header><p>Members share Threads, Comments, and Artifacts. Each person has their own private Agent Channels.</p><label>Email address<input type="email" placeholder="teammate@example.com"></label><p>Invitation form concept only. No invitation will be sent.</p><button class="primary" data-action="close-invite">Done</button></dialog>
   <noscript><p class="wrap">Enable JavaScript to render the journey snapshots and local example interactions. The complete written plan is in WORKBENCH_PLAN.md.</p></noscript>
-  <script src="workbench-concepts.js"></script>
+  <script src="workbench-concepts.js?v=20260922-1"></script>
   <script>
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -241,7 +241,7 @@
       const classes = [home ? 'home' : '',simple ? 'simple' : '',left ? 'left-shown' : '',artifact ? 'artifact' : '',tall ? 'tall' : ''].filter(Boolean).join(' ');
       return `<div class="stage-scroll"><div class="screen"><div class="browser-bar"><i class="browser-dot"></i><i class="browser-dot"></i><i class="browser-dot"></i><span class="route">workbench.local${route || (home ? '/' : artifact ? '/on-deck-evolution/threads/first-run/artifacts/button-study' : context === 'Thread' ? '/on-deck-evolution/threads/first-run' : '/on-deck-evolution')}</span><span class="screen-label">CONCEPT</span></div><div class="app ${classes}" data-scope="${scope}">
         ${!home ? `<a class="back" href="#step-${back}" aria-label="Back to ${artifact ? 'Thread' : context === 'Thread' ? 'Project' : 'Top'}">‹</a><button class="top-edge" data-action="top" aria-label="Reveal Titlebar"></button>` : ''}
-        <header class="titlebar"><span class="product" aria-label="Workbench"><img class="workbench-logo" src="workbench-logo.svg" alt=""></span>${!home ? `<span class="divider"></span><span class="project-choice">${WorkbenchConcept.icon('On Deck evolution')}<button class="project-select" aria-label="Select Project">On Deck evolution<span aria-hidden="true">⌄</span></button></span><span class="avatar-group">${projectMembers()}</span><button class="activity-summary" aria-label="Activity over the last 24 hours"></button><button class="icon titlebar-pin" data-action="pin-top" aria-label="Pin Titlebar" aria-pressed="false">${WorkbenchConcept.pin()}</button>` : ''}<span class="account-divider" role="separator" aria-orientation="vertical"></span><details class="account"><summary aria-label="Account and Settings"><span class="account-gear">${WorkbenchConcept.gear()}${avatar()}</span></summary><div class="account-menu"><b>Your account</b><p>Settings</p><small>Menu concept only</small></div></details></header>
+        <header class="titlebar"><span class="product" aria-label="Workbench"><img class="workbench-logo" src="workbench-logo.svg" alt=""></span>${!home ? `<span class="divider"></span><span class="project-choice">${WorkbenchConcept.icon('On Deck evolution')}<button class="project-select" aria-label="Select Project">On Deck evolution${WorkbenchConcept.chevron()}</button></span><span class="avatar-group">${projectMembers()}</span><button class="activity-summary" aria-label="Activity over the last 24 hours"></button><button class="icon titlebar-pin" data-action="pin-top" aria-label="Pin Titlebar" aria-pressed="false">${WorkbenchConcept.pin()}</button>` : ''}<span class="account-divider" role="separator" aria-orientation="vertical"></span><details class="account"><summary aria-label="Account and Settings"><span class="account-gear">${WorkbenchConcept.gear()}${avatar()}</span></summary><div class="account-menu"><b>Your account</b><p>Settings</p><small>Menu concept only</small></div></details></header>
         <div class="workspace">${items(home ? 'system' : artifact ? 'peers' : 'threads',selected,two,repeatables,empty || simple)}<div class="center">${content}</div></div>
         <button class="edge left-edge" data-action="left" aria-label="Reveal Items panel"><span class="signal"></span><span class="signal"></span></button>
         ${!home ? `<button class="edge right-edge ${busy ? 'busy' : ''} ${waiting ? 'waiting' : ''}" data-action="channel" aria-label="Reveal your private ${scope} Agent Channel"><span class="signal"></span><span class="signal"></span><span class="signal"></span><span class="signal"></span></button>${channel(scope,message,record,busy,waiting)}<span class="edge-note">${busy ? spinner : '<span class="activity-dot"></span>'}${waiting ? 'Your answer requested' : busy ? `${scope} agent active` : 'Channel quiet'}</span>` : ''}
@@ -375,6 +375,7 @@
       const pane = $(`[data-pane="${view}"]`,phone);
       pane.focus({preventScroll:true});
       scroller.scrollTop = Number(pane.dataset.scrollTop || 0);
+      WorkbenchConcept.updateMobileNav(phone);
     }
     $('#layout-example').innerHTML = shell(`${title()}${section('Questions',question('Which part of the experience needs the most attention?', ['First-run flow','Daily triage']))}${section('Attachments',file('project-brief.md')+file('workspace-reference.png',{image:true}))}`,{left:true,two:true,message:'This is your private Project channel. It floats over the Artifact preview without changing the layout.',tall:true});
     const layoutApp = $('#layout-example .app');
@@ -620,6 +621,7 @@
         const answer = event.target.closest('button').textContent;
         $('.mobile-question',phone).remove();
         $('.mobile-unread',phone).hidden = true;
+        WorkbenchConcept.updateMobileNav(phone);
         $('.mobile-answer-feedback',phone).textContent = 'Answer received. Planning continues.';
         $('.mobile-agent-state',phone).innerHTML = `${spinner}Planning · answer received`;
         $('.channel-message',phone).innerHTML = '<strong>Thread agent</strong>I recorded your audience decision. Planning continues; I will incorporate it into plan.md.';
@@ -782,7 +784,7 @@
         const description = form.elements.description.value.trim();
         if (!name || !description) return;
         $('#step-3 .context-title h4').innerHTML = `${WorkbenchConcept.icon(name)}<span class="entity-name">${escapeHTML(name)}</span>`;
-        $('#step-3 .project-select').innerHTML = `${escapeHTML(name)}<span aria-hidden="true">⌄</span>`;
+        $('#step-3 .project-select').innerHTML = `${escapeHTML(name)}${WorkbenchConcept.chevron()}`;
         $('#step-3 .project-choice .entity-icon').outerHTML = WorkbenchConcept.icon(name);
         $('#step-3 .context-title p').textContent = description;
         $('#step-3 .route').textContent = `workbench.local/${slug(name)}`;
