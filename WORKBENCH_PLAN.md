@@ -113,8 +113,8 @@ dismissal rules for the full-screen-content modal remain to be specified.
 | Panel | Home | Behavior |
 | --- | --- | --- |
 | Titlebar | Top | Always visible at Top; auto-hides elsewhere, can be pinned |
-| Items | Left | Can hide; content depends on context; can be maximized |
-| Center | Center | Always present; can dock right when Items is maximized |
+| Items | Left | Can collapse, float for a peek, or dock; can be maximized |
+| Center | Center | Always present; reclaims collapsed sides; docks right when Items is maximized |
 | Artifact preview | Right column | Opens when an Attachment is selected; can expand into Artifact context |
 | Agent Channel | Right edge, floating | Absent at Top; hover/focus/tap to reveal; never pinned or docked |
 
@@ -122,20 +122,45 @@ Present-but-hidden edge panels retain state and expose thin colored/animated
 gutters at their home edges. Absent panels have no gutter. Agent activity can
 be visible without opening conversation.
 
-Three-column proportions are **1 : 1.5 : 1** for Items, Center, and Artifact
-preview. The Center returns to its original width: 50% wider than either side
-column. It no longer fills the right section in ordinary Project/Thread
-Complex mode. The right section is reserved for inspecting an Attachment.
+With both sidebars open, initial proportions are **1 : 1.5 : 1** for Items,
+Center, and Artifact preview. Center reclaims the space of a collapsed sidebar:
+
+| Docked content sidebars | Center presentation |
+| --- | --- |
+| Both open | Middle column, initially 50% wider than either side |
+| Items only | Middle + right space |
+| Artifact preview only | Left + middle space |
+| Both collapsed | Wider centered reading surface, matching steps 01–05 |
+
+The both-collapsed presentation uses 64% of the available frame, capped at
+680px, in Simple and Complex modes. Expanded Artifact content instead uses
+all available space when peer Attachments are collapsed.
+
+The Items header has a collapse control. Hover or focus the left gutter for a
+floating peek without resizing Center; click the gutter or **Dock Items**
+in the floated header to keep Items open. Collapse it to focus on Thread
+detail beside its Artifact preview.
+
+Visible column boundaries have draggable separators, revealed on hover or
+keyboard focus. Left/Right arrows move a split by 10px; Shift uses 40px.
+Home/End reach its minimum/maximum, and double-click restores the default
+side width. The desktop concept keeps sidebars at least 200px and Center
+at least 280px. Width preferences remain proportional when the frame resizes
+and survive closing/reopening panels within that snapshot; reload resets
+them. Maximized Items has its own width preference. Floating panels have no
+layout divider. Narrow reading viewports scroll the desktop frame; the
+dedicated mobile examples retain their screen-based navigation.
 
 Click an Attachment's title, thumbnail, or body to open its content in the
 right-hand preview without changing Project/Thread context. Select another
-Attachment to replace the preview; close it to clear that column. The Center
-does not resize. Fresh-Project Simple mode retains its centered presentation
-until a preview is opened, when it shares the normal three-column frame.
+Attachment to replace the preview; close it to return that space to Center.
+Fresh-Project Simple mode retains its centered presentation until a sidebar
+opens, then follows the same layout rules.
 
 The preview's **Expand** control enters Artifact context: full content uses
 the middle and right space, Items lists durable peer Attachments, and Back
-restores the owning Project/Thread, its scroll position, and its preview.
+restores the owning Project/Thread, its scroll position, Items visibility,
+and its preview. Resizing the peer list uses the same Items width preference.
 The owner's private channel is unchanged. Ghosts have no preview or Expand.
 This is real local context navigation in the walkthrough, not a modal viewer.
 
@@ -153,7 +178,8 @@ changes column widths. Titlebar and widget pinning remain available.
 5. Opening an Attachment restores normal Items/Center widths and opens the
    right-hand preview. Toggling Items maximize also restores the normal frame.
 
-In full Artifact context, content still spans the middle and right sections.
+In full Artifact context, content spans the middle and right sections when
+peer Attachments are open, and the entire frame when they are collapsed.
 The floating channel can cover it temporarily, but cannot reserve space.
 
 ### Titlebar
@@ -399,10 +425,12 @@ This is a proposed mobile interaction design, chosen for this iteration:
 - Use 25 numbered before/after snapshots, organized into six journey chapters,
   followed by a seventh section with a dedicated mobile experience study.
   Each has a human action, visible result, and agent/system consequence.
-- Include an interactive shell study for normal columns, attachment preview,
+- Include an interactive shell study for all four sidebar visibility states,
   floating Agent Channel, expanded Artifact context, and maximized Items.
   Start with the Agent Channel hidden, `project-brief.md` open in the right
-  preview, and Center at its original width.
+  preview, and the default 1 : 1.5 : 1 proportions. Follow it with a separate
+  Thread + image focus study, initially showing Items collapsed and Center
+  using left + middle space. Both examples have resizable visible splits.
 - Lightweight local interactions include expanding Comments, answering
   Questions, showing panels, toggling cards/table, selecting tabs, changing
   widget pin/order, previewing Attachments, entering sample descriptions,
@@ -432,8 +460,8 @@ settled implementation rules:
 - Whether Question widgets are shared, answerable by any member, or targeted;
   this single-user journey shows questions for the viewing user.
 - Agent routing for a shared Comment when its author leaves or has no channel.
-- Durable panel pinning and view-state persistence, final mobile annotation
-  gestures, and layout sizing when only some panels are visible. The mobile
+- Durable panel preferences and view-state persistence, final mobile annotation
+  gestures, and production minimum panel sizes. The mobile
   screen-switcher and in-session state retention are proposed above.
 - Expanded Dynamic peer navigation; todo section placement; widget pin
   ordering across sections and members.
@@ -452,9 +480,14 @@ settled implementation rules:
   channel descriptions everywhere.
 - No bottom gutter or collapsible Center is introduced.
 - Panel study implements Items-maximize / attachment-open transitions.
-- Normal columns use 1 : 1.5 : 1. Attachments open the right-hand preview
-  without resizing Complex-mode Center; Expand enters full Artifact context,
-  retains the owning channel, and Back restores the owner and preview.
+- Initially, three open columns use 1 : 1.5 : 1. Center reclaims either
+  collapsed side and uses the wider centered presentation when both are
+  collapsed. Hover peeks do not resize it.
+- Visible splits resize by pointer or keyboard, enforce minimum widths, and
+  retain preferences across panel visibility changes.
+- Attachments open the right-hand preview; Expand enters full Artifact context,
+  retains the owning channel, and Back restores the owner, Items visibility,
+  and preview.
 - No Agent Channel Pin control or docking behavior exists. Hover/float never
   resizes the content.
 - Sample Thread cards show title, truncated summary, and one latest widget.

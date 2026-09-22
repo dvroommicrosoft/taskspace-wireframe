@@ -30,6 +30,23 @@
     .expanded-artifact h4{font-size:18px;font-weight:500;margin:0 0 25px}
     .artifact-peers{padding-top:0}
     .artifact-peers button{font-size:11px;overflow-wrap:anywhere}
+    .app .workspace,.app.items-max .workspace{grid-template-columns:var(--items-size,0px) minmax(0,1fr) var(--preview-size,0px);height:calc(100% - 28px);transition:none}
+    .app .workspace>.center{grid-column:2;grid-row:1;width:auto;max-width:none;justify-self:stretch;min-height:0}
+    .app.solo:not(.artifact):not(.artifact-expanded) .workspace>.center{width:64%;max-width:680px;justify-self:center}
+    .app .artifact-preview{width:var(--preview-size);min-width:0;bottom:28px}
+    .app .items{grid-column:1;grid-row:1;min-height:0}
+    .app.left-overlay .items{width:var(--items-overlay-size,28.6%)}
+    .app.left-shown .items{position:static;width:auto}
+    .app.items-max .workspace>.center{grid-column:2}
+    .app.artifact-expanded .center.expanded-artifact{grid-column:2}
+    .split-handle{position:absolute;top:48px;bottom:28px;width:12px;transform:translateX(-50%);z-index:6;cursor:col-resize;touch-action:none;outline-offset:1px}
+    .split-handle::after{content:"";position:absolute;top:0;bottom:0;left:5px;width:2px;background:var(--lime);border-radius:2px;opacity:0;transition:opacity .15s}
+    .split-handle:hover::after,.split-handle:focus-visible::after,.split-handle.dragging::after{opacity:1}
+    .split-handle:focus-visible{outline:1px solid var(--lime)}
+    .app.resizing,.app.resizing *{cursor:col-resize!important;user-select:none!important}
+    .focus-example{margin:44px 0 30px}
+    .focus-example h3{font-size:24px;letter-spacing:-.025em;font-weight:500;margin:10px 0}
+    .focus-example>p{max-width:820px;font-size:13px;color:var(--muted)}
     .project-members{display:flex;align-items:center;gap:9px;flex:none}
     .titlebar{visibility:hidden}.app.home .titlebar,.app.top-open .titlebar,.app.top-pinned .titlebar{visibility:visible}
     .owner-divider{width:1px;height:23px;background:var(--strong);margin-inline:2px}
@@ -122,11 +139,12 @@
       <p class="callout"><b>How to read this page.</b> Every numbered frame is an independent moment, not a connected app. Try the lime actions, question answers, comment disclosures, edge panels, and layout controls. Snapshot-navigation links illustrate uploads and handoffs; no files are uploaded, invitations sent, or jobs scheduled. Reload resets local edits. On narrow screens, scroll a frame horizontally to inspect its desktop composition.</p>
     </section>
     <section id="layout" class="chapter wrap">
-      <div class="chapter-head"><div><div class="eyebrow">Shell study</div><h2>Work in the middle. Evidence on the right.</h2></div><p>Items, Center, and Artifact preview use 1 : 1.5 : 1. Your private Agent Channel floats over the layout; it never becomes a docked column.</p></div>
-      <div class="layout-toolbar" role="group" aria-label="Layout examples"><button data-layout="normal">1 / Default · 1 : 1.5 : 1</button><button data-layout="preview">2 / Open attachment</button><button data-layout="hover">3 / Float Agent Channel</button><button data-layout="expand">4 / Expand Artifact</button><button data-layout="max">5 / Maximize Items</button></div>
+      <div class="chapter-head"><div><div class="eyebrow">Shell study</div><h2>Give the space back to the work.</h2></div><p>Both sidebars open: 1 : 1.5 : 1. Collapse either side and Center takes its space. Collapse both for the wider, centered reading layout. Agent conversation always floats.</p></div>
+      <div class="layout-toolbar" role="group" aria-label="Layout examples"><button data-layout="preview">1 / Three columns</button><button data-layout="normal">2 / Items + Work</button><button data-layout="focus">3 / Work + Artifact</button><button data-layout="solo">4 / Work only</button><button data-layout="hover">5 / Float Agent</button><button data-layout="expand">6 / Expand Artifact</button><button data-layout="max">7 / Maximize Items</button></div>
       <div id="layout-example"></div>
-      <div class="layout-state" id="layout-state" role="status">Center keeps its original width. Click an Attachment to open the right-hand Artifact preview.</div>
-      <div class="notes"><div><b>Preview, then expand</b>Opening an Attachment fills the right column without navigating away from your work. Expand it for Artifact context, peer Attachments, and the owner's channel. Back restores the work and preview.</div><div><b>Conversation is always floating</b>Hover, focus, or tap the right edge to reveal your private Agent Channel over the preview. It cannot be pinned and never resizes content. Maximizing Items docks Center right; opening an Attachment restores the normal layout.</div></div>
+      <div class="layout-state" id="layout-state" role="status">Items, Work, and Artifact preview are open. Hover a divider to resize.</div>
+      <div class="notes"><div><b>Collapse and focus</b>Use the Items header's collapse button to give its width to Center. Close the Artifact preview to reclaim the right side. Hover the left edge to peek; click it or Dock Items to keep Items open.</div><div><b>Resize the visible splits</b>Hover a divider for the resize cursor and accent line, then drag. Keyboard: focus a divider and use Left/Right arrows; Shift makes larger adjustments. Double-click to reset its width. The Agent Channel never resizes the layout.</div></div>
+      <article class="focus-example" id="thread-focus"><div class="eyebrow">Focus study / Items collapsed</div><h3>A Thread and its artifact. Nothing between them.</h3><p>The left sidebar is hidden. Thread detail takes the left + middle space, with the image on the right. Hover the split to resize, or open Items from the left edge without leaving the Thread.</p><div id="focus-example"></div></article>
       <div class="layers"><div><span class="eyebrow">Layer 3 / Foreground</span><br><br>Blocking modal<small>Login and catastrophic errors. Recovery details remain open.</small></div><div><span class="eyebrow">Layer 2</span><br><br>Full-screen content modal<small>Above the shell. Specific uses remain open; Artifact context is navigation.</small></div><div><span class="eyebrow">Layer 1 / Foundation</span><br><br>Items · Center · Artifact preview<small>Titlebar above; private Agent Channel floats at the right edge. There is no channel pinning.</small></div></div>
     </section>
     <div id="journey"></div>
@@ -213,7 +231,7 @@
       {id:11,name:'A new Thread starts moving.',context:'Project / Complex',description:'The Facilitator creates the first Thread and sends planning instructions to its new private channel. The Project onboarding is complete; the new card shows its latest widget.',human:'Reveal Items, then open the first Thread. Its card shows title, one description line, and Planning in progress.',system:'The onboarding Comment is addressed. The Thread agent can work while the user remains in Project context.',content:()=>shell(`${title()}${comments(comment('Project onboarding is complete.',{state:'Addressed'})+comment(nextSteps,{agent:true}))}${section('Controls',repo(true)+members())}${section('Attachments',initialFiles(false),'2')}`,{left:true,message:'I created “Design the first-run experience” and asked your Thread agent to start planning. Project onboarding is complete.',record:completionRecord,tall:true})},
       {id:12,chapter:'plan',name:'An output can be promised before it exists.',context:'Thread / Complex',description:'Open the Thread. The Agent Channel is hidden. The Center shows the todo list, Add Attachments, and a dotted plan.md placeholder with a spinner.',human:'Read progress without reading a conversation. The ghost cannot be opened.',system:'A ghost announces intent. It becomes a normal Attachment only when a durable file is available.',content:()=>shell(`${threadTitle()}${section('Controls',todo())}${upload(14)}${section('Attachments',file('plan.md',{ghost:true,detail:'Synthesizing the first-run journey.'}),'1 pending')}`,{context:'Thread',left:true,selected:'design',back:11,message:'I have the project brief, reference image, and repo context. I am drafting a first-run plan.',tall:true})},
       {id:13,name:'A question interrupts the page, not the flow.',context:'Thread / Complex',description:'The Thread agent asks a focused question. It animates into Questions. After the user answers, it disappears and activity resumes at the right edge.',human:'Pick “First-time solo user.” The channel receives a collapsed answer record.',system:'The answer updates planning. Channel activity is represented by edge segments, not a permanently open transcript.',content:()=>shell(`${threadTitle()}${section('Questions',question('Who should this first-run flow serve first?', ['First-time solo user','An existing team','Both from day one']),'1')}${section('Controls',todo())}${upload()}${section('Attachments',file('plan.md',{ghost:true}),'1 pending')}`,{context:'Thread',selected:'design',back:11,waiting:true,message:'One decision will sharpen this plan: the first user we should optimize for.',tall:true})},
-      {id:14,name:'Preview the next reference beside the work.',context:'Thread / Preview',description:'Drop a second image into this Thread, then click its Attachment. It opens in the right-hand preview while the Thread widgets stay in the Center at their original width.',human:'Inspect button-study.png on the right. Use Expand to enter Artifact context and work directly on the image.',system:'Opening a preview does not change the Thread or its channel. Only durable Thread Attachments appear in the expanded peer list.',content:()=>shell(`${threadTitle()}${section('Controls',todo())}${upload()}${section('Attachments',file('plan.md',{ghost:true})+file('button-study.png',{image:true}),'1 file · 1 pending')}`,{context:'Thread',left:true,selected:'design',back:11,record:'Audience · First-time solo user',tall:true})},
+      {id:14,name:'Preview the next reference beside the work.',context:'Thread / Preview',description:'Drop a second image into this Thread, then click its Attachment. The right-hand preview opens beside the Thread widgets. Collapse Items to give more space to Thread detail, or resize either split.',human:'Inspect button-study.png on the right. Use Expand to enter Artifact context and work directly on the image.',system:'Opening a preview does not change the Thread or its channel. Only durable Thread Attachments appear in the expanded peer list.',content:()=>shell(`${threadTitle()}${section('Controls',todo())}${upload()}${section('Attachments',file('plan.md',{ghost:true})+file('button-study.png',{image:true}),'1 file · 1 pending')}`,{context:'Thread',left:true,selected:'design',back:11,record:'Audience · First-time solo user',tall:true})},
       {id:15,name:'Comment on the thing itself.',context:'Artifact / Image',description:'Expand the image preview into Artifact context. The left side becomes a peer-attachment list with one real file. Full image content now occupies the middle and right sections.',human:'Drag a box around the button, then enter a color instruction. Keyboard users can use the preselected region.',system:'The floating composer anchors a shared Comment to the image region, while routing its update to your private Thread agent.',content:()=>shell(imageView(),{artifact:true,left:true,back:14,message:'I am still drafting the plan. Image annotations will reach me automatically.'})},
       {id:16,name:'The annotation stays. The composer leaves.',context:'Artifact / Image',description:'Enter submits the Comment and replaces the floating form with an anchored marker. The right gutter responds as the agent receives the update.',human:'Click marker 1 to read the Comment. Back returns to the Thread, not the Project.',system:'Shared annotation: “Make this button our lime accent rather than blue.” Private agent processing stays in your channel.',content:()=>shell(imageView(true),{artifact:true,left:true,back:14,message:'I received your image annotation. I will use the lime accent for the primary Create action and reflect that in the plan.'})},
       {id:17,chapter:'redirect',name:'Start another Thread with intent, not a title.',context:'Thread / New',description:'Back returns to the Thread. Hover or focus Items to reveal +. Creating a Thread prepends it to the list and opens an expanded Description field in the otherwise empty Center.',human:'Type the description and Save. “Focus description” demonstrates the creation-time cursor without stealing focus while reading this long page.',system:'No generated artifacts or canned content yet. The title will be generated after the description is saved.',content:()=>shell(`<div class="context-title"><div class="scope">New Thread · On Deck evolution</div><h4>Untitled Thread</h4></div><form class="description-form"><label>Description<textarea required placeholder="What should this Thread explore?">Explore options for the Items panel and its table presentation.</textarea></label><div class="choices"><button class="primary" type="submit">Save description →</button><button class="secondary" type="button" data-action="focus-description">Focus description</button></div></form><p class="notice" style="margin-top:25px">A description is enough to get started.</p>`,{context:'Thread',left:true,selected:'new',back:11,busy:false,route:'/on-deck-evolution/threads/new'})},
@@ -320,26 +338,136 @@
     }
     $('#layout-example').innerHTML = shell(`${title()}${section('Questions',question('Which part of the experience needs the most attention?', ['First-run flow','Daily triage']))}${section('Attachments',file('project-brief.md')+file('workspace-reference.png',{image:true}))}`,{left:true,two:true,message:'This is your private Project channel. It floats over the Artifact preview without changing the layout.',tall:true});
     const layoutApp = $('#layout-example .app');
-    const layoutMessages = {normal:'Center keeps its original width. Click an Attachment to open the right-hand Artifact preview.',preview:'The Attachment is open on the right. Center stays at its original width; Expand enters Artifact context.',max:'Items occupies left + center. Center docks on the right; opening an Attachment restores the normal layout.',hover:'Your private Agent Channel floats over the Artifact preview. No pinning, no resizing.',expand:'Artifact context: full content and peer Attachments, with the same owner channel. Back restores the work.'};
+    $('#focus-example').innerHTML = shell(`${threadTitle()}${section('Controls',todo())}${comments(comment('Keep the first-run experience quiet and make the primary action unmistakable. Use the image as the reference.'))}${section('Attachments',file('button-study.png',{image:true})+file('plan.md',{ghost:true}),'1 file · 1 pending')}`,{context:'Thread',selected:'design',back:11,message:'I am using the image to refine the first-run plan. Inspect the Thread and reference side by side.',tall:true});
+    const layoutMessages = {normal:'Items is open; Center takes the middle + right space.',preview:'Items, Center, and Artifact preview are open. Hover a divider to resize.',focus:'Items is collapsed; Center takes the left + middle space beside its Artifact.',solo:'Both sidebars are collapsed. Work uses the wider, centered reading layout.',max:'Items is maximized; Center docks on the right. Opening an Attachment restores normal Items width.',hover:'Your private Agent Channel floats over the content without resizing or docking.',expand:'Artifact context: full content and peer Attachments, with the same owner channel. Back restores the work.'};
     function setLayout(mode) {
       if (artifactStates.has(layoutApp)) restoreArtifactOwner(layoutApp);
       closeArtifactPreview(layoutApp);
       layoutApp.classList.remove('items-max','channel-open','left-overlay');
       layoutApp.classList.add('left-shown');
+      if (mode === 'solo' || mode === 'focus') layoutApp.classList.remove('left-shown');
       if (mode === 'max') layoutApp.classList.add('items-max');
-      if (['preview','hover','expand'].includes(mode)) openArtifactPreview(layoutApp,'project-brief.md',false);
+      if (['preview','hover','expand','focus'].includes(mode)) openArtifactPreview(layoutApp,'project-brief.md',false);
       if (mode === 'hover') layoutApp.classList.add('channel-open');
       if (mode === 'expand') expandArtifact(layoutApp);
       $('#layout-state').textContent = layoutMessages[mode];
       syncPanelButtons(layoutApp);
     }
     function syncPanelButtons(app) {
+      updatePanelLayout(app);
       $('[data-action="maximize-items"]',app).setAttribute('aria-pressed',String(app.classList.contains('items-max')));
+      const leftShown = app.classList.contains('left-shown');
+      $('.left-edge',app).setAttribute('aria-expanded',String(leftShown || app.classList.contains('left-overlay')));
+      $('.left-edge',app).setAttribute('aria-label',leftShown ? 'Collapse Items panel' : 'Open Items panel');
+      $$('[data-action="toggle-items"]',app).forEach(button => {
+        button.textContent = leftShown ? '‹' : '→';
+        button.title = leftShown ? 'Collapse Items' : 'Dock Items';
+        button.setAttribute('aria-label',button.title);
+        button.setAttribute('aria-expanded',String(leftShown));
+      });
       if (app === layoutApp) {
         const maximized = app.classList.contains('items-max');
         const floating = app.classList.contains('channel-open');
-        $('#layout-state').textContent = floating ? 'Your private Agent Channel floats over the content without resizing or docking.' : app.classList.contains('artifact-expanded') ? layoutMessages.expand : maximized ? layoutMessages.max : app.classList.contains('preview-open') ? layoutMessages.preview : layoutMessages.normal;
+        $('#layout-state').textContent = floating ? layoutMessages.hover : app.classList.contains('artifact-expanded') ? layoutMessages.expand : maximized ? layoutMessages.max : app.classList.contains('preview-open') ? layoutMessages[leftShown ? 'preview' : 'focus'] : layoutMessages[leftShown ? 'normal' : 'solo'];
       }
+    }
+    const panelSizes = new WeakMap();
+    const clamp = (value, min, max) => Math.min(max,Math.max(min,value));
+    function updatePanelLayout(app) {
+      const width = app.clientWidth - 24;
+      if (width <= 0) return;
+      const sizes = panelSizes.get(app) || {left:1/3.5,right:1/3.5,max:2.5/3.5};
+      panelSizes.set(app,sizes);
+      const leftShown = app.classList.contains('left-shown');
+      const rightShown = app.classList.contains('preview-open') && !app.classList.contains('artifact-expanded');
+      const maximized = app.classList.contains('items-max');
+      const left = leftShown ? clamp(width*(maximized ? sizes.max : sizes.left),200,width-280-(rightShown ? 200 : 0)) : 0;
+      const right = rightShown ? clamp(width*sizes.right,200,width-left-280) : 0;
+      app.style.setProperty('--items-size',`${left}px`);
+      app.style.setProperty('--preview-size',`${right}px`);
+      app.style.setProperty('--items-overlay-size',`${clamp(width*sizes.left,200,width-280)}px`);
+      app.classList.toggle('solo',!leftShown && !rightShown);
+      for (const handle of $$('.split-handle',app)) {
+        const isLeft = handle.dataset.split === 'left';
+        const value = isLeft ? left : right;
+        handle.hidden = isLeft ? !leftShown : !rightShown;
+        handle.style.left = `${12 + (isLeft ? left : width-right)}px`;
+        handle.setAttribute('aria-valuemin','200');
+        handle.setAttribute('aria-valuemax',String(Math.round(width-280-(isLeft ? right : left))));
+        handle.setAttribute('aria-valuenow',String(Math.round(value)));
+        handle.setAttribute('aria-valuetext',`${Math.round(value)} pixels`);
+      }
+    }
+    function resizePanel(app,side,value) {
+      const width = app.clientWidth-24;
+      const sizes = panelSizes.get(app);
+      const opposite = parseFloat(app.style.getPropertyValue(side === 'left' ? '--preview-size' : '--items-size'));
+      sizes[side === 'left' && app.classList.contains('items-max') ? 'max' : side] = clamp(value,200,width-opposite-280)/width;
+      updatePanelLayout(app);
+    }
+    function initializeSplitHandles(app) {
+      for (const side of ['left','right']) {
+        const handle = document.createElement('div');
+        handle.className = 'split-handle';
+        handle.dataset.split = side;
+        handle.tabIndex = 0;
+        handle.setAttribute('role','separator');
+        handle.setAttribute('aria-orientation','vertical');
+        handle.setAttribute('aria-label',side === 'left' ? 'Resize Items and Center' : 'Resize Center and Artifact preview');
+        handle.title = 'Drag to resize · Arrow keys adjust · Double-click resets';
+        app.append(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown',event => {
+          if (event.button !== 0 || !event.isPrimary) return;
+          event.preventDefault();
+          handle.focus({preventScroll:true});
+          drag = {x:event.clientX,width:Number(handle.getAttribute('aria-valuenow')),pointerId:event.pointerId};
+          handle.setPointerCapture(event.pointerId);
+          handle.classList.add('dragging');
+          app.classList.add('resizing');
+        });
+        handle.addEventListener('pointermove',event => {
+          if (!drag || drag.pointerId !== event.pointerId) return;
+          resizePanel(app,side,drag.width+(event.clientX-drag.x)*(side === 'left' ? 1 : -1));
+        });
+        const finish = () => {
+          drag = null;
+          handle.classList.remove('dragging');
+          app.classList.remove('resizing');
+        };
+        handle.addEventListener('pointerup',event => {
+          if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+          finish();
+        });
+        handle.addEventListener('pointercancel',finish);
+        handle.addEventListener('lostpointercapture',finish);
+        handle.addEventListener('keydown',event => {
+          if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+          event.preventDefault();
+          const current = Number(handle.getAttribute('aria-valuenow'));
+          const delta = (event.shiftKey ? 40 : 10)*(event.key === 'ArrowLeft' ? -1 : 1)*(side === 'left' ? 1 : -1);
+          resizePanel(app,side,event.key === 'Home' ? 200 : event.key === 'End' ? Number(handle.getAttribute('aria-valuemax')) : current+delta);
+        });
+        handle.addEventListener('dblclick',() => {
+          const sizes = panelSizes.get(app);
+          if (side === 'left' && app.classList.contains('items-max')) sizes.max = 2.5/3.5;
+          else sizes[side] = 1/3.5;
+          updatePanelLayout(app);
+        });
+      }
+      new ResizeObserver(() => updatePanelLayout(app)).observe(app);
+    }
+    function toggleItems(app) {
+      if (app.classList.contains('left-shown')) {
+        app.classList.remove('left-shown','left-overlay','items-max');
+        const center = $('.expanded-artifact',app) || $('.center',app);
+        center.tabIndex = -1;
+        center.focus({preventScroll:true});
+      } else {
+        app.classList.add('left-shown');
+        app.classList.remove('left-overlay');
+      }
+      syncPanelButtons(app);
     }
     function answerQuestion(widget, answer) {
       const app = widget.closest('.app');
@@ -408,7 +536,7 @@
       const peers = document.createElement('div');
       peers.className = 'artifact-peers';
       const names = $$('.attachment-widget',state.owner).map(widget => widget.dataset.name);
-      peers.innerHTML = `<div class="items-head">Attachments</div>${names.map(peer => `<button class="thread-card ${peer === name ? 'selected' : ''}" data-action="select-peer" data-file="${escapeHTML(peer)}" aria-pressed="${peer === name}">${escapeHTML(peer)}</button>`).join('')}<p class="notice">Available ${app.dataset.scope.toLowerCase()} Attachments only. Pending files are not listed.</p>`;
+      peers.innerHTML = `<div class="items-head">Attachments<button class="icon" data-action="toggle-items" aria-label="Collapse Items">‹</button></div>${names.map(peer => `<button class="thread-card ${peer === name ? 'selected' : ''}" data-action="select-peer" data-file="${escapeHTML(peer)}" aria-pressed="${peer === name}">${escapeHTML(peer)}</button>`).join('')}<p class="notice">Available ${app.dataset.scope.toLowerCase()} Attachments only. Pending files are not listed.</p>`;
       $('.items',app).append(peers);
       const back = $('.back',app);
       back.dataset.action = 'back-artifact';
@@ -431,10 +559,10 @@
       back.setAttribute('href',state.backHref);
       back.setAttribute('aria-label',state.backLabel);
       $('.route',app.closest('.screen')).textContent = state.route;
-      state.owner.scrollTop = state.scrollTop;
       artifactStates.delete(app);
-      if (state.focus?.isConnected) state.focus.focus({preventScroll:true});
       syncPanelButtons(app);
+      state.owner.scrollTop = state.scrollTop;
+      if (state.focus?.isConnected) state.focus.focus({preventScroll:true});
     }
     document.addEventListener('click',event => {
       const prLink = event.target.closest('a[href="#merged-pr-example"]');
@@ -487,7 +615,7 @@
         button.setAttribute('aria-pressed',String(pinned));
         app.classList.remove('top-open');
       }
-      if (action === 'left' && !app.classList.contains('left-shown')) app.classList.add('left-overlay');
+      if (action === 'left' || action === 'toggle-items') { toggleItems(app); return; }
       if (action === 'channel') app.classList.add('channel-open');
       if (action === 'close-channel') app.classList.remove('channel-open');
       if (action === 'maximize-items') {
@@ -645,6 +773,8 @@
       if (event.target.matches('.repo-form input')) event.target.setCustomValidity('');
     });
     $$('.app').forEach(app => {
+      $('.item-controls',app).insertAdjacentHTML('beforeend','<button class="icon" data-action="toggle-items" aria-label="Collapse Items">‹</button>');
+      initializeSplitHandles(app);
       const reveal = (selector, className) => {
         const edge = $(selector,app);
         if (!edge) return;
@@ -701,7 +831,12 @@
       };
       hideWhenLeaving('.channel','channel-open');
       hideWhenLeaving('.items','left-overlay');
-      app.addEventListener('keydown',event => { if (event.key === 'Escape') app.classList.remove('top-open','left-overlay','channel-open'); });
+      app.addEventListener('keydown',event => {
+        if (event.key === 'Escape') {
+          app.classList.remove('top-open','left-overlay','channel-open');
+          syncPanelButtons(app);
+        }
+      });
       syncPanelButtons(app);
     });
     function initializeImageCanvas(canvas) {
@@ -734,6 +869,7 @@
     $$('.app .image-canvas').forEach(initializeImageCanvas);
     openArtifactPreview($('#step-14 .app'),'button-study.png',false);
     openArtifactPreview(layoutApp,'project-brief.md',false);
+    openArtifactPreview($('#focus-example .app'),'button-study.png',false);
   </script>
 </body>
 </html>
