@@ -276,7 +276,9 @@ editing, comments, answers, invitations, or agent messages. Navigation,
 search, read access, view tabs, timeline exploration, and panel resizing are
 still available. Do not mark that member's updates read merely because the
 viewer opened them. The selected top-gutter mark becomes yellow; a subtle yellow
-glow sits outside the frame and gutters, without an inner border or connector. A persistent banner
+glow is inset at the browser content edges and clipped inside the frame, not
+cast outside the window. It is a soft edge treatment, without a solid border
+or connector, and does not intercept gutter interactions. A persistent banner
 explains the view. Selecting You restores normal assignment-based permissions.
 
 Shared updates still change that view without interaction. The explainer has
@@ -662,7 +664,7 @@ settled implementation rules:
 - Thread lists use all four requested tabs, a global search override, and
   the selected member's creation/assignment/edit and personal sleep rules.
 - Another-member views are live and read-only, with a yellow selected-member
-  mark and subtle glow outside the gutters. Their empty agent gutter shows
+  mark and subtle inset glow inside the browser content frame. Their empty agent gutter shows
   an own-view-only explanation instead of opening a channel; read markers
   are not changed on their behalf.
 - Only the assignee can edit a Thread; assignment, promotion, icon generation,
