@@ -52,6 +52,20 @@
     .owner-divider{width:1px;height:23px;background:var(--strong);margin-inline:2px}
     .member-invite{width:27px;height:27px;border:1px dashed #ffffff40;border-radius:50%;padding:0;color:var(--muted);background:transparent}
     .impact{border-color:#b6ff5745;background:linear-gradient(145deg,#b6ff5707,var(--surface))}
+    .impact-trigger{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap;border:0;padding:0;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:help}
+    .impact-label{border-bottom:1px dotted var(--muted)}
+    .impact-count{display:inline-flex;gap:6px;white-space:nowrap;font-family:monospace}
+    .impact-trigger:hover .impact-label,.impact-trigger:focus-visible .impact-label{color:var(--lime)}
+    .impact-hover{position:fixed;inset:auto;margin:0;width:min(370px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:17px;border:1px solid var(--strong);border-radius:10px;background:var(--surface);color:var(--text);box-shadow:0 14px 45px #0009;font:12px/1.6 system-ui}
+    .impact-hover>strong{display:block;font-size:12px;margin-bottom:12px}
+    .impact-hover>p{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:10px}
+    .impact-hover .impact-dirs{padding:0;border:0}
+    .impact-hover .impact-dirs>div{align-items:baseline;font-size:11px}
+    .impact-hover code{overflow-wrap:anywhere;min-width:0}
+    .impact-hover .impact-count{flex:none}
+    .completed-card-link{display:block;color:inherit;text-decoration:none}
+    .thread-card .impact-trigger{font-size:10px;gap:5px}
+    .thread-card .latest-widget:has(.impact-trigger){flex-wrap:wrap}
     .impact-badge{display:inline-block;font:9px monospace;color:var(--lime);border:1px solid #b6ff5740;border-radius:20px;padding:5px 8px;margin-bottom:12px}
     .impact-link{display:block;font-size:13px;line-height:1.5;color:var(--text);margin:0 0 10px;text-decoration:underline;text-underline-offset:4px}
     .diff-stats{display:flex;gap:15px;align-items:center;font:11px monospace;margin:15px 0}
@@ -184,12 +198,25 @@
     const file = (name, {image = false, ghost = false, simple = false, detail = ''} = {}) => `<article class="widget ${ghost ? 'ghost' : 'attachment-widget'}" data-name="${name}"><div class="widget-head">${ghost ? `<span>▤ &nbsp;${name}</span>${status('Writing')}` : `<button class="attachment-title" data-action="open-artifact" data-file="${name}" aria-label="Preview ${name}">${image ? '▧' : '▤'} &nbsp;${name} →</button>${simple ? '' : tools()}`}</div>${ghost ? `<div class="file-row"><span class="file-icon">MD</span><div class="file-body"><p>Announced by agent. File not created yet.</p><p>${detail || 'Preparing the first draft...'}</p></div></div><button class="tiny" disabled>Not available yet</button>` : image ? `<button class="attachment-thumbnail" data-action="open-artifact" data-file="${name}" aria-label="Preview image ${name}">${preview}</button>` : `<p class="document-preview">${detail || '<strong>Intent, before implementation.</strong>Make the work legible without making the conversation the workspace.'}</p>`}</article>`;
     const initialFiles = simple => file('workspace-reference.png', {image:true,simple}) + file('project-brief.md', {simple,detail:'<strong>A calm place to work.</strong>Keep artifacts in the foreground. Let agents move the work forward without demanding constant attention.'});
     const todo = () => `<article class="widget" data-name="todo"><div class="widget-head">Planning checklist${tools()}</div><div class="checklist"><div class="check-row done"><span class="check-box">✓</span>Read project context</div><div class="check-row active">${spinner}Planning in progress</div><div class="check-row"><span class="check-box"></span>Draft plan.md</div><div class="check-row"><span class="check-box"></span>Review with you</div></div></article>`;
-    const impact = () => `<article class="widget impact" data-name="impact"><div class="widget-head">↗ &nbsp;Impact${tools()}</div><span class="impact-badge">✓ Complete · PR merged</span><a class="impact-link" href="#merged-pr-example">↗ PR #42 · Ship a quieter first-run flow</a><p>Merged into <code>main</code> · completion policy satisfied</p><div class="diff-stats"><span>8 files</span><span class="diff-add">+186</span><span class="diff-remove">−42</span></div><div class="diff-bar" aria-hidden="true"><span></span><span></span></div><p>Replaced the setup wizard with inline onboarding, added Question widgets, and kept Back visible when the Titlebar hides.</p><div class="impact-dirs"><div><code>src/onboarding/</code><span>3 files · flow + questions</span></div><div><code>src/components/shell/</code><span>2 files · chrome + Back</span></div><div><code>src/styles/</code><span>1 file · quiet defaults</span></div><div><code>tests/onboarding/</code><span>2 files · journey coverage</span></div></div><p class="impact-footer">Illustrative PR and diff, not a real repository change. Open the PR link for the local merged-PR example.</p></article>`;
+    const impactDirectories = [
+      {path:'src/onboarding/',added:88,removed:18,files:3},
+      {path:'src/components/shell/',added:44,removed:12,files:2},
+      {path:'src/styles/',added:18,removed:8,files:1},
+      {path:'tests/onboarding/',added:36,removed:4,files:2}
+    ];
+    const impactTotals = impactDirectories.reduce((total,dir) => ({added:total.added+dir.added,removed:total.removed+dir.removed,files:total.files+dir.files}),{added:0,removed:0,files:0});
+    const diffCount = ({added,removed}) => `<span class="impact-count"><span class="diff-add">+${added}</span><span class="diff-remove">−${removed}</span></span>`;
+    const impactTrigger = () => `<button type="button" class="impact-trigger" data-impact-trigger aria-expanded="false" aria-controls="impact-directory-hover" aria-describedby="impact-directory-hover"><span class="impact-label">Impact</span>${diffCount(impactTotals)}</button>`;
+    const impact = () => `<article class="widget impact" data-name="impact"><div class="widget-head">${impactTrigger()}${tools()}</div><span class="impact-badge">✓ Complete · PR merged</span><a class="impact-link" href="#merged-pr-example">↗ PR #42 · Ship a quieter first-run flow</a><p>Merged into <code>main</code> · completion policy satisfied</p><div class="diff-stats"><span>${impactTotals.files} files changed</span></div><div class="diff-bar" aria-hidden="true"><span></span><span></span></div><p>Replaced the setup wizard with inline onboarding, added Question widgets, and kept Back visible when the Titlebar hides.</p><p class="impact-footer">Illustrative PR and diff, not a real repository change. Hover Impact or its diff count for every affected directory. Open the PR link for the local merged-PR example.</p></article>`;
     const question = (prompt, choices, freeform = false) => `<article class="widget question"><div class="widget-head"><span>◇ &nbsp;Question for you</span>${tools()}</div><p style="color:var(--text)">${prompt}</p><div class="choices">${choices.map(choice => `<button data-action="answer">${choice}</button>`).join('')}</div>${freeform ? '<form class="answer-form"><input required aria-label="Your own answer" placeholder="Or write your own answer..."><button class="primary" type="submit">Send</button></form>' : ''}</article>`;
     const repo = (attached = false) => `<article class="widget repo-widget"><div class="widget-head">⌘ &nbsp;Project Repos${tools()}</div><div class="repo-list">${attached ? '<div class="repo-row"><span title="https://github.com/dvroommicrosoft/taskspace-wireframe">dvroommicrosoft / taskspace-wireframe</span><button class="tiny" data-action="remove-repo" aria-label="Remove example repo reference">Remove</button></div>' : '<p class="empty-repos">No Repos attached.</p>'}</div><form class="repo-form answer-form"><input type="url" required aria-label="Repository git URL" placeholder="https://github.com/owner/repo"><button class="primary" type="submit">Attach</button></form><div class="inline-feedback" role="status"></div></article>`;
     const members = () => `<article class="widget"><div class="widget-head">◎ &nbsp;Project members${tools()}</div><div class="member-row">${avatar()}<span>You <small>· owner</small></span><button class="tiny" data-action="invite">Invite example member</button></div><p>Keep working. Invitations are optional.</p></article>`;
     const widgetPicker = () => `<details class="widget-picker"><summary>+ Add a widget</summary><p>Pre-configured widgets not yet on this surface.</p><button data-action="add-widget">Add output chart</button></details>`;
-    const threadCard = (name, description, latest, {selected = false, target = 12, schedule = false, complete = false} = {}) => `<a class="thread-card ${selected ? 'selected' : ''}" href="#step-${target}"><h5>${name}<span class="active-users" title="You are active">●</span></h5><div class="description">${description}</div>${schedule ? `<div class="schedule-row"><span>Weekly</span><span>${latest}</span></div>` : `<div class="latest-widget">${complete ? '<span class="diff-add">✓</span>' : spinner}${latest}</div>`}</a>`;
+    const threadCard = (name, description, latest, {selected = false, target = 12, schedule = false, complete = false} = {}) => {
+      const heading = `<h5>${name}<span class="active-users" title="You are active">●</span></h5><div class="description">${description}</div>`;
+      if (complete) return `<article class="thread-card ${selected ? 'selected' : ''}"><a class="completed-card-link" href="#step-${target}">${heading}</a><div class="latest-widget"><span class="diff-add">✓</span>${impactTrigger()}<span>${latest}</span></div></article>`;
+      return `<a class="thread-card ${selected ? 'selected' : ''}" href="#step-${target}">${heading}${schedule ? `<div class="schedule-row"><span>Weekly</span><span>${latest}</span></div>` : `<div class="latest-widget">${spinner}${latest}</div>`}</a>`;
+    };
     const activeCards = selected => threadCard('Research table foundations','Explore an open-source foundation for Items.',selected === 'research-start' ? 'Question · Planning ideas?' : 'research.md · Writing',{selected:selected === 'research' || selected === 'research-start',target:19}) + threadCard('Design the first-run experience','Make project setup feel like beginning the work.','Todo · Planning in progress',{selected:selected === 'design'});
     const recurringCards = () => threadCard('Maintain & prune tests','Keep the suite useful, focused, and fast.','Mon · 09:00',{target:21,schedule:true}) + threadCard('Explore the project UX','Walk key journeys and flag rough edges.','Wed · 09:00',{target:21,schedule:true}) + threadCard('Find dead code','Identify unused paths and propose removals.','Fri · 09:00',{target:21,schedule:true});
     const items = (kind = 'threads', selected = '', two = false, repeatables = false, empty = false) => `<aside class="items" aria-label="Items panel"><div class="items-head"><span>${kind === 'system' ? 'System Messages' : kind === 'peers' ? 'Attachments' : 'Threads'}</span><div class="item-controls">${kind === 'threads' ? '<a class="icon item-add" href="#step-17" aria-label="Create a Thread">+</a>' : ''}<button class="icon" data-action="table" aria-label="Toggle cards and table" aria-pressed="false">☷</button><button class="icon" data-action="maximize-items" aria-label="Maximize Items" aria-pressed="false">⤢</button></div></div>${kind === 'system' ? '<div class="widget"><small>SEP 21 / RELEASE NOTES</small><p style="color:var(--text)">A quieter way to work</p><p>Projects, shared artifacts, and agents at the edge.</p></div>' : kind === 'peers' ? '<div class="thread-card selected"><h5>button-study.png</h5><div class="description">Image · added just now</div><div class="latest-widget">Selected Attachment</div></div><p class="notice">plan.md is still a ghost, not a file.</p>' : `<div class="tabs"><button class="${selected === 'repeat' ? '' : 'selected'}" data-action="tab-active">Active</button><button class="${selected === 'repeat' ? 'selected' : ''}" data-action="tab-repeat">Repeatable</button></div><div class="active-list" ${selected === 'repeat' ? 'hidden' : ''}>${empty ? '<p class="notice">No Threads yet.</p>' : `${selected === 'new' ? threadCard('Untitled Thread','Add a description to begin.','Waiting for your description',{selected:true,target:17}) : ''}${two ? activeCards(selected) : threadCard('Design the first-run experience','Make project setup feel like beginning the work.','Todo · Planning in progress',{selected:selected === 'design'})}`}</div><div class="repeat-list" ${selected === 'repeat' ? '' : 'hidden'}>${repeatables ? recurringCards() : '<p class="notice">No repeatable Threads yet.</p>'}<small>Example timezone: America/Los_Angeles</small></div><details class="older"><summary>Older Threads · collapsed</summary><p>No older Threads in this new Project. A populated Project would show those beyond the recent-activity threshold here.</p></details>`}</aside>`;
@@ -270,7 +297,7 @@
       if (step.id >= 21) $('.repeat-list',article).innerHTML = `${recurringCards()}<small>Example timezone: America/Los_Angeles</small>`;
       if (step.id === 18) $('.active-list',article).innerHTML = activeCards('research-start');
       if (step.id === 25) {
-        $('.active-list',article).innerHTML = threadCard('Design the first-run experience','Make project setup feel like beginning the work.','Impact · PR #42 merged',{selected:true,target:25,complete:true}) + threadCard('Research table foundations','Explore an open-source foundation for Items.','research.md · Writing',{target:19});
+        $('.active-list',article).innerHTML = threadCard('Design the first-run experience','Make project setup feel like beginning the work.','PR #42 merged',{selected:true,target:25,complete:true}) + threadCard('Research table foundations','Explore an open-source foundation for Items.','research.md · Writing',{target:19});
         $('.channel .notice',article).outerHTML = '<div class="channel-message"><strong>Thread agent</strong>The example PR is merged into main. The Thread is complete; its Impact widget summarizes the result.</div>';
         $('.edge-note',article).textContent = '✓ Thread complete · channel quiet';
       }
@@ -866,6 +893,53 @@
       canvas.addEventListener('pointerup',finish);
       canvas.addEventListener('pointercancel',finish);
     }
+    function initializeImpactHover() {
+      const hover = document.createElement('div');
+      hover.id = 'impact-directory-hover';
+      hover.className = 'impact-hover';
+      hover.setAttribute('popover','auto');
+      hover.setAttribute('role','tooltip');
+      hover.innerHTML = `<strong>Affected directories</strong><div class="impact-dirs">${impactDirectories.map(dir => `<div><code>${dir.path}</code>${diffCount(dir)}</div>`).join('')}</div><p>${impactTotals.files} files · ${impactDirectories.length} directories · illustrative diff</p>`;
+      document.body.append(hover);
+      let activeTrigger = null;
+      let hideTimer;
+      const hide = () => { clearTimeout(hideTimer); hover.hidePopover(); };
+      const scheduleHide = () => {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          if (!hover.matches(':hover') && !activeTrigger?.matches(':hover,:focus-visible')) hide();
+        },160);
+      };
+      const show = trigger => {
+        clearTimeout(hideTimer);
+        activeTrigger?.setAttribute('aria-expanded','false');
+        activeTrigger = trigger;
+        hover.showPopover();
+        trigger.setAttribute('aria-expanded','true');
+        const bounds = trigger.getBoundingClientRect();
+        const width = hover.offsetWidth;
+        const height = hover.offsetHeight;
+        hover.style.left = `${Math.max(12,Math.min(bounds.left,innerWidth-width-12))}px`;
+        const below = bounds.bottom+8;
+        hover.style.top = `${Math.max(12,below+height <= innerHeight-12 ? below : bounds.top-height-8)}px`;
+      };
+      $$('[data-impact-trigger]').forEach(trigger => {
+        trigger.addEventListener('pointerenter',event => { if (event.pointerType !== 'touch') show(trigger); });
+        trigger.addEventListener('pointerleave',scheduleHide);
+        trigger.addEventListener('focus',() => show(trigger));
+        trigger.addEventListener('blur',scheduleHide);
+        trigger.addEventListener('click',() => show(trigger));
+      });
+      hover.addEventListener('pointerenter',() => clearTimeout(hideTimer));
+      hover.addEventListener('pointerleave',scheduleHide);
+      hover.addEventListener('toggle',() => {
+        if (!hover.matches(':popover-open')) activeTrigger?.setAttribute('aria-expanded','false');
+      });
+      document.addEventListener('scroll',event => { if (!hover.contains(event.target)) hide(); },true);
+      window.addEventListener('resize',hide);
+      window.addEventListener('blur',hide);
+    }
+    initializeImpactHover();
     $$('.app .image-canvas').forEach(initializeImageCanvas);
     openArtifactPreview($('#step-14 .app'),'button-study.png',false);
     openArtifactPreview(layoutApp,'project-brief.md',false);

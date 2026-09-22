@@ -371,8 +371,11 @@ not committed product defaults or real scheduled jobs.
 25. Later, the first-run implementation is complete and its PR is merged into
     `main`, satisfying the Thread's completion policy. Show an **Impact**
     Dynamic under Controls with the merged-PR link, a short explanation of
-    the change, code-diff totals, and the affected directories. The Thread's
-    card shows its latest Impact widget instead of a planning spinner. Its
+    the change, and code-diff totals immediately after **Impact**:
+    **Impact +186 / -42**. Hover the label or either count for a floating
+    breakdown of every affected directory and its added/removed line counts,
+    rather than a permanently expanded directory list. The Thread's
+    card shows the same Impact label, counts, and hover instead of a planning spinner. Its
     channel is quiet and retains its completion message. The Project's
     ongoing monitoring request is independent of this completed Thread.
 
@@ -380,6 +383,13 @@ The sample Impact uses a local, explicitly fictional PR #42 fixture: eight
 files, 186 added lines, and 42 removed lines across `src/onboarding/`,
 `src/components/shell/`, `src/styles/`, and `tests/onboarding/`. Its link opens
 a local merged-PR example, not an invented live GitHub URL.
+
+The illustrative directory breakdown is `src/onboarding/` +88/-18,
+`src/components/shell/` +44/-12, `src/styles/` +18/-8, and
+`tests/onboarding/` +36/-4; these sum to the displayed +186/-42 total.
+Keyboard focus or tapping the Impact/count control also opens the breakdown.
+The hover stays open while the pointer is over it, dismisses on Escape or an
+outside click, and floats above panel clipping without resizing the layout.
 
 ### G. Mobile concept: three columns become three screens
 
