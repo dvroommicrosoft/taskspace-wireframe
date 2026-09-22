@@ -338,6 +338,29 @@ Comments from other members affect this condition is an open detail.
 Todo Dynamics are shown under Controls in this walkthrough. Their definitive
 section classification remains a design choice.
 
+**Checklist trees** support nested subitems rather than a flat list alone.
+Each row shows completion, in-progress, or not-started state; branches show
+their immediate child count and an expand/collapse chevron. Indentation and
+vertical guides preserve the hierarchy at deeper levels. Completion is
+agent-maintained, not an editable checkbox in this study.
+
+Rows can show additions/deletions and link to durable artifacts. Parent diff
+counts sum their descendants' leaf changes once; expanding a branch does not
+change those totals. Counts are omitted until changes exist. Artifact links
+open the usual preview, with Expand and Back retaining their existing meaning.
+Links to announced-but-unwritten files remain disabled. The completed example
+rolls up implementation (+150 / -38) and verification (+36 / -4) to the same
++186 / -42 as its Impact widget.
+
+Thread cards show a collapsed checklist summary and completed/top-level count.
+Hover or keyboard-focus the summary for a floating tree; click to keep it open
+until outside click or Escape. A separate chevron expands the tree inline
+without opening the Thread. Branches can be expanded independently in either
+presentation. Inline expansion survives list rerenders; gutters follow the
+changed card heights. These are read-only inspection actions and remain
+available when viewing another member. Mobile uses the same inline chevron
+and tap-to-open preview, with touch-sized controls and wrapped rows.
+
 **Thread Attachments** rolls up durable attachments from the Project's
 Threads, newest update first. It follows Project Attachments. Older items
 are behind a horizontal expand/collapse line (7 days is illustrative).

@@ -160,5 +160,43 @@
 .phone .phone-nav button[aria-pressed="true"]:after{background:var(--lime)}
 .phone .phone-nav button:not([aria-pressed="true"]):has(.mobile-unread:not([hidden])):after{background:var(--amber)}
 .phone .phone-nav button:focus-visible{outline:1px solid var(--text);outline-offset:0}
+.checklist-tree{list-style:none;padding:0;margin:8px 0}
+.checklist-tree li{margin:0;padding:0}
+.checklist-tree .checklist-tree{margin:0 0 4px 8px;padding-left:14px;border-left:1px solid var(--strong)}
+.checklist-row{display:flex;align-items:center;gap:7px;min-height:32px;padding:5px 0;font-size:11px;line-height:1.6;color:var(--text)}
+.checklist-label{flex:1;min-width:0;overflow-wrap:anywhere}
+.checklist-status{display:grid;place-items:center;width:15px;height:15px;flex:none;color:var(--muted);font-size:12px;line-height:1}
+.checklist-status.done{border-radius:50%;color:var(--bg);background:#79ca92;font-weight:700}
+.checklist-status .spinner{width:12px;height:12px;margin:0}
+.checklist-branch>summary{cursor:pointer;list-style:none}
+.checklist-branch>summary::-webkit-details-marker{display:none}
+.checklist-branch>summary:hover{background:var(--hover)}
+.checklist-branch>summary:focus-visible{outline:1px solid var(--lime);outline-offset:2px}
+.checklist-child-count{font:10px monospace;color:var(--muted);border-radius:3px;background:var(--hover);padding:0 4px}
+.checklist-chevron{font-size:19px;color:var(--muted);line-height:1;transition:transform .15s}
+.checklist-branch[open]>summary>.checklist-chevron{transform:rotate(90deg)}
+.checklist-diff{display:inline-flex;gap:4px;flex:none;white-space:nowrap;font:10px monospace}
+.checklist-artifact{display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:none;max-width:150px;padding:4px;border:0;background:none;color:var(--muted);font-size:9px}
+.checklist-artifact svg{width:15px;height:15px;flex:none}
+.checklist-artifact span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.checklist-artifact:disabled{opacity:.4;cursor:not-allowed}
+.latest-widget:has(.card-checklist){display:block}
+.card-checklist{min-width:0;width:100%}
+.card-checklist-head{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.checklist-peek{border:0;padding:3px 0;background:none;font-size:10px;text-align:left;color:var(--text)}
+.checklist-peek span{margin-left:6px;color:var(--muted);font:9px monospace}
+.checklist-expand{display:grid;place-items:center;background:none;border:0;padding:3px;min-width:24px;min-height:24px;color:var(--muted)}
+.checklist-expand svg{width:14px;height:14px;transform:rotate(-90deg)}
+.checklist-expand[aria-expanded="true"] svg{transform:none}
+.checklist-caption{font-size:9px;color:var(--muted)}
+.card-checklist-body{margin-top:8px;border-top:1px solid var(--line)}
+.card-checklist .checklist-row{font-size:10px;gap:5px;flex-wrap:wrap}
+.card-checklist .checklist-label{flex-basis:calc(100% - 24px)}
+.card-checklist .checklist-child-count,.card-checklist .checklist-artifact{margin-left:20px}
+.card-checklist .checklist-tree .checklist-tree{padding-left:8px}
+.card-checklist .impact-trigger{margin-top:4px}
+.checklist-float{width:620px}
+#checklist-explainer .shown-float{max-width:920px;margin:auto}
+@media(max-width:600px){.checklist-row{flex-wrap:wrap}.checklist-label{flex-basis:calc(100% - 24px)}.checklist-artifact{min-height:44px;min-width:44px;margin-left:20px}.checklist-branch>summary{min-height:44px}}
 @media(max-width:900px){.titlebar{gap:8px}.activity-summary{min-width:85px}.mini-gantt{width:75px}.project-members{gap:4px}.feature-grid,.gutter-key{grid-template-columns:1fr}.feature-stage{padding:12px}.demo-controls{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){.mast>span{max-width:210px;text-align:right;line-height:1.5}.hero h1{font-size:43px}.timeline-toolbar{flex-wrap:wrap}.timeline-toolbar label{margin-left:auto}.concept-float{padding:14px}}

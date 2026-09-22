@@ -135,7 +135,7 @@
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
     @media print{.nav,.layout-toolbar,.widget-tools,.edge,.top-edge{display:none!important}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.wrap{width:100%}.step{break-inside:avoid}.stage-scroll{overflow:visible;box-shadow:none}.screen{min-width:0}.app{height:540px}.hero{padding:30px 0}.chapter{break-before:page}}
   </style>
-  <link rel="stylesheet" href="workbench-concepts.css?v=20260922-1">
+  <link rel="stylesheet" href="workbench-concepts.css?v=20260922-2">
 </head>
 <body>
   <header class="mast wrap"><a class="brand" href="#top" aria-label="Workbench"><img class="workbench-logo" src="workbench-logo.svg" alt=""></a><span class="muted">WORKBENCH / FORMAT + INFORMATION ARCHITECTURE</span></header>
@@ -176,6 +176,8 @@
       <div class="chapter-head"><div><div class="eyebrow">Feature explainers / Outside the journey</div><h2>More context. Less hunting.</h2></div><p>These are working feature studies, not later steps in the story. Floating surfaces are shown open below so the ideas are visible without discovering every hover.</p></div>
       <div class="feature-copy"><h3>Your work, or a read-only view through someone else's eyes.</h3><p>Select a member to see the Threads they created, were assigned, or edited, using their own sleep preferences. Search overrides all filters. Other-member views are live and read-only, with a subtle yellow glow outside the gutters. Agent access is unavailable: the empty right edge explains that agents can only be used in your own view. Only the assigned user can edit a Thread.</p></div>
       <div id="feature-example"></div>
+      <div class="feature-copy"><h3>A checklist with room for the work underneath.</h3><p>Each row can hold a tree of subitems, line additions and deletions, and links to the artifacts produced along the way. Counts on a parent roll up from its leaves, without counting the same change twice. Thread cards keep this compact: hover or focus Checklist for a floating preview, or use its chevron to expand inline. Expanding is navigation, so it also works in another member's read-only view.</p></div>
+      <div id="checklist-explainer" class="feature-stage"></div>
       <div class="feature-copy"><h3>Activity that you can follow into the work.</h3><p>The titlebar shows the busiest three members over 24 hours. The open vertical view below shows up to 15. Select a user, then a Thread icon; hover a white bar for the work behind that activity. Change the time span or go Back without losing your place.</p></div>
       <div id="timeline-explainer" class="feature-stage"></div>
       <div class="feature-grid"><article><h3>A familiar shape for every subject.</h3><p>Project and Thread icons are generated monochrome SVGs. Hover an icon to regenerate it with optional guidance. This local study generates deterministic SVG variations, not a real AI request.</p><div id="icon-explainer" class="feature-stage"></div></article><article><h3>Peek before changing your view.</h3><p>Hover an unselected member for their recently updated Threads. This is the same live list selecting that member would show, not a separate activity feed.</p><div id="member-explainer" class="feature-stage"></div></article></div>
@@ -186,7 +188,7 @@
   </main>
   <dialog id="invite-dialog" aria-labelledby="invite-title"><header><h2 id="invite-title">Invite to On Deck evolution</h2><button data-action="close-invite" aria-label="Close invitation preview">✕</button></header><p>Members share Threads, Comments, and Artifacts. Each person has their own private Agent Channels.</p><label>Email address<input type="email" placeholder="teammate@example.com"></label><p>Invitation form concept only. No invitation will be sent.</p><button class="primary" data-action="close-invite">Done</button></dialog>
   <noscript><p class="wrap">Enable JavaScript to render the journey snapshots and local example interactions. The complete written plan is in WORKBENCH_PLAN.md.</p></noscript>
-  <script src="workbench-concepts.js?v=20260922-1"></script>
+  <script src="workbench-concepts.js?v=20260922-2"></script>
   <script>
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -210,7 +212,7 @@
     };
     const file = (name, {image = false, ghost = false, simple = false, detail = ''} = {}) => `<article class="widget ${ghost ? 'ghost' : 'attachment-widget'}" data-name="${name}"><div class="widget-head">${ghost ? `<span>▤ &nbsp;${name}</span>${status('Writing')}` : `<button class="attachment-title" data-action="open-artifact" data-file="${name}" aria-label="Preview ${name}">${image ? '▧' : '▤'} &nbsp;${name} →</button>${simple ? '' : tools()}`}</div>${ghost ? `<div class="file-row"><span class="file-icon">MD</span><div class="file-body"><p>Announced by agent. File not created yet.</p><p>${detail || 'Preparing the first draft...'}</p></div></div><button class="tiny" disabled>Not available yet</button>` : image ? `<button class="attachment-thumbnail" data-action="open-artifact" data-file="${name}" aria-label="Preview image ${name}">${preview}</button>` : `<p class="document-preview">${detail || '<strong>Intent, before implementation.</strong>Make the work legible without making the conversation the workspace.'}</p>`}</article>`;
     const initialFiles = simple => file('workspace-reference.png', {image:true,simple}) + file('project-brief.md', {simple,detail:'<strong>A calm place to work.</strong>Keep artifacts in the foreground. Let agents move the work forward without demanding constant attention.'});
-    const todo = () => `<article class="widget" data-name="todo"><div class="widget-head">Planning checklist${tools()}</div><div class="checklist"><div class="check-row done"><span class="check-box">✓</span>Read project context</div><div class="check-row active">${spinner}Planning in progress</div><div class="check-row"><span class="check-box"></span>Draft plan.md</div><div class="check-row"><span class="check-box"></span>Review with you</div></div></article>`;
+    const todo = (options = {}) => `<article class="widget tree-widget" data-name="todo"><div class="widget-head">${options.complete ? 'Completed checklist' : 'Planning checklist'}${tools()}</div><div class="checklist">${WorkbenchConcept.checklist({imageReady:false,...options})}</div></article>`;
     const impactDirectories = [
       {path:'src/onboarding/',added:88,removed:18,files:3},
       {path:'src/components/shell/',added:44,removed:12,files:2},

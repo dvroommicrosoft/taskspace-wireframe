@@ -22,6 +22,57 @@ window.WorkbenchConcept = (() => {
   const rank = () => svg('<path d="m5 12 7-6 7 6M5 18l7-6 7 6"/>');
   const sleepIcon = () => svg('<path d="M19 16A8 8 0 0 1 8 5a8 8 0 1 0 11 11Z"/>');
   const wakeIcon = () => svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>');
+  const documentIcon = () => svg('<path d="M6 3h8l4 4v14H6Z"/><path d="M14 3v5h4M9 12h6M9 16h6"/>');
+  const checklistItems = [
+    {label:'Analyze the current first-run flow, project context, and test setup',done:true},
+    {label:'Design the first-run experience, dependencies, and validation strategy',active:true,file:'plan.md'},
+    {label:'Implement the approved first-run experience',children:[
+      {label:'Inline project creation',added:60,removed:12},
+      {label:'Onboarding Questions',added:28,removed:6},
+      {label:'Persistent shell navigation',children:[
+        {label:'Keep Back visible when the titlebar hides',added:30,removed:8},
+        {label:'Preserve panel state across navigation',added:14,removed:4}
+      ]},
+      {label:'Responsive styles',added:18,removed:8},
+      {label:'Match the reference image',file:'button-study.png'}
+    ]},
+    {label:'Verify interactions, coverage, and the production build',children:[
+      {label:'Project creation and onboarding tests',added:18,removed:2},
+      {label:'Artifact preview and Back tests',added:8,removed:1},
+      {label:'Keyboard and mobile navigation tests',added:10,removed:1},
+      {label:'Review the production build'},
+      {label:'Review the result with you'}
+    ]}
+  ];
+  function checklistTotals(item) {
+    return item.children ? item.children.reduce((total,child)=>{
+      const diff=checklistTotals(child);
+      return {added:total.added+diff.added,removed:total.removed+diff.removed};
+    },{added:0,removed:0}) : {added:item.added || 0,removed:item.removed || 0};
+  }
+  function checklist({complete=false,ready=false,imageReady=true,expanded=false,documentName='plan.md'}={}) {
+    const rows = items => `<ul class="checklist-tree">${items.map(item=>{
+      const done=complete || item.done, active=!done && item.active;
+      const diff=checklistTotals(item);
+      const counts=complete && (diff.added || diff.removed) ? `<span class="checklist-diff" aria-label="${diff.added} additions, ${diff.removed} deletions"><span class="diff-add">+${diff.added}</span><span class="diff-remove">−${diff.removed}</span></span>` : '';
+      const status=`<span class="checklist-status ${done ? 'done' : active ? 'active' : ''}" role="img" aria-label="${done ? 'Complete' : active ? 'In progress' : 'Not started'}">${done ? '✓' : active ? '<span class="spinner" aria-hidden="true"></span>' : '○'}</span>`;
+      const content=`${status}<span class="checklist-label">${escape(item.label)}</span>${item.children ? `<span class="checklist-child-count" aria-label="${item.children.length} subitems">${item.children.length}</span><span class="checklist-chevron" aria-hidden="true">›</span>` : ''}${counts}`;
+      const available=item.file==='plan.md' ? ready : imageReady;
+      const name=item.file==='plan.md' ? documentName : item.file;
+      const link=item.file ? `<button class="checklist-artifact" data-checklist-file="${escape(name)}" aria-label="${available ? 'Preview' : 'Not yet available:'} ${escape(name)}" title="${escape(available ? name : `${name} · not yet created`)}"${available ? '' : ' disabled'}>${documentIcon()}<span>${escape(name)}</span></button>` : '';
+      return `<li>${item.children ? `<details class="checklist-branch"${expanded ? ' open' : ''}><summary class="checklist-row">${content}</summary>${rows(item.children)}</details>` : `<div class="checklist-row">${content}${link}</div>`}</li>`;
+    }).join('')}</ul>`;
+    return rows(checklistItems);
+  }
+  function checklistCard(thread,state) {
+    const complete=!thread.incomplete;
+    const ready=complete || !!state.feature;
+    const open=state.expandedChecklists?.has(thread.id);
+    return `<div class="card-checklist" data-checklist-thread="${thread.id}" data-checklist-complete="${complete}" data-checklist-ready="${ready}" data-checklist-image-ready="${!state.step || state.step>=14}">
+      <div class="card-checklist-head"><button class="checklist-peek" data-checklist-peek aria-haspopup="dialog" aria-expanded="false" aria-label="Preview checklist for ${escape(thread.name)}">Checklist <span>${complete ? '4 / 4' : '1 / 4'}</span></button><button class="checklist-expand" data-checklist-toggle aria-expanded="${!!open}" aria-label="${open ? 'Collapse' : 'Expand'} checklist for ${escape(thread.name)}">${chevron()}</button></div>
+      ${complete ? impactTrigger() : '<span class="checklist-caption">Planning in progress</span>'}
+      <div class="card-checklist-body"${open ? '' : ' hidden'}>${checklist({complete,ready,imageReady:!state.step || state.step>=14})}</div></div>`;
+  }
   const iconSeeds = new Map();
   const defaultIcons = new Map();
   const usedIcons = new Set();
@@ -53,7 +104,7 @@ window.WorkbenchConcept = (() => {
   const recentHours = 168;
   let clock = now;
   const definitions = [
-    {id:'design',name:'Design the first-run experience',description:'Make project setup feel like beginning the work.',creator:'you',assignee:'you',editors:['mira'],hours:1,incomplete:true,unread:false,latest:'Planning checklist · 2 of 4',target:12},
+    {id:'design',name:'Design the first-run experience',description:'Make project setup feel like beginning the work.',creator:'you',assignee:'you',editors:['mira'],hours:1,incomplete:true,unread:false,latest:'Planning checklist · 1 of 4',target:12},
     {id:'research',name:'Research table foundations',description:'Explore an open-source foundation for Items.',creator:'you',assignee:'you',editors:['mira'],hours:2,incomplete:true,unread:true,latest:'Question · Compare two approaches',target:19},
     {id:'shipped',name:'Ship the first-run improvements',description:'Review the effect of a quieter beginning.',creator:'you',assignee:'you',editors:['theo'],hours:3,incomplete:false,unread:true,latest:'Impact',target:25},
     {id:'polish',name:'Polish empty states',description:'Keep the interface calm when there is nothing to show.',creator:'mira',assignee:'you',editors:['you'],hours:8,incomplete:false,unread:false,latest:'All requests addressed',target:25},
@@ -100,7 +151,7 @@ window.WorkbenchConcept = (() => {
     return `<article class="thread-card concept-thread ${thread.id === state.selected ? 'selected' : ''}" data-thread-id="${thread.id}" data-unread="${unread}" data-updated="${thread.updated}" data-signal="${threadColor(thread,state.user)}">
       <div class="thread-heading">${preview ? glyph(thread.name) : icon(thread.name)}<button class="thread-name" data-open-thread="${thread.id}">${escape(thread.name)}</button>${unread ? '<span class="unread-dot" aria-label="Unread"></span>' : ''}
       ${!preview ? `<button class="icon sleep-thread" data-sleep-thread="${thread.id}" aria-label="${asleep ? 'Wake' : 'Sleep'} ${escape(thread.name)}" title="${asleep ? 'Wake' : 'Sleep until updated'}"${state.user !== 'you' ? ' disabled' : ''}>${asleep ? wakeIcon() : sleepIcon()}</button>` : ''}</div>
-      <div class="description">${escape(thread.description)}</div><div class="latest-widget">${!thread.incomplete && (thread.id === 'shipped' || thread.latest.startsWith('Impact')) ? impactTrigger() : `<span class="work-indicator ${thread.incomplete ? 'incomplete' : ''}"></span><span>${escape(thread.latest)}</span>`}</div>
+      <div class="description">${escape(thread.description)}</div><div class="latest-widget">${!preview && (thread.id==='design' || thread.id==='shipped') ? checklistCard(thread,state) : !thread.incomplete && (thread.id === 'shipped' || thread.latest.startsWith('Impact')) ? impactTrigger() : `<span class="work-indicator ${thread.incomplete ? 'incomplete' : ''}"></span><span>${escape(thread.latest)}</span>`}</div>
       <div class="thread-meta">${avatar(thread.assignee)}<span>${thread.incomplete ? 'Incomplete work' : 'No incomplete work'}${asleep ? ' · Sleeping' : ''}</span></div></article>`;
   }
   function renderThreads(app) {
@@ -225,8 +276,9 @@ window.WorkbenchConcept = (() => {
     const center = document.createElement('div'); center.className='center';
     const ghost = !state.feature && state.step<25;
     const documentName=thread.id==='research'?'research.md':'plan.md';
-    const attachments=(thread.id==='design' && !state.promoted.has('button-study.png') ? file('button-study.png',{image:true}) : '')+(!state.promoted.has(documentName) ? file(documentName,{ghost,detail:'<strong>A repeatable plan.</strong>Tests, review, and a small set of manual checks validate the implementation.'}) : '');
-    center.innerHTML = `${title(thread.name,thread.description,`Thread · ${projectName}`)}<button class="assignment-control" data-assignment></button>${comments('')}${section('Controls',thread.incomplete ? todo() : impact())}${section('Attachments',attachments)}`;
+    const imageReady=['design','shipped'].includes(thread.id) && !state.promoted.has('button-study.png');
+    const attachments=(imageReady ? file('button-study.png',{image:true}) : '')+(!state.promoted.has(documentName) ? file(documentName,{ghost,detail:'<strong>A repeatable plan.</strong>Tests, review, and a small set of manual checks validate the implementation.'}) : '');
+    center.innerHTML = `${title(thread.name,thread.description,`Thread · ${projectName}`)}<button class="assignment-control" data-assignment></button>${comments('')}${section('Controls',thread.incomplete ? todo({ready:!ghost,imageReady,documentName}) : impact()+todo({complete:true,ready:true,imageReady,documentName}))}${section('Attachments',attachments)}`;
     $('.center',app).replaceWith(center);
     app.dataset.scope='Thread'; app.dataset.threadId=id; state.selected=id;
     if (state.user==='you') thread.read.you=thread.updated;
@@ -428,6 +480,9 @@ window.WorkbenchConcept = (() => {
     const channel=$('.channel',app);
     if (channel && $('.channel-message',channel)) channel.insertAdjacentHTML('afterbegin','<div class="channel-message user-message"><strong>You</strong>Use the shared context and move this work forward. Ask for decisions when needed.</div>');
     const feedback=document.createElement('span'); feedback.className='concept-feedback'; feedback.setAttribute('role','status'); app.append(feedback);
+    $$('.tree-widget .checklist',app).forEach(node=>{
+      node.innerHTML=checklist({ready:!!$('.attachment-widget[data-name="plan.md"]',app),imageReady:!!$('.attachment-widget[data-name="button-study.png"]',app)});
+    });
     app.addEventListener('workbench-layout',()=>{
       const opened=app.classList.contains('artifact-expanded') ? $('.artifact-peers [aria-pressed="true"]',app)?.dataset.file : $('.artifact-preview',app)?.dataset.file;
       if (opened && state.user==='you') state.filesRead.you.add(opened);
@@ -459,6 +514,7 @@ window.WorkbenchConcept = (() => {
       if (marker) {marker.textContent='';marker.setAttribute('aria-hidden','true');}
     });
     updateMobileNav(phone);
+    $('.tree-widget .checklist',phone).innerHTML=checklist();
     $('[data-pane="work"] h4',phone).insertAdjacentHTML('afterend','<button class="assignment-control" data-assignment></button>');
     renderThreads(phone);
   }
@@ -486,6 +542,11 @@ window.WorkbenchConcept = (() => {
     $('#step-21 .notes>div').innerHTML='<b>Human / visible result</b>Try Recent / Scheduled / Incomplete / Sleeping, and search across all Threads regardless of the current view.';
     $('#step-25 .step-heading p').textContent='The first-run requests have been satisfied and the PR is merged. The Thread has no incomplete work right now; another request can make it incomplete again. Impact shows what changed.';
     $('#step-25 .center>.impact-badge').textContent='No incomplete work';
+    $('#step-25 .center>.section:last-child .section-body').insertAdjacentHTML('beforeend',todo({complete:true,ready:true,imageReady:true}));
+    $('#step-25 .center').insertAdjacentHTML('beforeend',section('Attachments',file('plan.md',{detail:expandedContents['plan.md']})+file('button-study.png',{image:true})));
+    $('#checklist-explainer').dataset.sourceApp=$('#feature-example .app').id;
+    $('#checklist-explainer').dataset.checklistThread='design';
+    $('#checklist-explainer').innerHTML=`<div class="shown-float"><strong>Completed checklist · 4 / 4 · +186 / −42</strong><p>Illustrative first-run changes, matching the completed Thread's Impact. Branches are expanded here to show the hierarchy.</p>${checklist({complete:true,ready:true,expanded:true})}</div>`;
     const timeline=document.createElement('div'); timeline.className='shown-float'; $('#timeline-explainer').append(timeline); makeTimeline(timeline);
     $('#icon-explainer').innerHTML=`<div class="shown-float">${iconForm(projectName)}</div>`;
     refreshMemberPeeks($('#feature-example .app'));
@@ -530,17 +591,18 @@ window.WorkbenchConcept = (() => {
     });
     document.addEventListener('pointerover',event=>{
       if (event.pointerType==='touch') return;
-      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar,.right-edge,.mobile-agent-trigger');
+      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar,.right-edge,.mobile-agent-trigger,.checklist-peek');
       if (!trigger || trigger.contains(event.relatedTarget)) return;
       showTrigger(trigger);
     });
     document.addEventListener('focusin',event=>{
       if (restoringFocus) return;
-      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar,.right-edge,.mobile-agent-trigger');
+      const trigger=event.target.closest('.entity-icon,.member-filter,.activity-summary,.activity-bar,.right-edge,.mobile-agent-trigger,.checklist-peek');
       if (trigger) showTrigger(trigger);
     });
     function showTrigger(trigger) {
       const app=appFor(trigger);
+      if (trigger.matches('.checklist-peek')) showChecklist(trigger);
       if (trigger.matches('.right-edge,.mobile-agent-trigger') && states.get(app)?.user!=='you') showAgentUnavailable(trigger);
       if (trigger.matches('.entity-icon')) {
         if (app && !editingAllowed(app)) return;
@@ -552,6 +614,14 @@ window.WorkbenchConcept = (() => {
         const event=events.find(e=>e.id===trigger.dataset.event), panel=trigger.closest('.timeline-panel');
         floating(trigger,'activity-work',`<strong>${person(event.user).name} · ${event.ago.toFixed(1)}h ago</strong><p>All work in this activity bar</p><div class="bar-work-list">${[...new Set(event.works)].map(id=>`<button data-timeline-work="${id}" data-timeline-owner="${panel.id}">${glyph(workName(id))}${escape(workName(id))}</button>`).join('')}</div>`,{label:'Threads in this activity'});
       }
+    }
+    function showChecklist(trigger,pinned=false) {
+      const card=trigger.closest('.card-checklist');
+      const app=appFor(trigger);
+      const complete=card.dataset.checklistComplete==='true';
+      const panel=floating(trigger,'checklist',`<strong>${complete ? 'Completed' : 'Planning'} checklist · ${complete ? '4 / 4' : '1 / 4'}</strong><p>Expand a row to inspect its subitems. Diff counts roll up from the leaves; file links open Artifact preview.</p>${checklist({complete,ready:card.dataset.checklistReady==='true',imageReady:card.dataset.checklistImageReady==='true'})}`,{pinned,label:'Thread checklist'});
+      panel.dataset.checklistThread=card.dataset.checklistThread;
+      panel.dataset.sourceApp=app.id;
     }
     function showAgentUnavailable(trigger,pinned=false) {
       const panel=floating(trigger,'agent-unavailable','<strong>Agents unavailable</strong><p>You can only use agents when in your own view.</p>',{pinned,label:'Agents are only available in your own view'});
@@ -566,6 +636,30 @@ window.WorkbenchConcept = (() => {
       const button=event.target.closest('button,a');
       if (!button) return;
       const app=appFor(button), state=app && states.get(app);
+      if (button.matches('[data-checklist-peek]')) showChecklist(button,true);
+      if (button.matches('[data-checklist-toggle]')) {
+        const card=button.closest('.card-checklist'),body=$('.card-checklist-body',card);
+        body.hidden=!body.hidden;
+        button.setAttribute('aria-expanded',String(!body.hidden));
+        button.setAttribute('aria-label',`${body.hidden ? 'Expand' : 'Collapse'} checklist for ${workName(card.dataset.checklistThread)}`);
+        state.expandedChecklists ??= new Set();
+        if (body.hidden) state.expandedChecklists.delete(card.dataset.checklistThread); else state.expandedChecklists.add(card.dataset.checklistThread);
+        closeFloat('checklist');queueGutters(app);
+      }
+      if (button.matches('[data-checklist-file]')) {
+        const name=button.dataset.checklistFile;
+        const thread=button.closest('[data-checklist-thread]')?.dataset.checklistThread;
+        closeFloat('checklist');
+        if (app.classList.contains('phone')) {
+          if (thread) openThread(app,thread);
+          showMobileView(app,'preview');
+        } else {
+          if (state.promoted.has(name)) {
+            if (app.dataset.scope==='Thread') $('.back',app).click();
+          } else if (thread && app.dataset.threadId!==thread) openThread(app,thread);
+          openArtifactPreview(app,name);
+        }
+      }
       if (button.matches('.member-filter')) setUser(app,button.dataset.user);
       if (button.matches('[data-view-member]')) setUser(document.getElementById(button.dataset.sourceApp),button.dataset.viewMember);
       if (button.matches('[data-thread-tab]')) {state.tab=button.dataset.threadTab;state.query='';$('.thread-search',app).value='';renderThreads(app);}
@@ -642,8 +736,16 @@ window.WorkbenchConcept = (() => {
     document.addEventListener('scroll',event=>{
       for (const [kind,record] of floats) if (!record.pinned && !record.panel.contains(event.target)) closeFloat(kind);
     },true);
+    document.addEventListener('toggle',event=>{
+      if (!event.target.matches('.checklist-branch')) return;
+      const app=appFor(event.target);
+      if (app) queueGutters(app);
+      const panel=event.target.closest('.checklist-float');
+      const record=floats.get('checklist');
+      if (panel && record) positionFloat(panel,record.trigger);
+    },true);
     window.addEventListener('resize',()=>{closeFloats();$$('.app').forEach(queueGutters);});
   }
   document.addEventListener('DOMContentLoaded',initialize);
-  return {icon,glyph,pin,gear,chevron,updateMobileNav};
+  return {icon,glyph,pin,gear,chevron,updateMobileNav,checklist};
 })();
