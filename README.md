@@ -32,3 +32,20 @@ A recorded walkthrough is included at [`taskspace-demo.mp4`](./taskspace-demo.mp
 ## Published demo
 
 [https://dvroommicrosoft.github.io/taskspace-wireframe/](https://dvroommicrosoft.github.io/taskspace-wireframe/)
+
+## Workbench concept
+
+The next-product concept is documented separately from the existing On Deck
+wireframes:
+
+- [Published Workbench walkthrough](https://dvroommicrosoft.github.io/taskspace-wireframe/workbench-journey.html)
+- [Architecture and journey plan](WORKBENCH_PLAN.md)
+- [Visual journey](public/workbench-journey.html): 25 step-by-step snapshots
+  with lightweight local interactions, right-column Attachment previews that
+  expand into Artifact context, floating-only Agent Channels, a completed
+  Thread's Impact widget, and three interactive mobile screen examples.
+
+Open `public/workbench-journey.html` directly, or visit
+`http://localhost:5173/workbench-journey.html` with the dev server running.
+The walkthrough uses example data only; it does not run agents or create real
+uploads, invitations, repository connections, or schedules.
