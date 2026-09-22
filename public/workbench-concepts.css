@@ -63,7 +63,7 @@
 .app:not(.left-shown):not(.left-overlay) .items{display:block;position:absolute;left:12px;top:0;bottom:28px;width:var(--items-overlay-size);visibility:hidden;pointer-events:none}
 .app.top-pinned:not(.left-shown) .items,.app.home:not(.left-shown) .items{top:48px}
 .app:not(.channel-open) .channel{display:block;visibility:hidden;pointer-events:none}
-.channel .user-message{margin-top:10px;border-left:2px solid var(--text)}
+.channel .user-message{margin-top:10px;border-left:2px solid var(--text);padding-left:12px}
 .viewing-other .channel,.viewing-other .mobile-agent{display:none!important}
 .viewing-other .right-edge:before{display:none}
 .assignment-control{display:inline-flex;align-items:center;gap:7px;padding:5px 8px;margin:-8px 0 18px;background:transparent;border:1px solid var(--line);font-size:10px}
