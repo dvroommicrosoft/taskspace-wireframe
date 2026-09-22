@@ -554,6 +554,97 @@ window.WorkbenchConcept = (() => {
     document.addEventListener('visibilitychange',syncVisibility);
     syncVisibility();
   }
+  function initializeTooltips() {
+    const tooltip=document.createElement('div');
+    tooltip.id='control-tooltip';
+    tooltip.className='control-tooltip';
+    tooltip.setAttribute('role','tooltip');
+    tooltip.setAttribute('popover','manual');
+    document.body.append(tooltip);
+    let active=null, pending=null, timer;
+    const selector='button[aria-label],a[aria-label],summary[aria-label],[data-tooltip]';
+    const migrateTitles = root => {
+      for (const node of [...(root.hasAttribute('title') ? [root] : []),...$$('[title]',root)]) {
+        node.dataset.tooltip=node.getAttribute('title');
+        node.removeAttribute('title');
+      }
+    };
+    migrateTitles(document.body);
+    const hide = () => {
+      clearTimeout(timer);
+      tooltip.hidePopover();
+      if (active) {
+        const ids=(active.getAttribute('aria-describedby') || '').split(/\s+/).filter(id=>id && id!==tooltip.id);
+        if (ids.length) active.setAttribute('aria-describedby',ids.join(' ')); else active.removeAttribute('aria-describedby');
+      }
+      active=null;
+      pending=null;
+    };
+    const detail = node => {
+      if (node.getAttribute('aria-disabled')==='true') return 'Read-only view. Switch to your own view; only the assigned user can edit a Thread.';
+      if (node.matches('[data-promote]')) return 'Move this attachment from its Thread to the Project so it becomes shared project-level context.';
+      if (node.matches('[data-sleep-thread]')) return node.getAttribute('aria-label').startsWith('Wake') ? 'Bring this Thread back into your Recent view.' : 'Hide from your Recent view until it receives an update or you wake it. Only your view changes.';
+      if (node.matches('[data-action="pin-top"]')) return node.getAttribute('aria-pressed')==='true' ? 'Let the titlebar hide when you leave it.' : 'Keep the titlebar visible instead of automatically hiding it.';
+      if (node.matches('[data-action="pin-widget"]')) return node.getAttribute('aria-pressed')==='true' ? 'Return this widget to its normal position in the section.' : 'Keep this widget first in its section; pinned widgets can be reordered.';
+      if (node.matches('[data-action="move-widget"]')) return node.disabled ? 'Pin this widget first to change its order.' : 'Move this pinned widget one position up in its section.';
+      if (node.matches('[data-action="table"]')) return 'Switch the Thread list between cards and compact table rows.';
+      if (node.matches('[data-action="maximize-items"]')) return node.getAttribute('aria-pressed')==='true' ? 'Restore the normal Items and Work split.' : 'Give more space to the Items list without leaving this context.';
+      if (node.matches('[data-action="toggle-items"]')) return node.getAttribute('aria-expanded')==='true' ? 'Hide Items and give its space to the work. Hover the left edge to peek.' : 'Keep Items open beside the work.';
+      if (node.matches('[data-checklist-toggle]')) return 'Expand or collapse this checklist inside the Thread card without opening the Thread.';
+      if (node.matches('[data-timeline-user]')) return 'Show this person’s activity in separate lanes for each Project or Thread.';
+      if (node.matches('.lane-head[data-timeline-work]')) return 'Show activity for this work, with a lane for each person.';
+      if (node.matches('[data-checklist-file]')) return node.disabled ? 'This artifact has been announced but has not been created yet.' : 'Open Artifact preview without losing your place in the work.';
+      return node.dataset.tooltip && node.dataset.tooltip!==node.getAttribute('aria-label') ? node.dataset.tooltip : '';
+    };
+    const show = node => {
+      if (!node.isConnected || node.matches('[data-impact-trigger],.checklist-peek') || [...floats.values()].some(record=>record.trigger===node)) return;
+      const bounds=node.getBoundingClientRect();
+      if (!bounds.width || !bounds.height || bounds.bottom<=0 || bounds.top>=innerHeight || bounds.right<=0 || bounds.left>=innerWidth) return;
+      const label=node.getAttribute('aria-label') || node.dataset.tooltip;
+      if (!label) return;
+      active=node;
+      tooltip.replaceChildren();
+      const heading=document.createElement('strong');heading.textContent=label;tooltip.append(heading);
+      const description=detail(node);
+      if (description) {const text=document.createElement('span');text.textContent=description;tooltip.append(text);}
+      node.setAttribute('aria-describedby',[...(node.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean),tooltip.id].join(' '));
+      tooltip.showPopover();positionFloat(tooltip,node);
+    };
+    const schedule = (node,delay) => {hide();pending=node;timer=setTimeout(()=>{pending=null;show(node);},delay);};
+    const leave = () => {
+      if (pending===document.activeElement) return;
+      clearTimeout(timer);
+      timer=setTimeout(()=>{if (!tooltip.matches(':hover') && !active?.matches(':hover,:focus-visible')) hide();},120);
+    };
+    document.addEventListener('pointerover',event=>{
+      if (event.pointerType==='touch') return;
+      const node=event.target.closest(selector);
+      if (node && !node.contains(event.relatedTarget)) schedule(node,350);
+    });
+    document.addEventListener('pointerout',event=>{
+      const node=event.target.closest(selector);
+      if (node && !node.contains(event.relatedTarget)) leave();
+    });
+    document.addEventListener('focusin',event=>{
+      const node=event.target.closest(selector);
+      if (node) schedule(node,120);
+    });
+    document.addEventListener('focusout',leave);
+    tooltip.addEventListener('pointerenter',()=>clearTimeout(timer));
+    tooltip.addEventListener('pointerleave',leave);
+    document.addEventListener('pointerdown',hide,true);
+    document.addEventListener('keydown',event=>{if(event.key==='Escape') hide();});
+    document.addEventListener('scroll',()=>{if(active) hide();},true);
+    window.addEventListener('resize',hide);
+    document.addEventListener('visibilitychange',()=>{if(document.hidden) hide();});
+    new MutationObserver(records=>{
+      for (const record of records) {
+        if (record.type==='attributes' && record.target.hasAttribute('title')) migrateTitles(record.target);
+        for (const node of record.addedNodes) if (node instanceof Element) migrateTitles(node);
+      }
+      if (active && !active.isConnected) hide();
+    }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['title']});
+  }
   function initialize() {
     $('.nav .wrap').insertAdjacentHTML('beforeend','<a href="#features">Feature explainers</a>');
     attachmentFixtures.filter(item=>!item.image).forEach(item=>{expandedContents[item.name]=item.text;});
@@ -580,6 +671,7 @@ window.WorkbenchConcept = (() => {
     $('#feature-example').insertAdjacentHTML('afterend','<div class="demo-controls"><button data-demo-update>Simulate a shared update</button><button data-demo-complete>Simulate requests satisfied</button><span>Demo events, outside the UI: shared updates keep read-only views live.</span></div>');
     bindInteractions();
     initializeMotion();
+    initializeTooltips();
   }
   function bindInteractions() {
     let restoringFocus=false;

@@ -635,6 +635,14 @@ settled implementation rules:
 
 ## 8. Acceptance checklist
 
+Icon controls have custom dark hover/focus descriptions, not native browser
+title tooltips. Descriptions explain consequences (especially promotion,
+personal sleep, pinning, and panel layout), reflect toggle state, and explain
+disabled actions. Existing rich hover dialogs remain the explanation where
+available, without a second tooltip covering them. Hints can be hovered,
+are associated through `aria-describedby`, stay inside the viewport, and
+dismiss on Escape, interaction, scrolling, or leaving the control and hint.
+
 The long walkthrough animates spinners only while they intersect the visible
 viewport, including clipping by scrollable panels. Hidden Agent Channels and
 background tabs pause motion. Newly inserted spinners follow the same rule,
