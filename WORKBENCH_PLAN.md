@@ -1,7 +1,13 @@
-# Workbench: architecture and first-project journey
+# Projects, Threads, and Widgets
+
+**Reimagining the Workbench UI format and Information Architecture**
 
 This is the product plan for **Workbench**, not a description of the existing
 implementation. **Wireframes** means the On Deck demo in this repository.
+The audience already knows Workbench, not these wireframes. Introduce the
+proposal through three contrasts: **Tenants become Projects**, **Threads, not
+Tasks**, and **Recognizable From a Distance**. Projects make the incoming
+Tenant concept work-centric and provide a home for artifacts spanning Threads.
 The companion [visual walkthrough](public/workbench-journey.html) presents
 independent snapshots with lightweight, local interactions. It does not connect
 to agents, git hosts, invitation services, or a scheduler.
@@ -15,6 +21,13 @@ to agents, git hosts, invitation services, or a scheduler.
 - A Thread is a unit or theme of work in a Project. It has a name, description,
   any number of Artifacts and Comments, and references any subset of its
   Project's Repos. "Task" and "work item" in earlier discussion mean Thread.
+- A Thread is not a backlog item with a single Status. It independently has
+  incomplete work or not, unread updates or not (per user), and a sleeping
+  preference (per user). New requests make work incomplete; satisfying those
+  requests clears that signal without closing the subject forever.
+- Each Thread has an assigned user, initially the owner. **Only its assigned
+  user can edit it.** The detail header shows their avatar and an assignment
+  button; reassignment makes the former assignee's view read-only.
 - A Project or Thread has **zero or one Agent Channel per human member**.
   This supersedes the initial statement that each has one channel in total.
 - An Agent Channel is private to its human user. It has any number of Agents.
@@ -87,6 +100,8 @@ Every context except Top has a Back button in the upper left. It is visible
 even when the Titlebar is hidden; when the Titlebar opens it appears integrated
 with it. Back from an Artifact restores its owner; Back from a Thread restores
 the Project; Back from a Project restores Top.
+Back is a larger floating control overlapping the gutter, with the icon of
+its Project/Thread destination, or a generic list icon when returning to Top.
 
 Navigation should retain relevant view state such as selection, scroll,
 pinned widgets, and panel preferences. The exact persistence scope is not yet
@@ -184,14 +199,33 @@ The floating channel can cover it temporarily, but cannot reserve space.
 
 ### Titlebar
 
-Left: **Workbench**. Right: the user's avatar with an Account + Settings menu.
+Left: a monochrome SVG workbench logo, also used as this document's favicon.
+Right: the current user's colored avatar inside a gear for Account + Settings.
 Top context contains nothing else. In Project, Thread, and Artifact contexts,
 also show a Project selector with the current Project name, member avatars,
-and a pin-open control. Show the owner first, a vertical separator, then the
+and an icon-only pin toggle, right-justified before a vertical divider and
+the account avatar. The Project name has no enclosing input-like container;
+its disclosure chevron immediately follows the name. Show the owner first,
+a vertical separator, then the
 other members and a **+** invitation control. The walkthrough uses You, Mira,
 and Theo as illustrative titlebar members; it does not imply invitations
 were sent during onboarding. Human activity indicators show presence, never
-expose private channel contents.
+expose private channel contents. The current user is selected by default.
+
+Every Project and Thread has a generated monochrome SVG icon before its name.
+Hover or focus its icon to open a regeneration dialog, optionally supplying
+guidance. A click keeps the dialog open for editing. The local walkthrough
+generates deterministic SVG variations; it does not call an AI service.
+
+The titlebar's compact, three-lane timeline shows the last 24 hours of
+activity for the three most active members, using representative dominant
+colors from their avatars. Hover/focus opens a vertical timeline; click pins
+it until an outside click or Escape. It shows up to 15 members across the top,
+time since increasing downward, and white activity bars. Hovering a bar shows
+all the Threads/Project work in it. Selecting a user drills into lanes for
+their Projects and Threads; selecting a work icon drills into that work with
+members across the top. Drilldowns provide Back and time spans of 24 hours,
+3 days, and 7 days in this example.
 
 An unpinned Titlebar hides when the pointer leaves its reveal/header region,
 keyboard focus moves outside that region, the user clicks elsewhere, or the
@@ -209,10 +243,65 @@ context remains always visible.
 | Attachment | Peer Attachments belonging to the same Project or Thread |
 
 Items defaults to wide formatted cards; a table alternative is available.
-Older Threads can be expanded/collapsed. Cards show only the title, one
-truncated description line, and the most recently updated widget.
-A hover/focus reveal exposes **+** to create a Thread. Repeatable Threads have
-a separate tab.
+The Items background matches Center. Move the Threads heading and controls
+to the top, next to Back, with search between the heading and controls.
+Cards show the generated icon, title, one truncated description line, latest
+widget, and a compact assignee / work indicator. Cards are the default because
+dynamic progress and Impact content need space; old work need not occupy a
+permanently compact list.
+
+The tabs are **Recent**, **Scheduled**, **Incomplete**, and **Sleeping**.
+Recent uses an illustrative 7-day cutoff, with an older-Threads disclosure.
+Scheduled shows recurrence definitions. Incomplete is independent of unread
+or recency. Sleeping shows the selected member's own sleeping Threads.
+Sleep moves a Thread below that user's cutoff until the Thread is updated
+or they wake it. Waking changes personal recency, not shared edit history.
+
+Search matches names and descriptions across **all Threads in the Project**,
+ignoring member, sleep, incomplete, schedule, and recency filters. Clearing
+search restores the selected view. The selected avatar remains visible so
+search does not accidentally change editing permissions.
+
+### Member filtering and read-only views
+
+Selecting a member shows Threads they created, were assigned, or edited,
+excluding their own sleeping Threads in the non-Sleeping tabs. Hover/focus
+on an unselected avatar shows a floating, scrollable recent list with exactly
+the same membership and sleep rules as selecting them. It updates live.
+
+Viewing as another member is **read-only**, not impersonation. Do not allow
+sleeping/waking, pinning, assignment, icon regeneration, Thread or artifact
+editing, comments, answers, invitations, or agent messages. Navigation,
+search, read access, view tabs, timeline exploration, and panel resizing are
+still available. Do not mark that member's updates read merely because the
+viewer opened them. The selected top-gutter mark becomes yellow; a thin yellow
+border sits inside the gutters and connects to that mark. A persistent banner
+explains the view. Selecting You restores normal assignment-based permissions.
+
+Shared updates still change that view without interaction. The explainer has
+explicit outside-the-UI demo event buttons for new shared work and satisfied
+requests, including wake-on-update. These are illustrative incoming events,
+not a way to edit through the read-only UI. Other members' private Agent
+Channels are never exposed; opening the right panel explains the boundary.
+
+### Element-aligned gutters
+
+Gutters use actual panel-element positions, including the retained geometry
+of collapsed panels, and update after scrolling, resizing, filtering, and
+incoming changes. The top gutter remains visible with the Titlebar open.
+
+| Panel / element | Gutter signal |
+| --- | --- |
+| Selected member | Green for You; yellow when viewing another member |
+| Other member | White when active; dark gray when inactive |
+| Unread Thread, no incomplete work | Green |
+| Unread Thread, waiting / idle with incomplete work | Yellow |
+| Read Thread, incomplete work | White / light gray |
+| Read Thread, no incomplete work | Dark gray |
+| Attachment changed since last opened | Green |
+| Already-read Attachment | Dark gray |
+| User channel message / answer | White / light gray |
+| Agent channel message | Dark gray |
 
 The brief defines the peer list for Attachments, but not for maximized
 Dynamics; that Artifact-context case is still open.
@@ -224,7 +313,7 @@ Both modes contain an optional title and widget sections.
 **Simple:** no section headers or common pin/reorder controls. The top widget
 is vertically centered; subsequent widgets follow below it.
 
-**Complex:** widgets can be pinned; pinned widgets can be reordered. Widgets
+**Complex:** widgets have icon-only pin toggles; pinned widgets can be reordered. Widgets
 with expanded presentations can be maximized into Artifact context. A plus
 control adds pre-configured artifact widgets that are not already present.
 Show collapsible headers only for nonempty sections.
@@ -233,7 +322,7 @@ Show collapsible headers only for nonempty sections.
 | --- | --- |
 | Top, Simple | New Project widget; below it, existing Projects with descriptions and member avatars, owner first |
 | Fresh Project, Simple | Project name/description; centered Get Started; Add Attachments; any Attachments |
-| Active Project, Complex | Project name/description; Comments; Questions; Controls; Add Attachments; Attachments |
+| Active Project, Complex | Project name/description; Comments; Questions; Controls; Add Attachments; Project Attachments; Thread Attachments |
 | Thread, Complex | Thread name/description; the same sections, scoped to the Thread |
 | Artifact | Full artifact content |
 
@@ -244,6 +333,16 @@ Comments from other members affect this condition is an open detail.
 
 Todo Dynamics are shown under Controls in this walkthrough. Their definitive
 section classification remains a design choice.
+
+**Thread Attachments** rolls up durable attachments from the Project's
+Threads, newest update first. It follows Project Attachments. Older items
+are behind a horizontal expand/collapse line (7 days is illustrative).
+Each row identifies its owning Thread and includes a double-chevron,
+military-rank-style **Promote to Project** icon. Promotion moves the file to
+Project ownership and removes it from the Thread rollup / peer list.
+The preview and expanded artifact then use the Project's channel. Ghosts
+remain excluded. Opening an unpromoted item takes the viewer to its owning
+Thread and its preview. Empty fresh Projects do not gain complex-mode headers.
 
 ### Agent Channel
 
@@ -260,14 +359,16 @@ agent** in Thread channels. Multiple configured agents may share one user's
 channel. Shared member presence and private channel ownership must remain
 visually distinct.
 
-## 4. Visual direction, inherited from the wireframes
+## 4. Visual direction
 
 Preserve On Deck's near-black foundation (`#090a0c`), layered dark surfaces
 (`#0e1013`, `#13161a`, `#191c21`), low-contrast borders, muted supporting text,
 rounded cards, restrained lime (`#b6ff57`) accents, small avatar groups, and
 content-first controls. Keep agent conversation secondary to artifacts.
 
-Extend those concepts with a real Project hierarchy, a persistent Center,
+The introductory copy contrasts these ideas with the team's current
+Workbench, not the largely unfamiliar On Deck wireframes.
+Extend the visual concepts with a real Project hierarchy, a persistent Center,
 shared Comments, typed Dynamics, and private per-human Agent Channels.
 Do not rename or rewrite the old demo as part of this deliverable.
 
@@ -306,6 +407,9 @@ not committed product defaults or real scheduled jobs.
    A completion-policy Question appears: merge to local branch, merge PR,
    push branch, no definition, or a freeform answer. After answer, remove the
    widget and keep a collapsed channel record.
+   A separate Question asks how changes should be validated: tests + CI +
+   review, tests + manual checks, an agent-proposed per-Thread strategy, no
+   fixed validation, or freeform guidance. This has its own answer record.
 9. Add a Member Control Dynamic plus an Agent Comment suggesting invitations.
    The agent does not block waiting for invitations.
 10. Drawing on the initial image and Markdown context, a Question suggests
@@ -353,7 +457,7 @@ not committed product defaults or real scheduled jobs.
 20. Back opens the Project. Post a Comment requesting repeatable Threads for
     maintaining/pruning tests, exploring UX, and finding dead code. Request
     weekly morning runs on different weekdays.
-21. Switch Items to Repeatable Threads. Watch the three definitions and their
+21. Switch Items to Scheduled. Watch the three definitions and their
     schedules appear. These are reusable definitions, not the two active
     one-off Threads. Run-generation semantics remain open.
 22. Post another Project Comment: monitor the two in-progress Threads, keep
@@ -375,7 +479,9 @@ not committed product defaults or real scheduled jobs.
     **Impact +186 / -42**. Hover the label or either count for a floating
     breakdown of every affected directory and its added/removed line counts,
     rather than a permanently expanded directory list. The Thread's
-    card shows the same Impact label, counts, and hover instead of a planning spinner. Its
+    card shows the same Impact label, counts, and hover instead of a planning
+    spinner. "Complete" means no incomplete requests now, not a permanent
+    Thread Status. Its
     channel is quiet and retains its completion message. The Project's
     ongoing monitoring request is independent of this completed Thread.
 
@@ -428,13 +534,20 @@ This is a proposed mobile interaction design, chosen for this iteration:
 
 ## 6. Walkthrough implementation and boundaries
 
-- Deliver one standalone long HTML page in `public/workbench-journey.html`,
-  alongside this plan in the repository root.
-- Title the page **Projects, Threads, and Artifacts**, with the subheader
-  **Three-column Format Concept**.
+- Deliver one long HTML page in `public/workbench-journey.html`,
+  alongside this plan in the repository root. Its companion
+  `workbench-concepts.js` and `.css` implement the richer concept controls,
+  with dedicated logo and colored-avatar SVG assets; keep these files
+  together when opening the document directly.
+- Title the page **Projects, Threads, and Widgets**, with the subheader
+  **Reimagining the Workbench UI format and Information Architecture**.
 - Use 25 numbered before/after snapshots, organized into six journey chapters,
   followed by a seventh section with a dedicated mobile experience study.
   Each has a human action, visible result, and agent/system consequence.
+- Follow the journey with an unnumbered Feature explainers section: a
+  live membership/permissions/attachment shell, a vertical activity panel,
+  an icon-regeneration dialog, a member Thread preview, and a gutter key.
+  The floating-style explainer panels start open and remain interactive.
 - Include an interactive shell study for all four sidebar visibility states,
   floating Agent Channel, expanded Artifact context, and maximized Items.
   Start with the Agent Channel hidden, `project-brief.md` open in the right
@@ -446,6 +559,7 @@ This is a proposed mobile interaction design, chosen for this iteration:
   widget pin/order, previewing Attachments, entering sample descriptions,
   and demonstrating image-region Comments.
 - Examples are independent; altering one does not rewrite later snapshots.
+  Generated icon variations remain consistent throughout this document.
   Reset/reload restores the sample. No persistence, real file upload, network
   invitations, real agents, or scheduling is implied.
 - New Project, upload/paste, and handoff controls may move to the next
@@ -511,5 +625,15 @@ settled implementation rules:
   affected directories, and a quiet channel rather than false ongoing work.
 - Mobile examples preserve context across Items / Work / Preview and the
   floating Agent overlay, including Artifact ownership and answer records.
+- Thread lists use all four requested tabs, a global search override, and
+  the selected member's creation/assignment/edit and personal sleep rules.
+- Another-member views are live, visibly yellow, and read-only; private
+  channels are not disclosed and read markers are not changed on their behalf.
+- Only the assignee can edit a Thread; assignment, promotion, icon generation,
+  and pinning honor the read-only boundary.
+- Project Thread Attachments are newest-first, exclude ghosts, have a stale
+  disclosure, and can be promoted to Project ownership.
+- Activity supports user and work drilldowns, span changes, and bar previews;
+  gutters align to actual member, card, artifact, and message positions.
 - Unpinned Titlebars hide on pointer exit, focus departure, outside click, and
   window blur; pinned and Top-level Titlebars remain visible.

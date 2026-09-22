@@ -44,8 +44,14 @@ wireframes:
   with lightweight local interactions, right-column Attachment previews that
   expand into Artifact context, floating-only Agent Channels, a completed
   Thread's Impact widget, and three interactive mobile screen examples.
+  The **Projects, Threads, and Widgets** concept also includes member-filtered
+  Thread views, global search, personal sleep, read-only view-as modes,
+  assignment controls, generated SVG icons, attachment promotion, aligned
+  gutters, and interactive activity-timeline explainers.
 
 Open `public/workbench-journey.html` directly, or visit
 `http://localhost:5173/workbench-journey.html` with the dev server running.
-The walkthrough uses example data only; it does not run agents or create real
+Keep `workbench-concepts.js`, `workbench-concepts.css`, and the companion SVG
+assets beside the HTML when copying it elsewhere. The walkthrough uses
+example data only; it does not run agents or create real
 uploads, invitations, repository connections, or schedules.
