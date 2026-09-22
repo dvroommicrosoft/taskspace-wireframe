@@ -1,4 +1,7 @@
 .workbench-logo{width:31px;height:31px;display:block}
+.spinner{animation-play-state:paused}
+.spinner.motion-visible{animation-play-state:running}
+.app:not(.channel-open) .channel .spinner,.page-hidden .spinner{animation-play-state:paused}
 .brand .workbench-logo{width:40px;height:40px}
 .hero-intro{max-width:820px}
 .titlebar{gap:12px;padding-left:57px;align-items:center}

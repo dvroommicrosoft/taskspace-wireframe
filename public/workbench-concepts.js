@@ -527,6 +527,33 @@ window.WorkbenchConcept = (() => {
       button.title=hint;
     });
   }
+  function initializeMotion() {
+    const tracked = new Set();
+    const observer = new IntersectionObserver(entries=>{
+      for (const entry of entries) entry.target.classList.toggle('motion-visible',entry.isIntersecting);
+    });
+    const track = root => {
+      const spinners=[...(root.matches('.spinner') ? [root] : []),...$$('.spinner',root)];
+      for (const spinner of spinners) {
+        if (tracked.has(spinner)) continue;
+        tracked.add(spinner);
+        observer.observe(spinner);
+      }
+    };
+    track(document.body);
+    new MutationObserver(records=>{
+      for (const record of records) for (const node of record.addedNodes) {
+        if (node instanceof Element && node.isConnected) track(node);
+      }
+      for (const spinner of tracked) if (!spinner.isConnected) {
+        observer.unobserve(spinner);
+        tracked.delete(spinner);
+      }
+    }).observe(document.body,{childList:true,subtree:true});
+    const syncVisibility=()=>document.documentElement.classList.toggle('page-hidden',document.hidden);
+    document.addEventListener('visibilitychange',syncVisibility);
+    syncVisibility();
+  }
   function initialize() {
     $('.nav .wrap').insertAdjacentHTML('beforeend','<a href="#features">Feature explainers</a>');
     attachmentFixtures.filter(item=>!item.image).forEach(item=>{expandedContents[item.name]=item.text;});
@@ -552,6 +579,7 @@ window.WorkbenchConcept = (() => {
     refreshMemberPeeks($('#feature-example .app'));
     $('#feature-example').insertAdjacentHTML('afterend','<div class="demo-controls"><button data-demo-update>Simulate a shared update</button><button data-demo-complete>Simulate requests satisfied</button><span>Demo events, outside the UI: shared updates keep read-only views live.</span></div>');
     bindInteractions();
+    initializeMotion();
   }
   function bindInteractions() {
     let restoringFocus=false;

@@ -635,6 +635,11 @@ settled implementation rules:
 
 ## 8. Acceptance checklist
 
+The long walkthrough animates spinners only while they intersect the visible
+viewport, including clipping by scrollable panels. Hidden Agent Channels and
+background tabs pause motion. Newly inserted spinners follow the same rule,
+and the existing reduced-motion preference continues to suppress animations.
+
 - All four contexts and both Center modes appear.
 - The user clarifications supersede the original bottom-panel and single-
   channel descriptions everywhere.
