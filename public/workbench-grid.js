@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const previousIcon=svg('<path d="m14 6-6 6 6 6"/>');
   const nextIcon=svg('<path d="m10 6 6 6-6 6"/>');
   const folderShape=()=>`<svg class="gw-folder-shape" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M.5 39.5V8Q.5 .5 8 .5H88Q92 .5 93 5L99.5 39.5" vector-effect="non-scaling-stroke"/><path class="gw-folder-base" d="M.5 39.5h99" vector-effect="non-scaling-stroke"/></svg>`;
+  const folderObserver=new ResizeObserver(entries=>{
+    for(const {target,contentRect:{width,height}} of entries){
+      if(!width || !height)continue;
+      target.setAttribute('viewBox',`0 0 ${width} ${height}`);
+      target.firstElementChild.setAttribute('d',`M.5 ${height-.5}V10Q.5 .5 10 .5H${width-25}Q${width-17} .5 ${width-15} 5L${width-.5} ${height-.5}`);
+      target.lastElementChild.setAttribute('d',`M.5 ${height-.5}H${width-.5}`);
+    }
+  });
   const filterIcons={
     Recent:svg('<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>'),
     Scheduled:svg('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 10h18"/>'),
@@ -261,6 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if(overflow)tabs.push(['more','More']);
     const selectedTab=!state.active?'work':overflow && files.some(([id])=>id===owner.tab) && !visible.some(([id])=>id===owner.tab)?'more':owner.tab;
     $('.gw-tabs').innerHTML=`<div role="tablist" aria-label="Work and Artifact tabs">${tabs.map(([id,label])=>`<button role="tab" data-g="${state.active?'tab':'project'}" data-id="${id}" aria-selected="${selectedTab===id}" aria-label="${escape(label)}" class="${id==='more'?'gw-more':id==='work'?'gw-primary-tab gw-project-toggle':''}">${folderShape()}${id==='work'?icon(owner.name):''}<span>${escape(label)}</span></button>`).join('')}</div><button data-g="add" class="gw-add" aria-expanded="false" aria-label="Add Artifact: upload files, paste content, or create a new document"${readonly()?' disabled':''}>${plus}</button>`;
+    folderObserver.disconnect();
+    all('.gw-folder-shape').forEach(shape=>folderObserver.observe(shape));
   }
   function renderPane() {
     const pane=$('.gw-detail'),owner=current();
@@ -309,11 +319,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(owner.editor) {renderEditor();return;}
     if(owner.tab==='work') {
       body.innerHTML=`${descriptionMarkup(owner,locked)}
-        ${owner.id==='project' && owner.phase==='fresh'?`<form class="gw-intent gw-start-action"><span>Get Started</span><button class="primary" type="submit" aria-label="Get Started">${nextIcon}</button></form>`:''}
+        ${owner.id==='project' && owner.phase==='fresh'?`<form class="gw-intent"><button class="primary" type="submit">Get Started</button></form>`:''}
         ${owner.id==='project' && owner.phase==='setup'?questionMarkup(owner,'How should changes be validated?',['Tests + CI + review','Tests + manual checks','Agent proposes per Thread'],'validation'):''}
         ${owner.question && owner.id!=='project'?questionMarkup(owner,'Who should this first-run flow serve first?',['First-time solo users','An existing team'],'answer'):''}
-        <section class="gw-comments"><h4>Comments <small>Attachments stay with their message</small></h4>${owner.comments.map(commentMarkup).join('')}</section>
-        <form class="gw-composer"><textarea name="comment" aria-label="New Comment" placeholder="Write an instruction, or paste an image or file..."${locked?' disabled':''}>${escape(owner.draft)}</textarea><div class="gw-pending"></div><div class="gw-compose-actions"><button type="button" data-g="attach" aria-label="Attach files to this Comment; pasted images and files work too"${locked?' disabled':''}>${clip}</button><button type="submit" class="primary" aria-label="Send Comment"${locked?' disabled':''}>${sendIcon}</button></div></form>
+        ${owner.id==='project' && owner.phase==='fresh'?'':`<section class="gw-comments"><h4>Comments</h4>${owner.comments.map(commentMarkup).join('')}</section>
+        <form class="gw-composer"><textarea name="comment" aria-label="New Comment" placeholder="Write an instruction, or paste an image or file..."${locked?' disabled':''}>${escape(owner.draft)}</textarea><div class="gw-pending"></div><div class="gw-compose-actions"><button type="button" data-g="attach" aria-label="Attach files to this Comment; pasted images and files work too"${locked?' disabled':''}>${clip}</button><button type="submit" class="primary" aria-label="Send Comment"${locked?' disabled':''}>${sendIcon}</button></div></form>`}
         ${owner.id!=='project'?`<details class="gw-work-checklist" open><summary>${owner.incomplete?'Planning checklist':'Completed checklist · +186 / −42'}</summary>${WorkbenchConcept.checklist({complete:!owner.incomplete,ready:true})}</details>`:''}
         ${owner.id==='project' && owner.phase!=='fresh'?controlsMarkup(owner,locked):''}
         ${dropzoneMarkup(locked)}`;
@@ -598,26 +608,41 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTabs();renderBody();renderGrid();announce(`${name} added as an Artifact. Your selected tab is unchanged.`);
     }
   });
-  let hoverTimer;
+  let hoverTimer,moreTimer;
+  const leaveMore=()=>{
+    clearTimeout(moreTimer);
+    moreTimer=setTimeout(()=>{
+      if(!$('.gw-more-float')?.matches(':hover,:focus-within') && !$('.gw-more')?.matches(':hover,:focus-visible'))$('.gw-more-float')?.setAttribute('hidden','');
+    },180);
+  };
   root.addEventListener('pointerover',event=>{
     if(event.pointerType==='touch')return;
-    if(event.target.closest('.gw-more')) {
+    const more=event.target.closest('.gw-more');
+    if(more && !more.contains(event.relatedTarget)) {
       const popup=$('.gw-more-float');
       if(popup){popup.innerHTML=`<label>All Artifacts<input type="search" class="gw-more-search" aria-label="Search all Artifacts" placeholder="Find an Artifact"></label>${fileList(current().artifacts,'hover')}`;popup.hidden=false;}
     }
+    if(event.target.closest('.gw-more,.gw-more-float'))clearTimeout(moreTimer);
     if(event.target.closest('.gw-more,.gw-more-float,.gw-detail,.gw-project-return'))clearTimeout(hoverTimer);
     if(event.target.closest('.gw-collapsed .gw-project-toggle,.gw-project-return'))hoverTimer=setTimeout(()=>{open('project',false);state.projectPeek=true;},350);
   });
   root.addEventListener('pointerout',event=>{
+    if(event.target.closest('.gw-more,.gw-more-float'))leaveMore();
     if(!event.target.closest('.gw-more,.gw-more-float,.gw-detail,.gw-project-return'))return;
     clearTimeout(hoverTimer);
     hoverTimer=setTimeout(()=>{
-      if(!$('.gw-more-float')?.matches(':hover,:focus-within') && !$('.gw-more')?.matches(':hover')){$('.gw-more-float')?.setAttribute('hidden','');}
       if(state.projectPeek && !$('.gw-detail').matches(':hover,:focus-within')){state.projectPeek=false;close();}
     },180);
   });
   root.addEventListener('focusin',event=>{
     if(event.target.matches('.gw-more') && current().tab!=='more')$('.gw-more-float').hidden=false;
+  });
+  root.addEventListener('focusout',event=>{
+    if(event.target.closest('.gw-more,.gw-more-float'))leaveMore();
+  });
+  window.addEventListener('blur',()=>{
+    clearTimeout(hoverTimer);clearTimeout(moreTimer);
+    $('.gw-more-float')?.setAttribute('hidden','');
   });
   root.addEventListener('pointerdown',event=>{if(state.projectPeek && event.target.closest('.gw-detail'))state.projectPeek=false;});
   document.addEventListener('keydown',event=>{

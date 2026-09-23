@@ -38,6 +38,8 @@ not silently presented as current requirements.
   click keeps it open. Opening Project context
   replaces the Thread pane, preserving the Thread's state. Empty Projects
   start with Project context expanded; Get Started exposes onboarding widgets.
+  Get Started remains a labeled primary button until pressed. Before that,
+  the Project has no visible Comments section or Comment composer.
 - The Project description appears once. Hover or focus reveals an insertion-bar
   edit icon, and an inline editor saves changes in place.
 - Folder-shaped tabs sit above the content container, with the first tab flush
@@ -57,6 +59,8 @@ not silently presented as current requirements.
   Tabs stay the same height when selected, overlap at their rounded slants,
   and place the active tab in front with white content and the pane's gray fill.
   The active tab opens directly into the content without a dividing line.
+  Corners and slants use fixed pixel geometry across every tab width, with
+  identical overlap spacing. Hover previews dismiss on pointer/focus exit.
 - Promote on a Thread Artifact adds the same file object to Project Artifacts;
   it does not copy the file or remove the Thread reference. Its icon then becomes
   Demote, which removes only the Project reference. The same operation is available

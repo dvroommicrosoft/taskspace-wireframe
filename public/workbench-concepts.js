@@ -561,7 +561,7 @@ window.WorkbenchConcept = (() => {
     tooltip.setAttribute('role','tooltip');
     tooltip.setAttribute('popover','manual');
     document.body.append(tooltip);
-    let active=null, pending=null, timer;
+    let active=null, pending=null, timer, keyboardFocus=false;
     const selector='button[aria-label],a[aria-label],summary[aria-label],[data-tooltip]';
     const migrateTitles = root => {
       for (const node of [...(root.hasAttribute('title') ? [root] : []),...$$('[title]',root)]) {
@@ -612,9 +612,10 @@ window.WorkbenchConcept = (() => {
     };
     const schedule = (node,delay) => {hide();pending=node;timer=setTimeout(()=>{pending=null;show(node);},delay);};
     const leave = () => {
-      if (pending===document.activeElement) return;
+      if (keyboardFocus && pending===document.activeElement) return;
       clearTimeout(timer);
-      timer=setTimeout(()=>{if (!tooltip.matches(':hover') && !active?.matches(':hover,:focus-visible')) hide();},120);
+      pending=null;
+      timer=setTimeout(()=>{if (!tooltip.matches(':hover') && !active?.matches(':hover') && !(keyboardFocus && active===document.activeElement)) hide();},120);
     };
     document.addEventListener('pointerover',event=>{
       if (event.pointerType==='touch') return;
@@ -627,15 +628,16 @@ window.WorkbenchConcept = (() => {
     });
     document.addEventListener('focusin',event=>{
       const node=event.target.closest(selector);
-      if (node) schedule(node,120);
+      if (node && keyboardFocus) schedule(node,120);
     });
     document.addEventListener('focusout',leave);
     tooltip.addEventListener('pointerenter',()=>clearTimeout(timer));
     tooltip.addEventListener('pointerleave',leave);
-    document.addEventListener('pointerdown',hide,true);
-    document.addEventListener('keydown',event=>{if(event.key==='Escape') hide();});
+    document.addEventListener('pointerdown',()=>{keyboardFocus=false;hide();},true);
+    document.addEventListener('keydown',event=>{keyboardFocus=true;if(event.key==='Escape') hide();},true);
     document.addEventListener('scroll',()=>{if(active) hide();},true);
     window.addEventListener('resize',hide);
+    window.addEventListener('blur',hide);
     document.addEventListener('visibilitychange',()=>{if(document.hidden) hide();});
     new MutationObserver(records=>{
       for (const record of records) {
