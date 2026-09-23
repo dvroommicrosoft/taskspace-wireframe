@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ['first','04','The first Thread starts moving.','The Facilitator has completed onboarding. The first card appears while Project context remains open.'],
     ['thread','05','Open the work already in progress.','A Thread opens beside its card. Review its checklist, Comments, and curated Artifacts without an extra side panel.'],
     ['new','06','Start another subject.','The new card is editable immediately. Save its description to start a Thread; existing work continues alongside it.'],
-    ['full','07','A grid that grows with the Project.','Hover the titlebar for the full controls. Cards show only their widget carousel below the title. Scroll to the wavy divider to reveal older Threads.'],
+    ['full','07','A grid that grows with the Project.','Steer agents directly from the card view: add instructions or attach context beneath any carousel without opening the Thread. The same Comment and draft appear in Thread details. Scroll to the wavy divider to reveal older Threads.'],
     ['member','08','See the work through a teammate’s view.','Mira is selected. Orange marks her avatar and the edges of the content, while the titlebar stays neutral. Browse her Threads and Artifacts read-only; your private agents remain available only in your own view.']
   ];
   document.querySelector('#grid-journey').innerHTML=moments.map(([mode,n,title,copy])=>`<article class="gw-moment" id="grid-${mode}"><header class="gw-moment-heading"><span>${n}</span><div><h3>${title}</h3><p>${copy}</p></div></header><div class="grid-workbench" data-grid-mode="${mode}" id="${mode==='full'?'grid-workbench':`workspace-${mode}`}"></div></article>`).join('');
@@ -100,7 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderShell();
   }
   const current = () => !state.active || state.active==='project' ? state.project : state.threads.find(t=>t.id===state.active);
-  const readonly = () => state.member!=='you' || current()?.member!=='you';
+  const readonly = (owner=current()) => state.member!=='you' || owner?.member!=='you';
+  const composerOwner = form => form.dataset.owner==='project'?state.project:state.threads.find(t=>t.id===form.dataset.owner);
   const getFile = id => {
     const owner=current();
     return owner?.artifacts.find(f=>f.id===id) || owner?.comments.flatMap(c=>c.attachments).find(f=>f.id===id);
@@ -225,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<article class="gw-card ${state.active===t.id?'selected':''}" data-thread="${t.id}">
       <div class="gw-card-heading">${icon(t.name)}<button data-g="thread" data-id="${t.id}" class="gw-thread-name">${escape(t.name)}</button><div class="gw-artifact-dots" role="group" aria-label="Thread Artifacts">${t.artifacts.map(f=>`<button data-g="thread-artifact" data-id="${t.id}" data-file="${f.id}" class="gw-artifact-dot ${f.unread?f.fresh?'new-unread':'old-unread':'read'}" aria-label="${escape(f.name)} · ${f.unread?f.fresh?'new, unread':'unread':'read'}"></button>`).join('')}</div><button class="gw-sleep" data-g="sleep" data-id="${t.id}" aria-label="${t.sleeping?'Wake':'Sleep'} ${escape(t.name)}"${state.member!=='you'?' disabled':''}>${t.sleeping?'☀':'☾'}</button></div>
       <div class="gw-carousel" aria-label="Thread widgets" tabindex="0" data-index="${t.widgetIndex}">${kinds.map((kind,i)=>`<div class="gw-slide" data-slide="${i}">${widgetMarkup(t,kind)}</div>`).join('')}</div>
+      ${composerMarkup(t,true)}
       ${kinds.length>1?`<div class="gw-carousel-controls" role="group" aria-label="Choose a card widget"><button data-g="carousel" data-id="${t.id}" data-dir="-1" aria-label="Previous widget">${previousIcon}</button>${kinds.map((kind,i)=>`<button data-g="carousel" data-id="${t.id}" data-index="${i}" class="gw-carousel-dot" aria-current="${t.widgetIndex===i}" aria-label="Show ${kind} widget"></button>`).join('')}<button data-g="carousel" data-id="${t.id}" data-dir="1" aria-label="Next widget">${nextIcon}</button></div>`:''}
     </article>`;
   }
@@ -311,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ${locked?'<div class="gw-readonly">Read-only · switch to your own view to edit your assigned work.</div>':''}
       <div class="gw-add-menu" hidden><button data-g="upload">Upload files</button><button data-g="paste">Paste content</button><button data-g="new-file">New document</button></div>
       <div class="gw-more-float" hidden><label>All Artifacts<input type="search" class="gw-more-search" aria-label="Search all Artifacts" placeholder="Find an Artifact"></label>${fileList(owner.artifacts,'hover')}</div>
-      <div class="gw-body"></div><input type="file" class="gw-file-input" multiple hidden><input type="file" class="gw-comment-input" multiple hidden></div>`;
+      <div class="gw-body"></div><input type="file" class="gw-file-input" multiple hidden></div>`;
     positionPane();renderTabs();renderBody();
     $('.gw-body').scrollTop=owner.scroll[owner.tab] || 0;
     syncMobile();
@@ -340,6 +342,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function artifactActions(file) {
     return `<span class="gw-artifact-actions">${projectArtifactButton(file)}<button data-g="expand" class="gw-icon-action" aria-label="${state.full?'Restore pane size':'Expand Artifact'}">${state.full?restoreIcon:expandIcon}</button></span>`;
   }
+  function pendingMarkup(owner) {
+    return owner.pending.map(f=>`<span>${escape(f.name)}<button type="button" data-g="remove-pending" data-id="${f.id}" aria-label="Remove ${escape(f.name)} from the draft"${readonly(owner)?' disabled':''}>×</button></span>`).join('');
+  }
+  function composerMarkup(owner,compact=false) {
+    const locked=readonly(owner);
+    return `<form class="gw-composer${compact?' gw-card-composer':''}" data-owner="${owner.id}" aria-label="Comment on ${escape(owner.name)}"><textarea name="comment" aria-label="New Comment" placeholder="${compact?'Steer the agent...':'Write an instruction, or paste an image or file...'}"${locked?' disabled':''}>${escape(owner.draft)}</textarea><div class="gw-pending">${pendingMarkup(owner)}</div><div class="gw-compose-actions"><button type="button" data-g="attach" aria-label="Attach files to this Comment; pasted images and files work too"${locked?' disabled':''}>${clip}</button><button type="submit" class="primary" aria-label="Send Comment"${locked?' disabled':''}>${sendIcon}</button></div><input type="file" class="gw-comment-input" multiple hidden></form>`;
+  }
   function renderBody() {
     const owner=current(),body=$('.gw-body'),locked=readonly();
     if(owner.editor) {renderEditor();return;}
@@ -349,11 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ${owner.id==='project' && owner.phase==='setup'?questionMarkup(owner,'How should changes be validated?',['Tests + CI + review','Tests + manual checks','Agent proposes per Thread'],'validation'):''}
         ${owner.question && owner.id!=='project'?questionMarkup(owner,'Who should this first-run flow serve first?',['First-time solo users','An existing team'],'answer'):''}
         ${owner.id==='project' && owner.phase==='fresh'?'':`<section class="gw-comments"><h4>Comments</h4>${owner.comments.map(commentMarkup).join('')}</section>
-        <form class="gw-composer"><textarea name="comment" aria-label="New Comment" placeholder="Write an instruction, or paste an image or file..."${locked?' disabled':''}>${escape(owner.draft)}</textarea><div class="gw-pending"></div><div class="gw-compose-actions"><button type="button" data-g="attach" aria-label="Attach files to this Comment; pasted images and files work too"${locked?' disabled':''}>${clip}</button><button type="submit" class="primary" aria-label="Send Comment"${locked?' disabled':''}>${sendIcon}</button></div></form>`}
+        ${composerMarkup(owner)}`}
         ${owner.id!=='project'?`<details class="gw-work-checklist" open><summary>${owner.incomplete?'Planning checklist':'Completed checklist · +186 / −42'}</summary>${WorkbenchConcept.checklist({complete:!owner.incomplete,ready:true})}</details>`:''}
         ${owner.id==='project' && owner.phase!=='fresh'?controlsMarkup(owner,locked):''}
         ${dropzoneMarkup(locked)}`;
-      renderPending();
       decorateWidgets(body,owner);
     } else if(owner.tab==='more') {
       body.innerHTML=`<div class="gw-file-heading"><h4>All Artifacts · ${owner.artifacts.length}</h4><button data-g="add" class="gw-icon-action" aria-label="Add Artifact">${plus}</button></div><label>Find an Artifact<input type="search" class="gw-list-search" placeholder="Search files and images"></label>${fileList(owner.artifacts)}`;
@@ -368,9 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
       body.innerHTML=`<div class="gw-file-heading"><div><small>${attachment?'COMMENT ATTACHMENT':'ARTIFACT'}</small><h4>${escape(file.name)}</h4></div>${artifactActions(file)}</div>${file.kind==='image'?`<img class="gw-file-image" src="${escape(file.url)}" alt="${escape(file.name)}">`:file.kind==='text'?`<div class="gw-document">${markdown(file.text)}</div>`:`<p>No inline viewer for this file type. ${escape(file.size || 0)} bytes are held locally in this tab.</p>`}`;
     }
   }
-  function renderPending() {
-    const target=$('.gw-pending');
-    if(target)target.innerHTML=current().pending.map(f=>`<span>${escape(f.name)}<button type="button" data-g="remove-pending" data-id="${f.id}" aria-label="Remove ${escape(f.name)} from the draft">×</button></span>`).join('');
+  function renderPending(owner) {
+    all('.gw-composer').filter(form=>form.dataset.owner===owner.id).forEach(form=>$('.gw-pending',form).innerHTML=pendingMarkup(owner));
   }
   function positionPane() {
     const pane=$('.gw-detail');if(pane.hidden)return;
@@ -431,10 +438,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!results.length){if(failures.length)announce(failures.join(' '),true);return;}
     (attachment?owner.pending:owner.artifacts).push(...results);
     if(!attachment){owner.sleeping=false;owner.older=false;}
-    if(current()===owner) {
-      if(attachment)renderPending();else {renderTabs();if(['more','gallery'].includes(owner.tab))renderBody();}
+    if(attachment)renderPending(owner);
+    else {
+      if(current()===owner){renderTabs();if(['more','gallery'].includes(owner.tab))renderBody();}
+      renderGrid();
     }
-    renderGrid();
     announce(`${results.length} ${attachment?'Attachment(s) added to the Comment draft':'Artifact(s) added'} · stored in this tab only.${failures.length?' '+failures.join(' '):''}`,!!failures.length);
   }
   function fileEditor(mode) {
@@ -470,6 +478,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const action=button.dataset.g,id=button.dataset.id;
+    if(action==='attach' || action==='remove-pending'){
+      const form=button.closest('.gw-composer'),owner=composerOwner(form);
+      if(readonly(owner)){announce('This view is read-only.',true);return;}
+      if(action==='attach')$('.gw-comment-input',form).click();
+      else {owner.pending=owner.pending.filter(f=>f.id!==id);renderPending(owner);}
+      return;
+    }
     if(action==='pin-widget' || action==='trash-widget'){
       const owner=button.dataset.owner==='project'?state.project:state.threads.find(t=>t.id===button.dataset.owner),kind=button.dataset.kind;
       const inCard=!!button.closest('.gw-card');
@@ -547,10 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
       $('.gw-add').setAttribute('aria-expanded',String(!$('.gw-add-menu').hidden));
     }
     if(action==='upload')$('.gw-file-input').click();
-    if(action==='attach')$('.gw-comment-input').click();
     if(action==='paste' || action==='new-file')fileEditor(action==='paste'?'paste':'new');
     if(action==='cancel-editor'){current().editor=null;renderBody();}
-    if(action==='remove-pending'){current().pending=current().pending.filter(f=>f.id!==id);renderPending();}
     if(action==='promote'){
       const file=getFile(id);
       if(!current().artifacts.some(f=>f.id===id))current().artifacts.unshift({...file,unread:true,fresh:true});
@@ -564,7 +577,12 @@ document.addEventListener('DOMContentLoaded', () => {
   root.addEventListener('input',event=>{
     const el=event.target;
     if(el.matches('.gw-search')) {state.query=el.value;renderGrid();positionPane();}
-    if(el.matches('.gw-composer textarea'))current().draft=el.value;
+    if(el.matches('.gw-composer textarea')){
+      const owner=composerOwner(el.closest('form'));owner.draft=el.value;
+      all('.gw-composer').filter(form=>form.dataset.owner===owner.id).forEach(form=>{
+        const other=$('textarea',form);if(other!==el)other.value=owner.draft;
+      });
+    }
     if(el.closest('.gw-artifact-editor'))current().editor[el.name]=el.value;
     if(el.closest('.gw-description-editor'))current().descriptionDraft=el.value;
     if(el.closest('.gw-answer-form')){
@@ -585,15 +603,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const el=event.target;
     if(el.matches('.gw-reduce-motion'))$('.gw-shell').classList.toggle('gw-no-motion',el.checked);
     if(el.matches('.gw-file-input,.gw-comment-input')) {
-      const owner=current(),attachment=el.matches('.gw-comment-input');
+      const attachment=el.matches('.gw-comment-input'),owner=attachment?composerOwner(el.closest('form')):current();
+      if(readonly(owner)){el.value='';announce('This view is read-only.',true);return;}
       void readFiles([...el.files],owner,attachment);el.value='';
       if($('.gw-add-menu'))$('.gw-add-menu').hidden=true;
     }
   });
   root.addEventListener('paste',event=>{
-    if(!event.target.matches('.gw-composer textarea,.gw-artifact-editor textarea,.gw-dropzone') || readonly())return;
+    if(!event.target.matches('.gw-composer textarea,.gw-artifact-editor textarea,.gw-dropzone'))return;
+    const attachment=event.target.matches('.gw-composer textarea'),owner=attachment?composerOwner(event.target.closest('form')):current();
+    if(readonly(owner))return;
     const files=[...event.clipboardData.files];
-    if(files.length) {event.preventDefault();void readFiles(files,current(),event.target.matches('.gw-composer textarea'));}
+    if(files.length) {event.preventDefault();void readFiles(files,owner,attachment);}
   });
   root.addEventListener('dragover',event=>{if(event.target.closest('.gw-dropzone'))event.preventDefault();});
   root.addEventListener('drop',event=>{
@@ -604,12 +625,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   root.addEventListener('submit',event=>{
     event.preventDefault();
-    const form=event.target,owner=current();
+    const form=event.target,owner=form.matches('.gw-composer')?composerOwner(form):current();
     if(form.matches('.gw-answer-form')){
       const id=form.dataset.owner;
       answerQuestion(id==='project'?state.project:state.threads.find(t=>t.id===id),form.dataset.actionKind,form.elements.answer.value.trim());return;
     }
-    if(readonly()){announce('This view is read-only.',true);return;}
+    if(readonly(owner)){announce('This view is read-only.',true);return;}
     if(form.matches('.gw-description-editor')){
       const text=form.elements.description.value.trim();
       if(!text){announce('A description cannot be empty.',true);return;}
@@ -644,7 +665,10 @@ document.addEventListener('DOMContentLoaded', () => {
       owner.comments.push({id:`c${++serial}`,author:'You',text,attachments:owner.pending});
       owner.pending=[];owner.draft='';owner.incomplete=true;owner.sleeping=false;owner.older=false;
       if(owner.name==='New Thread' && text)owner.name=text.slice(0,65);
-      renderPane();renderGrid();announce('Comment posted locally. Attachments stay with this Comment.');
+      if(current()===owner)renderPane();
+      renderGrid();
+      if(form.classList.contains('gw-card-composer'))$(`[data-thread="${owner.id}"] .gw-composer textarea`)?.focus({preventScroll:true});
+      announce(`Comment posted to this ${owner.id==='project'?'Project':'Thread'} locally. In Workbench, this steers its agents; this demo does not contact agents.`);
     }
     if(form.matches('.gw-artifact-editor')) {
       const name=form.elements.name.value.trim(),text=form.elements.content.value;

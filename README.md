@@ -46,6 +46,8 @@ wireframes:
   Project context expands from a fixed bottom anchor. Floating details have
   folder tabs for curated Artifacts, a Gallery, and More only on overflow.
   Cards contain widget carousels with nested checklists, Questions, or Impact.
+  A Comment composer beneath each carousel lets users steer agents from the
+  card view, sharing drafts and Attachments with Thread details.
   A fixed-height titlebar reveals its full controls on hover or keyboard focus.
   Comment Attachments support file selection, paste, and Save as Artifact.
   Three mobile examples use Project / Thread list / Thread detail swipe
