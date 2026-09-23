@@ -8,9 +8,59 @@ The audience already knows Workbench, not these wireframes. Introduce the
 proposal through three contrasts: **Tenants become Projects**, **Threads, not
 Tasks**, and **Recognizable From a Distance**. Projects make the incoming
 Tenant concept work-centric and provide a home for artifacts spanning Threads.
-The companion [visual walkthrough](public/workbench-journey.html) presents
-independent snapshots with lightweight, local interactions. It does not connect
+The companion [visual walkthrough](public/workbench-journey.html) now leads
+with a connected grid-first study, followed by the earlier independent
+three-column snapshots in a collapsed comparison section. It does not connect
 to agents, git hosts, invitation services, or a scheduler.
+
+## Current direction: grid-first Project workspace
+
+This revision supersedes the three-column layout and file terminology in the
+historical journey below. The earlier examples are retained for comparison,
+not silently presented as current requirements.
+
+- Monitor recent Threads in a full-width card grid for **one selected Project**.
+  Cross-Project monitoring is deferred. Keep Recent, Scheduled, Incomplete,
+  Sleeping, search, member filters, unread indicators, and nested checklists.
+- A Thread pane floats beside its selected card, choosing a side with enough
+  room rather than always opening in one fixed position. Keep that card visible
+  when space permits; other cards can be covered. Reposition on resize and grid
+  scroll. On a narrow screen, the pane fills the workspace frame.
+- Clicking outside, Escape, or Close dismisses the pane. Comment drafts,
+  pending attachments, selected tabs, and per-tab scroll positions survive
+  ordinary navigation. Local new-artifact drafts survive closing/reopening too;
+  selecting another content tab or Cancel exits that editor.
+- Project context has a distinct home: a fixed bottom-center dock. Hover
+  previews shared context; click expands upward. Opening Project context
+  replaces the Thread pane, preserving the Thread's state. Empty Projects
+  start with Project context expanded; Get Started populates the sample grid.
+- Each pane has folder-shaped tabs: **Work**, individual non-image Artifacts,
+  one **Gallery** for all images, and **More**. More hover shows a searchable
+  floating list of *all* Artifacts; clicking More puts the same list in the
+  content area. Excess document tabs are accessible from More. Selecting an
+  overflow document gives it a visible tab when there is room.
+- The **+** beside the tabs offers Upload, Paste, and New document. No additional
+  Artifact sidebar opens automatically. New arrivals mark the collection
+  without taking over the selected tab. Expand makes the file view fill the
+  workspace; Restore returns to the floating pane.
+- **Artifacts** are curated files directly attached to Projects or Threads.
+  **Attachments** are files attached to Comments/messages, not another name
+  for all files. Both user and agent Comments can show attachments. The
+  composer supports a paperclip picker and pasted images/files; ordinary
+  pasted text stays Comment text. Save as Artifact retains the original
+  attachment on its Comment and adds it to the curated collection.
+- Widgets remain presentations and interactions (Questions, checklists,
+  controls), not a reason to call every file an Attachment.
+- The prototype holds files locally in memory, limits individual files to
+  10 MB, renders text and images, and explicitly identifies file types without
+  an inline viewer. Nothing is uploaded, sent to an agent, or saved to a server.
+  Reload/scenario reset clears local changes. The historical root demo remains
+  unchanged.
+
+Five scenario controls demonstrate empty Project, nine-card monitor, open
+Thread, Gallery/artifact browsing, and Project context. These explicitly reset
+the example; navigating within a scenario does not. Responsive layouts use the
+same working prototype rather than a separate static mobile drawing.
 
 ## 1. Confirmed vocabulary and information architecture
 
@@ -40,13 +90,15 @@ to agents, git hosts, invitation services, or a scheduler.
 - A Repo is a reference to a git URL. Project repo attachment and Thread repo
   association are distinct operations.
 
-### Artifacts
+### Files and widgets
 
-Every Artifact has a widget presentation.
+**Artifact:** a curated file connected directly to a Project or Thread, with a
+file-type-specific presentation and full viewer and/or editor. Examples:
+`plan.md`, `research.md`, and curated reference images.
 
-**Attachment:** represents a durable file. Its file type supplies a default
-widget and a default full viewer and/or editor. Examples: an uploaded image,
-a pasted Markdown document, `plan.md`, `research.md`, and `explanation.md`.
+**Attachment:** a file connected to a Comment or message, shown alongside that
+session-log entry rather than in the curated Artifact collection. Ephemeral
+here describes its role, not an automatic deletion policy.
 
 **Dynamic:** a widget paired with internal data that can interface with the
 Workbench SDK. Examples: agent questions, member invitations, repo controls,
@@ -55,14 +107,15 @@ agent-maintained todo lists, and output charts.
 An agent can define, edit, and attach widgets through tools. The built-in
 ask-user-question tool creates a Question Dynamic in the Center Panel.
 
-A **ghost attachment** is an announced output, not a durable file. It shows a
+A **ghost artifact** is an announced output, not a durable file. It shows a
 dotted outline and progress indicator. It is not openable and must not appear
-as an available file in the peer-attachment list. It becomes a normal
-Attachment only when content actually exists.
+as an available file. It becomes a normal Artifact only when content exists.
 
 ### Comments and questions
 
-Comments support Markdown and have a human or agent author.
+Comments support Markdown, have a human or agent author, and can carry
+Attachments added by paperclip picker or paste. Save as Artifact curates an
+attachment without removing it from the original Comment.
 
 - User Comment: posted -> in progress (agent marks it) -> addressed.
 - Agent Comment: can request action, then be marked complete and hidden by
@@ -79,7 +132,11 @@ Comments support Markdown and have a human or agent author.
   region persists with an expandable comment marker. Its update reaches the
   posting user's agent automatically.
 
-## 2. Context, navigation, and URLs
+## 2. Earlier three-column concept: context, navigation, and URLs
+
+The following sections preserve the earlier design and its historical use of
+"Attachment" for a directly connected file. Where the layout or terminology
+differs, the current grid-first direction above takes precedence.
 
 The four context levels are **Top**, **Project**, **Thread**, and **Artifact**.
 An Artifact inherits its owning Project or Thread, including the user's

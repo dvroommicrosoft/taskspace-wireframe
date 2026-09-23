@@ -136,6 +136,7 @@
     @media print{.nav,.layout-toolbar,.widget-tools,.edge,.top-edge{display:none!important}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.wrap{width:100%}.step{break-inside:avoid}.stage-scroll{overflow:visible;box-shadow:none}.screen{min-width:0}.app{height:540px}.hero{padding:30px 0}.chapter{break-before:page}}
   </style>
   <link rel="stylesheet" href="workbench-concepts.css?v=20260922-6">
+  <link rel="stylesheet" href="workbench-grid.css?v=20260922-1">
 </head>
 <body>
   <header class="mast wrap"><a class="brand" href="#top" aria-label="Workbench"><img class="workbench-logo" src="workbench-logo.svg" alt=""></a><span class="muted">WORKBENCH / FORMAT + INFORMATION ARCHITECTURE</span></header>
@@ -145,15 +146,37 @@
       <p class="hero-intro">Reimagining the Workbench UI format and Information Architecture</p>
       <div class="legend"><span><i></i>Agent working</span><span><i></i>Needs an answer</span><span><i></i>Quiet / available</span></div>
     </section>
-    <nav class="nav" aria-label="Walkthrough chapters"><div class="wrap"><a href="#architecture">The model</a><a href="#layout">The shell</a><a href="#arrive">01 / Arrive</a><a href="#onboard">02 / Onboard</a><a href="#plan">03 / Plan</a><a href="#redirect">04 / Redirect</a><a href="#coordinate">05 / Coordinate</a><a href="#complete">06 / Impact</a><a href="#mobile">07 / Mobile</a></div></nav>
+    <nav class="nav" aria-label="Walkthrough chapters"><div class="wrap"><a href="#architecture">The model</a><a href="#grid-study">Grid workspace</a><a href="#grid-journey">New journey</a><a href="#earlier-concept">Earlier concept</a></div></nav>
     <section id="architecture" class="wrap">
       <div class="intro-grid">
         <article class="intro-card"><span class="rule-num">01 / ORGANIZE AROUND THE WORK</span><h3>Tenants become Projects</h3><p>The Tenant concept being added to Workbench becomes a work-centric Project, not a user-centric container. Project-level artifacts give context and outputs a home that spans Threads.</p></article>
         <article class="intro-card"><span class="rule-num">02 / CONTEXT WITHOUT THE BACKLOG</span><h3>Threads, not Tasks</h3><p>A Thread can hold a subject or long-running work without becoming an endless task backlog. Incomplete work, unread updates, and sleep are independent signals, not one Status. Requests come and go; older Threads leave the default view.</p></article>
         <article class="intro-card"><span class="rule-num">03 / ROOM FOR THE SIGNAL</span><h3>Recognizable From a Distance</h3><p>Cards with generated icons make Threads easy to recognize and leave room for changing progress and Impact widgets. Automatically filtering older Threads reduces the need for compact lists that compete with the work for horizontal space.</p></article>
       </div>
-      <p class="callout"><b>How to read this page.</b> Every numbered frame is an independent moment, not a connected app. Try the lime actions, question answers, comment disclosures, edge panels, and layout controls. Snapshot-navigation links illustrate uploads and handoffs; no files are uploaded, invitations sent, or jobs scheduled. Reload resets local edits. On narrow screens, scroll a frame horizontally to inspect its desktop composition.</p>
+      <p class="callout"><b>Current direction: a grid with the work close at hand.</b> One Project fills the workspace with Thread cards. Thread details float beside their card; Project context opens from a fixed bottom dock. Curated files are <b>Artifacts</b>. Files on Comments and messages are <b>Attachments</b>. The earlier three-column study is preserved below for comparison, with its original terminology.</p>
     </section>
+    <section id="grid-study" class="chapter wrap">
+      <div class="chapter-head"><div><div class="eyebrow">Current concept / Grid-first Project workspace</div><h2>Monitor broadly. Open just what you need.</h2></div><p>The grid stays behind the work. Select a card to open its detail beside it. The Project has a distinct home at the bottom, not another Thread-shaped page.</p></div>
+      <div class="grid-scenarios" role="group" aria-label="Try the new journey">
+        <button data-grid-scenario="empty">1 / New Project</button><button data-grid-scenario="monitor">2 / Monitor Threads</button><button data-grid-scenario="thread">3 / Open a Thread</button><button data-grid-scenario="artifacts">4 / Explore Artifacts</button><button data-grid-scenario="project">5 / Project context</button>
+      </div>
+      <p class="grid-study-note">A local, interactive prototype. Files stay in this tab; nothing is uploaded or sent to agents. Reload clears the study. Scenario buttons reset the sample workspace; ordinary navigation preserves drafts, tabs, and files.</p>
+      <div id="grid-workbench"></div>
+      <div class="notes"><div><b>Files without a second side panel</b>Work and individual file tabs share the same pane. Images live together in Gallery. Hover More for a searchable floating list of every Artifact; click it to use that list as the pane content. The + beside the tabs contains Upload, Paste, and New.</div><div><b>Different homes, shared capabilities</b>The Project dock opens upward and replaces any Thread pane. Threads open beside their cards. Both have Comments, widgets, and curated Artifacts. Opening a pane never discards a draft or changes its remembered tab.</div></div>
+    </section>
+    <section id="grid-journey" class="chapter wrap">
+      <div class="chapter-head"><div><div class="eyebrow">Try it / Five connected moments</div><h2>From an empty Project to a visible body of work.</h2></div><p>Use the scenario controls above, or follow the flow within the workspace. The same layout adapts to a phone: details fill the frame instead of squeezing around a card.</p></div>
+      <div class="grid-story">
+        <article><span>01</span><h3>Begin with Project intent</h3><p>The empty grid leaves room for the Project dock to start expanded. Add a description and Project Artifacts, then Get Started creates the sample Threads.</p></article>
+        <article><span>02</span><h3>Monitor the recent work</h3><p>Nine cards show independent unread, incomplete, and sleeping signals, generated icons, and checklist or Impact summaries. Search, member filters, and Recent / Scheduled / Incomplete / Sleeping keep the grid useful.</p></article>
+        <article><span>03</span><h3>Open beside the subject</h3><p>Select a Thread. The pane chooses a side that leaves the card visible when space permits. Read its Questions and nested checklist, write a Comment, and attach a file with the paperclip or paste an image. Outside click, Escape, or Close returns to the grid.</p></article>
+        <article><span>04</span><h3>Curate the outputs</h3><p>Inspect a file tab or the image Gallery. More always lists every Artifact, not just overflow. Upload, paste, or create a new Artifact from +. Use Save as Artifact on a user or agent Comment attachment to add it to this curated collection.</p></article>
+        <article><span>05</span><h3>Step back to the Project</h3><p>Hover the fixed Project dock to preview its shared context. Click to expand it upward, replacing Thread details. Go back to the Thread to find its draft and selected tab unchanged. Newly added Artifacts signal their arrival without switching away from your work.</p></article>
+      </div>
+    </section>
+    <details id="earlier-concept" class="earlier-concept">
+      <summary class="wrap">Earlier concept · three-column studies and original journey</summary>
+      <p class="wrap grid-study-note">Historical comparison, not the current layout. These examples retain the earlier use of “Attachments” for directly connected files. The grid-first study above uses the revised vocabulary.</p>
     <section id="layout" class="chapter wrap">
       <div class="chapter-head"><div><div class="eyebrow">Shell study</div><h2>Give the space back to the work.</h2></div><p>Both sidebars open: 1 : 1.5 : 1. Collapse either side and Center takes its space. Collapse both for the wider, centered reading layout. Agent conversation always floats.</p></div>
       <div class="layout-toolbar" role="group" aria-label="Layout examples"><button data-layout="preview">1 / Three columns</button><button data-layout="normal">2 / Items + Work</button><button data-layout="focus">3 / Work + Artifact</button><button data-layout="solo">4 / Work only</button><button data-layout="hover">5 / Float Agent</button><button data-layout="expand">6 / Expand Artifact</button><button data-layout="max">7 / Maximize Items</button></div>
@@ -184,11 +207,13 @@
       <div class="feature-copy"><h3>Gutters are the panel, compressed.</h3><p>Each mark aligns with the element it represents, including while the panel is hidden. The top gutter stays visible when the titlebar opens.</p></div>
       <div class="gutter-key"><div><b>Titlebar</b><p><i class="signal-key green"></i>You selected · <i class="signal-key yellow"></i>Another member selected<br><i class="signal-key white"></i>Other active members · <i class="signal-key gray"></i>Inactive</p></div><div><b>Threads</b><p><i class="signal-key green"></i>Unread, work complete · <i class="signal-key yellow"></i>Unread, waiting / idle<br><i class="signal-key white"></i>Read, incomplete · <i class="signal-key gray"></i>Read, complete</p></div><div><b>Artifacts / Agent Channel</b><p><i class="signal-key green"></i>Artifact changed since opened · <i class="signal-key gray"></i>Already read<br><i class="signal-key white"></i>User message · <i class="signal-key gray"></i>Agent message</p></div></div>
     </section>
-    <footer class="footer wrap"><div><div class="eyebrow">A starting point, not a frozen specification</div><h2>The work is visible.<br>The machinery is optional.</h2><p>A work-centric evolution of Workbench: Projects instead of Tenants, Threads instead of Tasks, and widgets that make shared context and outcomes visible.</p><p>Unresolved: multi-user Question ownership, production recency thresholds, recurring-run semantics, monitoring lifetime, and failure recovery. The complete decisions and open details are recorded in <code>WORKBENCH_PLAN.md</code>.</p></div><a href="#top">Back to top ↑</a></footer>
+    </details>
+    <footer class="footer wrap"><div><div class="eyebrow">A starting point, not a frozen specification</div><h2>The work is visible.<br>The machinery is optional.</h2><p>Projects frame the work. Threads open from the grid. Artifacts are curated outputs; Attachments stay with the Comments that introduced them.</p><p>Still to explore: multi-Project monitoring, multi-user Question ownership, recurring-run semantics, and production persistence. The complete decisions are recorded in <code>WORKBENCH_PLAN.md</code>.</p></div><a href="#top">Back to top ↑</a></footer>
   </main>
   <dialog id="invite-dialog" aria-labelledby="invite-title"><header><h2 id="invite-title">Invite to On Deck evolution</h2><button data-action="close-invite" aria-label="Close invitation preview">✕</button></header><p>Members share Threads, Comments, and Artifacts. Each person has their own private Agent Channels.</p><label>Email address<input type="email" placeholder="teammate@example.com"></label><p>Invitation form concept only. No invitation will be sent.</p><button class="primary" data-action="close-invite">Done</button></dialog>
   <noscript><p class="wrap">Enable JavaScript to render the journey snapshots and local example interactions. The complete written plan is in WORKBENCH_PLAN.md.</p></noscript>
-  <script src="workbench-concepts.js?v=20260922-6"></script>
+  <script src="workbench-concepts.js?v=20260922-7"></script>
+  <script src="workbench-grid.js?v=20260922-1"></script>
   <script>
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];

@@ -40,10 +40,12 @@ wireframes:
 
 - [Published Workbench walkthrough](https://dvroommicrosoft.github.io/taskspace-wireframe/workbench-journey.html)
 - [Architecture and journey plan](WORKBENCH_PLAN.md)
-- [Visual journey](public/workbench-journey.html): 25 step-by-step snapshots
-  with lightweight local interactions, right-column Attachment previews that
-  expand into Artifact context, floating-only Agent Channels, a completed
-  Thread's Impact widget, and three interactive mobile screen examples.
+- [Visual journey](public/workbench-journey.html): a grid-first Project monitor
+  with floating Thread details, a fixed Project dock, folder tabs for curated
+  Artifacts, an image Gallery, and searchable More lists. Comment Attachments
+  support local file selection, paste, and Save as Artifact. Five scenario
+  controls demonstrate the connected flow, including the empty Project.
+  The earlier 25-step three-column journey is retained under a disclosure.
   The **Projects, Threads, and Widgets** concept also includes member-filtered
   Thread views, global search, personal sleep, read-only view-as modes,
   assignment controls, generated SVG icons, attachment promotion, aligned
@@ -51,7 +53,9 @@ wireframes:
 
 Open `public/workbench-journey.html` directly, or visit
 `http://localhost:5173/workbench-journey.html` with the dev server running.
-Keep `workbench-concepts.js`, `workbench-concepts.css`, and the companion SVG
+Keep `workbench-grid.js`, `workbench-grid.css`, `workbench-concepts.js`,
+`workbench-concepts.css`, and the companion SVG
 assets beside the HTML when copying it elsewhere. The walkthrough uses
-example data only; it does not run agents or create real
-uploads, invitations, repository connections, or schedules.
+example data and optional files held locally in the current tab; it does not
+run agents, upload files, send invitations, connect repositories, or schedule jobs.
+Reloading or choosing another scenario clears local changes.

@@ -597,7 +597,7 @@ window.WorkbenchConcept = (() => {
       return node.dataset.tooltip && node.dataset.tooltip!==node.getAttribute('aria-label') ? node.dataset.tooltip : '';
     };
     const show = node => {
-      if (!node.isConnected || node.matches('[data-impact-trigger],.checklist-peek') || [...floats.values()].some(record=>record.trigger===node)) return;
+      if (!node.isConnected || node.matches('[data-impact-trigger],.checklist-peek,.gw-card-checklist>summary') || [...floats.values()].some(record=>record.trigger===node)) return;
       const bounds=node.getBoundingClientRect();
       if (!bounds.width || !bounds.height || bounds.bottom<=0 || bounds.top>=innerHeight || bounds.right<=0 || bounds.left>=innerWidth) return;
       const label=node.getAttribute('aria-label') || node.dataset.tooltip;
