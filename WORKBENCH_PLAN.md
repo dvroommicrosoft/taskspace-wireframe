@@ -99,6 +99,8 @@ not silently presented as current requirements.
   The member activity gutter stays visible. On touch, tapping the header reveals
   controls without changing the height reserved for it.
 - New Thread is docked to the left canvas edge, aligned with the card grid's top.
+  Creating a Thread focuses its description, not its title. The save checkmark
+  stays disabled until the description contains non-whitespace text.
   It is fully exposed without cards and partly tucked away when cards exist;
   hover or keyboard focus reveals it. It has a violet outline and +, with a faint
   violet background. The bold + moves from the exposed edge into the button's
