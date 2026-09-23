@@ -111,6 +111,12 @@ not silently presented as current requirements.
   Labels, outlines, icons, and accessible descriptions supplement color.
 - Every Question offers a freeform answer in addition to suggested choices.
 - Comments and their composer follow Questions, before checklists and controls.
+  Secondary attachment, repository removal, and invitation actions are borderless.
+  Widgets expose icon-only pin/unpin and removal actions on hover or keyboard
+  focus. Pins sort first within their section or card carousel; removal hides
+  the widget without deleting its underlying content or answering a Question.
+  Widget choices persist across navigation and agree between card and detail
+  presentations. Other-member views cannot change them.
   Repository attachment, member invitation, file upload/promotion, and form
   submission/cancel actions use icons with custom hover/focus descriptions.
 - Another-member view uses an orange avatar selection and gutter, plus an inset

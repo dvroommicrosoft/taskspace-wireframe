@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveIcon=svg('<path d="m5 12 4 4L19 6"/>');
   const previousIcon=svg('<path d="m14 6-6 6 6 6"/>');
   const nextIcon=svg('<path d="m10 6 6 6-6 6"/>');
+  const trashIcon=svg('<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>');
   const folderShape=()=>`<svg class="gw-folder-shape" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M.5 39.5V8Q.5 .5 8 .5H88Q92 .5 93 5L99.5 39.5" vector-effect="non-scaling-stroke"/><path class="gw-folder-base" d="M.5 39.5h99" vector-effect="non-scaling-stroke"/></svg>`;
   const folderObserver=new ResizeObserver(entries=>{
     for(const {target,contentRect:{width,height}} of entries){
@@ -60,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   const doc = (name, text) => ({id:`f${++serial}`,name,kind:'text',text,unread:false});
   const subject = (id, name, description, extra = {}) => ({
-    id,name,description,tab:'work',draft:'',pending:[],comments:[],artifacts:[],scroll:{},incomplete:true,unread:false,sleeping:false,member:'you',question:true,...extra
+    id,name,description,tab:'work',draft:'',pending:[],comments:[],artifacts:[],scroll:{},widgets:{},incomplete:true,unread:false,sleeping:false,member:'you',question:true,...extra
   });
   let state;
   function reset(mode = root.dataset.gridMode, preservedProject = null) {
@@ -184,6 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
     $('.gw-top-content').innerHTML=`<div class="gw-top-primary"><div class="gw-start-action"><span>New Project</span><button class="primary" data-g="new-project" aria-label="New Project">${plus}</button></div><form class="gw-new-project" hidden><label>Project name<input name="name" required placeholder="What are we working on?"></label><label>Description<textarea name="description" required placeholder="What should this Project achieve?"></textarea></label><div><button type="button" data-g="cancel-project" aria-label="Cancel Project creation">${cancelIcon}</button><button class="primary" type="submit" aria-label="Create Project">${saveIcon}</button></div></form></div><div class="gw-project-list">${[['On Deck evolution','A quieter workspace for human intent and agent-led work.'],['Design system','Shared patterns for a coherent product.'],['Release readiness','Coordinate the next release.']].map(([name,desc])=>`<button data-g="existing-project" data-name="${name}">${icon(name)}<span><strong>${name}</strong><small>${desc}</small></span><span class="avatars">${avatar('you')}${avatar('mira')}${avatar('theo')}</span></button>`).join('')}</div>`;
   }
   const prIcon=svg('<circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v10M18 17V9a4 4 0 0 0-4-4h-2m2-2-2 2 2 2"/>');
+  const widgetNames={question:'Question',checklist:'Planning checklist',impact:'Impact',note:'Working notes',repos:'Project Repos',members:'Project members'};
+  function decorateWidgets(scope,owner) {
+    const locked=state.member!=='you' || owner.member!=='you';
+    all('.widget,.gw-work-checklist',scope).forEach(widget=>{
+      const kind=widget.matches('.question')?'question':widget.matches('.gw-impact')?'impact':widget.matches('.gw-carousel-checklist,.gw-work-checklist')?'checklist':widget.matches('.repo-widget')?'repos':widget.closest('.gw-controls')?'members':'note';
+      if(owner.widgets[kind]?.removed){widget.remove();return;}
+      const pinned=!!owner.widgets[kind]?.pinned,name=widgetNames[kind];
+      widget.dataset.widget=kind;
+      widget.classList.add('gw-managed-widget');
+      (widget.querySelector(':scope > summary') || widget).insertAdjacentHTML('beforeend',`<span class="gw-widget-tools"><button type="button" data-g="pin-widget" data-owner="${owner.id}" data-kind="${kind}" aria-label="${pinned?'Unpin':'Pin'} ${name} widget" aria-pressed="${pinned}"${locked?' disabled':''}>${WorkbenchConcept.pin()}</button><button type="button" data-g="trash-widget" data-owner="${owner.id}" data-kind="${kind}" aria-label="Remove ${name} widget"${locked?' disabled':''}>${trashIcon}</button></span>`);
+    });
+    const controls=$('.gw-controls',scope);
+    if(controls)all('[data-widget]',controls).sort((a,b)=>Number(!!owner.widgets[b.dataset.widget]?.pinned)-Number(!!owner.widgets[a.dataset.widget]?.pinned)).forEach(widget=>controls.append(widget));
+  }
   function questionMarkup(owner,prompt,choices,action) {
     return `<article class="widget question"><div class="widget-head">◇ Question for you</div><p>${prompt}</p><div class="choices">${choices.map(text=>`<button data-g="${action}" data-id="${owner.id}">${text}</button>`).join('')}</div><form class="gw-answer-form" data-action-kind="${action}" data-owner="${owner.id}"><input name="answer" required aria-label="Your own answer" placeholder="Or write your own answer..." value="${escape(owner.questionDraft || '')}"><button type="submit" class="primary" aria-label="Send answer">${sendIcon}</button></form></article>`;
   }
@@ -204,8 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function cardMarkup(t) {
     if(t.isNew)return `<article class="gw-card gw-new-card" data-thread="${t.id}"><form class="gw-thread-editor" data-id="${t.id}"><input name="name" aria-label="Thread title" placeholder="Untitled Thread" value="${escape(t.name)}"><textarea name="description" aria-label="Thread description" placeholder="Describe what you want to work on..." required>${escape(t.description)}</textarea><button class="primary" type="submit" aria-label="Save Thread"${t.description.trim()?'':' disabled'}>${saveIcon}</button></form></article>`;
-    const kinds=t.question?['question','checklist']:!t.incomplete?['impact','checklist']:Number(t.id.replace(/\D/g,''))%4===0?['checklist']:t.id==='thread-3'?['note','checklist']:['checklist','note'];
-    t.widgetIndex=Math.min(t.widgetIndex || 0,kinds.length-1);
+    const kinds=(t.question?['question','checklist']:!t.incomplete?['impact','checklist']:Number(t.id.replace(/\D/g,''))%4===0?['checklist']:t.id==='thread-3'?['note','checklist']:['checklist','note'])
+      .filter(kind=>!t.widgets[kind]?.removed).sort((a,b)=>Number(!!t.widgets[b]?.pinned)-Number(!!t.widgets[a]?.pinned));
+    t.widgetIndex=Math.max(0,Math.min(t.widgetIndex || 0,kinds.length-1));
     return `<article class="gw-card ${state.active===t.id?'selected':''}" data-thread="${t.id}">
       <div class="gw-card-heading">${icon(t.name)}<button data-g="thread" data-id="${t.id}" class="gw-thread-name">${escape(t.name)}</button><div class="gw-artifact-dots" role="group" aria-label="Thread Artifacts">${t.artifacts.map(f=>`<button data-g="thread-artifact" data-id="${t.id}" data-file="${f.id}" class="gw-artifact-dot ${f.unread?f.fresh?'new-unread':'old-unread':'read'}" aria-label="${escape(f.name)} · ${f.unread?f.fresh?'new, unread':'unread':'read'}"></button>`).join('')}</div><button class="gw-sleep" data-g="sleep" data-id="${t.id}" aria-label="${t.sleeping?'Wake':'Sleep'} ${escape(t.name)}"${state.member!=='you'?' disabled':''}>${t.sleeping?'☀':'☾'}</button></div>
       <div class="gw-carousel" aria-label="Thread widgets" tabindex="0" data-index="${t.widgetIndex}">${kinds.map((kind,i)=>`<div class="gw-slide" data-slide="${i}">${widgetMarkup(t,kind)}</div>`).join('')}</div>
@@ -220,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const older=threads.filter(t=>t.older && !state.query),recent=threads.filter(t=>!t.older || state.query);
     $('.gw-grid').innerHTML=recent.map(cardMarkup).join('')+(older.length?`<button class="gw-older" data-g="older" aria-expanded="${state.showOlder}">${squiggle}<span>${state.showOlder?'Hide':'Show'} older Threads · ${older.length}</span>${squiggle}</button>${state.showOlder?older.map(cardMarkup).join(''):''}`:'') || (state.threads.length?'<p class="gw-empty">No matching Threads.</p>':'');
     $('.gw-new-thread').classList.toggle('gw-tucked',recent.length>0 || state.showOlder && older.length>0);
+    all('.gw-card').forEach(card=>decorateWidgets(card,state.threads.find(t=>t.id===card.dataset.thread)));
     all('.gw-carousel').forEach(el=>el.scrollLeft=el.clientWidth*Number(el.dataset.index));
     updateHeader();
     syncMobile();
@@ -337,6 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ${owner.id==='project' && owner.phase!=='fresh'?controlsMarkup(owner,locked):''}
         ${dropzoneMarkup(locked)}`;
       renderPending();
+      decorateWidgets(body,owner);
     } else if(owner.tab==='more') {
       body.innerHTML=`<div class="gw-file-heading"><h4>All Artifacts · ${owner.artifacts.length}</h4><button data-g="add" class="gw-icon-action" aria-label="Add Artifact">${plus}</button></div><label>Find an Artifact<input type="search" class="gw-list-search" placeholder="Search files and images"></label>${fileList(owner.artifacts)}`;
     } else if(owner.tab==='gallery') {
@@ -452,6 +470,22 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const action=button.dataset.g,id=button.dataset.id;
+    if(action==='pin-widget' || action==='trash-widget'){
+      const owner=button.dataset.owner==='project'?state.project:state.threads.find(t=>t.id===button.dataset.owner),kind=button.dataset.kind;
+      const inCard=!!button.closest('.gw-card');
+      if(state.member!=='you' || owner.member!=='you'){announce('This view is read-only.',true);return;}
+      const settings=owner.widgets[kind] ||= {};
+      if(action==='pin-widget')settings.pinned=!settings.pinned;else settings.removed=true;
+      owner.widgetIndex=0;
+      savePane();renderGrid();
+      if(current()===owner)renderBody();
+      if(action==='pin-widget'){
+        const scope=inCard?$(`[data-thread="${owner.id}"]`):$('.gw-body');
+        $(`[data-g="pin-widget"][data-kind="${kind}"]`,scope)?.focus();
+      }
+      announce(action==='trash-widget'?`${widgetNames[kind]} widget removed. Its underlying content is unchanged.`:`${widgetNames[kind]} widget ${settings.pinned?'pinned first':'unpinned'}.`);
+      return;
+    }
     if(action==='mobile-view'){mobileView(Number(button.dataset.index));return;}
     if(action==='new-project'){$('.gw-new-project').hidden=false;$('.gw-new-project input').focus();return;}
     if(action==='cancel-project'){$('.gw-new-project').hidden=true;return;}

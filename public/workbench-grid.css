@@ -176,6 +176,15 @@
 .gw-description-editor button{padding:7px}
 .gw-body .widget{margin:12px 0;padding:14px}
 .gw-body .widget-head{font-size:12px}
+.gw-managed-widget{position:relative}
+.gw-managed-widget>.widget-head,.gw-managed-widget>summary{padding-right:54px;min-height:24px}
+.gw-widget-tools{position:absolute;right:8px;top:8px;display:flex;gap:2px;opacity:0;pointer-events:none}
+.gw-slide .gw-widget-tools{top:0;right:0}
+.gw-managed-widget:is(:hover,:focus-within) .gw-widget-tools{opacity:1;pointer-events:auto}
+.grid-workbench .gw-widget-tools button{display:grid;place-items:center;padding:3px;width:24px;height:24px;min-height:24px;border:0;background:transparent;color:var(--muted)}
+.gw-widget-tools button[aria-pressed="true"]{color:var(--lime)}
+.gw-widget-tools button[aria-pressed="true"] svg{fill:currentColor;fill-opacity:.2;transform:rotate(-25deg)}
+.grid-workbench :is([data-g="attach"],[data-g="remove-repo"],[data-g="invite"],[data-g="remove-pending"],[data-g="cancel-editor"],[data-g="cancel-project"],.gw-repo-form button,.gw-invite-form button){border:0;background:transparent;color:var(--muted)}
 .gw-body .question{border-color:#f59e0b50;background:#f59e0b06}
 .gw-body .question .widget-head{color:var(--amber)}
 .grid-workbench .question .choices button{background:#f59e0b08;border-color:#f59e0b35}
