@@ -140,18 +140,17 @@
 .gw-detail-content{display:flex;flex-direction:column;min-height:0;flex:1;background:var(--raised);border:1px solid #535c65;border-radius:0 0 10px 10px;overflow:hidden;box-shadow:0 10px 20px #0004}
 .gw-tabs{display:flex;align-items:flex-end;gap:5px;padding:0;flex:none;height:38px;margin-bottom:-1px;position:relative;z-index:1}
 .gw-tabs [role="tablist"]{display:flex;flex:1;min-width:0;height:100%;align-items:flex-end;isolation:isolate}
-.gw-tabs [role="tab"]{position:relative;z-index:1;height:38px;display:flex;align-items:center;gap:6px;border:0;background:transparent!important;border-radius:0;padding:8px 25px 8px 10px;min-width:0;width:100px;flex-shrink:0;font-size:10px;white-space:nowrap;--tab-fill:var(--surface)}
+.gw-tabs [role="tab"]{position:relative;z-index:1;height:38px;display:flex;align-items:center;gap:6px;border:0;background:transparent!important;border-radius:0;padding:8px 25px 8px 10px;min-width:0;width:max-content;flex-shrink:0;font-size:10px;white-space:nowrap;--tab-fill:var(--surface)}
 .gw-tabs [role="tab"]+[role="tab"]{margin-left:-10px}
 .grid-workbench button>.gw-folder-shape{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;fill:var(--tab-fill,var(--raised));stroke:#535c65;stroke-width:1}
 .gw-tabs [role="tab"]>.entity-glyph,.gw-tabs [role="tab"]>span,.gw-project-return>.entity-glyph,.gw-project-return>span{position:relative}
 .gw-tabs .gw-folder-base{display:block}
-.gw-tabs [role="tab"]>span{overflow:hidden;text-overflow:ellipsis}
+.gw-tabs .gw-primary-tab>span{overflow:hidden;text-overflow:ellipsis}
 .gw-tabs [role="tab"].gw-primary-tab{width:210px;max-width:48%;flex-shrink:0}
 .gw-tabs .gw-primary-tab .entity-glyph{width:19px;height:19px}
 .gw-tabs [role="tab"][aria-selected="true"]{--tab-fill:var(--raised);color:#fff;z-index:3}
 .gw-tabs [role="tab"][aria-selected="true"] .gw-folder-base{display:none}
 .gw-detail:not(.gw-collapsed) .gw-tabs [aria-selected="true"]:after{content:"";position:absolute;bottom:-1px;left:1px;right:1px;height:2px;background:var(--raised);pointer-events:none}
-.gw-tabs [role="tab"].gw-more{width:58px}
 .gw-tabs .gw-add{height:34px;width:32px;display:grid;place-items:center;flex:none;padding:4px;border-radius:5px 5px 0 0;background:var(--raised);border:1px solid #535c65;border-bottom:0;margin:0 0 0 auto}
 .gw-collapsed .gw-tabs{height:38px}
 .gw-collapsed .gw-tabs [role="tab"]:not(.gw-primary-tab),.gw-collapsed .gw-add{display:none}

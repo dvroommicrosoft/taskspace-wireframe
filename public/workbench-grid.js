@@ -253,22 +253,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function renderTabs() {
     const owner=current();if(!owner)return;
-    const width=parseFloat($('.gw-detail').style.width) || 540;
-    const primaryWidth=Math.min(210,width*.48),tabWidth=90;
     const files=owner.artifacts.filter(f=>f.kind!=='image').map(f=>[f.id,f.name]);
     if(owner.artifacts.some(f=>f.kind==='image'))files.push(['gallery','Gallery']);
     const attachment=owner.comments.flatMap(c=>c.attachments).find(f=>f.id===owner.tab);
     if(attachment && !owner.artifacts.some(f=>f.id===attachment.id))files.unshift([attachment.id,attachment.name]);
-    const space=width-primaryWidth-40;
-    const overflow=files.length*tabWidth>space;
-    const slots=Math.max(0,Math.floor((space-(overflow?48:0))/tabWidth));
-    const visible=files.slice(0,slots);
-    const selected=files.find(([id])=>id===owner.tab);
-    if(selected && slots && !visible.includes(selected))visible[visible.length-1]=selected;
-    const tabs=[['work',owner.name],...visible];
-    if(overflow)tabs.push(['more','More']);
-    const selectedTab=!state.active?'work':overflow && files.some(([id])=>id===owner.tab) && !visible.some(([id])=>id===owner.tab)?'more':owner.tab;
+    const tabs=[['work',owner.name],...files,['more','More']];
+    const selectedTab=!state.active?'work':owner.tab;
     $('.gw-tabs').innerHTML=`<div role="tablist" aria-label="Work and Artifact tabs">${tabs.map(([id,label])=>`<button role="tab" data-g="${state.active?'tab':'project'}" data-id="${id}" aria-selected="${selectedTab===id}" aria-label="${escape(label)}" class="${id==='more'?'gw-more':id==='work'?'gw-primary-tab gw-project-toggle':''}">${folderShape()}${id==='work'?icon(owner.name):''}<span>${escape(label)}</span></button>`).join('')}</div><button data-g="add" class="gw-add" aria-expanded="false" aria-label="Add Artifact: upload files, paste content, or create a new document"${readonly()?' disabled':''}>${plus}</button>`;
+    const pane=$('.gw-detail'),nav=$('.gw-tabs'),paneStyle=getComputedStyle(pane);
+    const width=(parseFloat(pane.style.width) || pane.clientWidth)-parseFloat(paneStyle.paddingLeft)-parseFloat(paneStyle.paddingRight);
+    const available=width-$('.gw-add').getBoundingClientRect().width-parseFloat(getComputedStyle(nav).columnGap);
+    const space=available-Math.min(210,available*.48);
+    const fileTabs=all('[role="tab"]',nav).slice(1,-1),more=$('.gw-more');
+    const cost=tab=>tab.getBoundingClientRect().width+parseFloat(getComputedStyle(tab).marginLeft);
+    const costs=new Map(fileTabs.map(tab=>[tab,cost(tab)]));
+    if([...costs.values()].reduce((sum,width)=>sum+width,0)<=space)more.remove();
+    else {
+      let remaining=space-cost(more);
+      const selected=fileTabs.find(tab=>tab.dataset.id===owner.tab);
+      const visible=new Set();
+      for(const tab of selected?[selected,...fileTabs.filter(tab=>tab!==selected)]:fileTabs){
+        if(costs.get(tab)<=remaining){visible.add(tab);remaining-=costs.get(tab);}
+      }
+      for(const tab of fileTabs)if(!visible.has(tab))tab.remove();
+      if(selected && !visible.has(selected))more.setAttribute('aria-selected','true');
+    }
     folderObserver.disconnect();
     all('.gw-folder-shape').forEach(shape=>folderObserver.observe(shape));
   }

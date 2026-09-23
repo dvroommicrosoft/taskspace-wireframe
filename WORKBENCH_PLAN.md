@@ -61,6 +61,9 @@ not silently presented as current requirements.
   The active tab opens directly into the content without a dividing line.
   Corners and slants use fixed pixel geometry across every tab width, with
   identical overlap spacing. Hover previews dismiss on pointer/focus exit.
+  Artifact tabs use their full filename width rather than truncating names.
+  The measured available space determines which tabs fit; the rest stay in
+  More, including a selected file whose name is too wide for the tab strip.
 - Promote on a Thread Artifact adds the same file object to Project Artifacts;
   it does not copy the file or remove the Thread reference. Its icon then becomes
   Demote, which removes only the Project reference. The same operation is available
