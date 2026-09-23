@@ -48,9 +48,13 @@ wireframes:
   Cards contain widget carousels with nested checklists, Questions, or Impact.
   A fixed-height titlebar reveals its full controls on hover or keyboard focus.
   Comment Attachments support file selection, paste, and Save as Artifact.
-  Three mobile examples use the same renderer. Both Workbench concepts use
-  violet/orange accents with subtle background tints.
-  The earlier 25-step three-column journey is retained under a disclosure.
+  Three mobile examples use Project / Thread list / Thread detail swipe
+  navigation, showing only one screen at a time. Neutral surfaces use violet
+  for selection and primary actions, orange for Questions, and standard
+  green/red diff counts.
+  Examples initialize progressively near the viewport. The earlier 25-step
+  three-column journey has its own [comparison page](public/workbench-earlier.html)
+  and is not rendered by the current page.
   The **Projects, Threads, and Widgets** concept also includes member-filtered
   Thread views, global search, personal sleep, read-only view-as modes,
   assignment controls, generated SVG icons, attachment promotion, aligned
@@ -58,7 +62,7 @@ wireframes:
 
 Open `public/workbench-journey.html` directly, or visit
 `http://localhost:5173/workbench-journey.html` with the dev server running.
-Keep `workbench-grid.js`, `workbench-grid.css`, `workbench-concepts.js`,
+Keep `workbench-journey.css`, `workbench-grid.js`, `workbench-grid.css`, `workbench-concepts.js`,
 `workbench-concepts.css`, and the companion SVG
 assets beside the HTML when copying it elsewhere. The walkthrough uses
 example data and optional files held locally in the current tab; it does not

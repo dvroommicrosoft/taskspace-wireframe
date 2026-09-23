@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Projects, Threads, and Widgets</title>
+  <link rel="icon" type="image/svg+xml" href="workbench-logo.svg">
+  <style>
+    :root{color-scheme:dark;--bg:#090a0c;--surface:#0e1013;--raised:#13161a;--hover:#191c21;--line:#ffffff14;--strong:#ffffff25;--text:#eceeef;--muted:#979fa8;--lime:#a78bfa;--soft:#a78bfa12;--amber:#f59e0b;--blue:#a9c6ef;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-synthesis:none}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0}button,input,textarea,select{font:inherit}button,a,input,textarea,select{-webkit-tap-highlight-color:transparent}button{color:inherit;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}a{color:inherit;text-decoration:none}a:hover{color:var(--lime)}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible,select:focus-visible{outline:2px solid var(--lime);outline-offset:4px}button,input,textarea,select{border:1px solid var(--strong);border-radius:7px;background:var(--raised)}button{padding:7px 11px}button:hover:not(:disabled){background:var(--hover);border-color:#ffffff40}input,textarea,select{padding:10px;color:var(--text);max-width:100%}input,textarea{width:100%}textarea{resize:vertical;min-height:70px}label{display:grid;gap:7px;font-size:12px;color:var(--muted)}p{line-height:1.65}h1,h2,h3,h4,p{margin-top:0}small{color:var(--muted);font-size:11px;line-height:1.5}code,.mono,.eyebrow,.step-no{font-family:"SFMono-Regular",Consolas,monospace}code{font-size:.9em;color:var(--lime)}.wrap{width:min(1240px,calc(100% - 80px));margin:auto}.mast{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);font-size:13px}.brand{font-weight:650;letter-spacing:-.04em;font-size:18px;display:flex;align-items:center;gap:12px}.mark{width:23px;height:23px;display:inline-block;border:1px solid var(--lime);border-radius:5px;box-shadow:5px -5px 0 -1px var(--bg),5px -5px 0 0 #a78bfa50}.muted{color:var(--muted)}.eyebrow{color:var(--lime);text-transform:uppercase;font-size:11px;letter-spacing:.17em}.hero{padding:82px 0 64px;position:relative}.hero h1{font-size:clamp(44px,6.2vw,84px);max-width:1040px;line-height:1.04;letter-spacing:-.065em;font-weight:500;margin:22px 0 26px}.hero h1 span{color:var(--lime)}.hero-intro{max-width:740px;color:var(--muted);font-size:18px;line-height:1.7}.hero-meta{display:flex;gap:35px;padding-top:23px;font-size:12px;color:var(--muted)}.hero-meta b{display:block;color:var(--text);font-size:20px;margin-bottom:6px;font-weight:500}.nav{position:sticky;top:0;z-index:100;background:#090a0cf5;backdrop-filter:blur(14px);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.nav .wrap{display:flex;gap:25px;overflow:auto;white-space:nowrap;padding:17px 0;font-size:12px}.nav a:first-child{color:var(--lime)}.intro-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;padding:42px 0 56px}.intro-card{border:1px solid var(--line);padding:24px;border-radius:12px;background:var(--surface)}.intro-card h3{font-size:16px;font-weight:500;margin:16px 0 10px}.intro-card p{font-size:13px;color:var(--muted);margin:0}.rule-num{font:11px monospace;color:var(--lime)}.model{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:15px 0 0;font-size:11px}.model span{padding:6px 9px;border:1px solid var(--line);border-radius:5px}.chapter{padding-top:50px;border-top:1px solid var(--line);margin-top:24px}.chapter-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:40px}.chapter h2{font-size:36px;font-weight:500;letter-spacing:-.04em;margin:12px 0}.chapter-head p{font-size:13px;color:var(--muted);max-width:400px}.step{margin:0 0 64px;scroll-margin-top:86px}.step-heading{display:grid;grid-template-columns:54px 1fr auto;gap:16px;align-items:start;margin:0 0 20px}.step-no{font-size:12px;color:var(--lime);border-top:1px solid var(--lime);padding-top:9px}.step-heading h3{font-size:24px;letter-spacing:-.025em;font-weight:500;margin:0 0 8px}.step-heading p{font-size:14px;color:var(--muted);max-width:780px;margin:0}.tag{font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:7px 10px;border:1px solid var(--line);border-radius:20px;white-space:nowrap;color:var(--muted)}.notes{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding:18px 3px 0;font-size:12px;color:var(--muted)}.notes b{font-weight:500;color:var(--text);display:block;font-size:10px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}.stage-scroll{overflow-x:auto;border:1px solid var(--strong);border-radius:13px;background:#090a0c;box-shadow:0 18px 70px #0003}.screen{min-width:760px;position:relative;isolation:isolate}.browser-bar{height:33px;padding:0 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);background:#111316;border-radius:12px 12px 0 0}.browser-dot{height:5px;width:5px;border-radius:100%;background:#454951}.route{margin:auto;font:10px monospace;letter-spacing:.01em;color:#8a929d;padding-right:25px}.screen-label{font:9px monospace;color:#747d86}.app{height:520px;position:relative;overflow:hidden;background:var(--bg)}.app.tall{height:610px}.titlebar{position:absolute;inset:0 0 auto;height:48px;padding:0 22px 0 58px;display:flex;align-items:center;gap:18px;background:#101216fa;border-bottom:1px solid var(--line);z-index:9;transform:translateY(-100%);opacity:0;transition:transform .2s,opacity .2s}.titlebar .product{font-size:12px;font-weight:650}.titlebar .divider{width:1px;height:18px;background:var(--line)}.titlebar .project-select{font-size:11px;padding:5px 8px;max-width:220px}.titlebar .account{margin-left:auto;position:relative}.account summary{list-style:none;cursor:pointer}.account-menu{position:absolute;right:0;top:34px;width:155px;padding:14px;background:var(--raised);border:1px solid var(--strong);border-radius:9px;font-size:11px;line-height:2}.account-menu p{margin:0}.app.home .titlebar{transform:none;opacity:1;padding-left:22px}.app.top-open .titlebar,.app.top-pinned .titlebar{transform:none;opacity:1}.app.top-pinned .workspace{padding-top:48px}.app.home .workspace{padding-top:48px}.top-edge{position:absolute;top:0;left:62px;right:16px;height:12px;padding:0;background:transparent;border:0;z-index:10;border-radius:0}.top-edge:after{content:"";position:absolute;top:1px;left:40%;width:80px;height:2px;background:#6e5d93;border-radius:3px}.app.top-open .top-edge,.app.top-pinned .top-edge{display:none}.back{position:absolute;left:17px;top:10px;z-index:12;font-size:18px;line-height:18px;padding:4px 8px;background:#101216;border-color:transparent}.workspace{display:grid;grid-template-columns:1fr 1.5fr 1fr;height:100%;transition:grid-template-columns .25s;padding:0 12px}.center{grid-column:2;padding:48px 23px 24px;min-width:0;overflow:auto;position:relative;scrollbar-width:thin}.context-title{margin-bottom:24px}.context-title .scope{font:9px monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px}.context-title h4{font-size:21px;letter-spacing:-.035em;line-height:1.2;font-weight:550;margin:0 0 8px}.context-title p{font-size:11px;color:var(--muted);margin:0;line-height:1.6}.app.simple .center{grid-column:1 / -1;width:64%;max-width:680px;justify-self:center;padding-top:42px}.app.home .center{padding-top:46px}.simple-primary{margin-top:92px;margin-bottom:25px;text-align:center}.home .simple-primary{margin-top:50px}.simple-primary h4{font-size:22px;font-weight:500;letter-spacing:-.035em;margin-bottom:10px}.simple-primary p{font-size:12px;color:var(--muted);margin:8px 0 18px}.primary{background:var(--lime);color:#191625;border-color:var(--lime);font-size:11px;font-weight:600}.primary:hover:not(:disabled){background:#c4b5fd;color:#191625;border-color:var(--lime)}.secondary{background:transparent;font-size:11px}.tiny{font-size:10px;padding:4px 7px}.icon{padding:4px 7px;font-size:12px;background:transparent;border-color:transparent}.avatar{width:24px;height:24px;border:2px solid #171a1d;border-radius:100%;object-fit:cover;vertical-align:middle;background:#292d33}.avatars{display:flex;align-items:center}.avatars .avatar+.avatar{margin-left:-5px}.avatar-group{display:flex;gap:9px;align-items:center}.activity-dot{width:5px;height:5px;display:inline-block;border-radius:50%;background:var(--lime);margin-right:5px}.section{margin-bottom:16px}.section>summary,.section-title{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:10px;font-weight:500;padding:6px 0 9px;list-style:none}.section>summary{cursor:pointer}.section>summary:before{content:"⌄";color:#818891}.section:not([open])>summary:before{content:"›"}.section>summary .count{margin-left:4px;font:9px monospace;color:#818891}.section-title .right,.section>summary .right{margin-left:auto}.widget{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:9px;background:var(--surface);font-size:11px}.widget:last-child{margin-bottom:0}.widget-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:11px;font-weight:500}.widget p{font-size:11px;color:var(--muted);margin:7px 0;line-height:1.6}.widget-tools{display:flex;gap:2px}.widget-tools button{font-size:9px;padding:3px 5px;border-color:transparent;background:transparent;color:var(--muted)}.widget.pinned{border-color:#a78bfa55}.widget.pinned>.widget-head:before{content:"PINNED";font:8px monospace;color:var(--lime)}.question{border-color:#a78bfa40;background:linear-gradient(110deg,#a78bfa06,transparent);animation:enter .35s ease-out}.question .widget-head{color:var(--lime)}.choices{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.choices button{font-size:10px;background:#191625;border-color:#a78bfa22;padding:7px 9px}.answer-form{display:flex;gap:6px;margin-top:10px}.answer-form input{font-size:10px;padding:7px;min-width:0}.dropzone{border:1px dashed #ffffff30;border-radius:9px;padding:16px;text-align:center;color:var(--muted);font-size:11px;margin-bottom:10px;background:transparent}.dropzone .plus{font-size:20px;display:block;color:#b8bfc7;margin-bottom:7px}.dropzone .upload-links{display:flex;gap:12px;justify-content:center;margin-top:8px}.text-button{border:0;background:transparent;color:var(--lime);padding:2px;font-size:10px;text-decoration:underline;text-underline-offset:3px}.file-row{display:flex;gap:10px;align-items:center}.file-icon{border:1px solid var(--line);border-radius:6px;width:30px;height:34px;display:grid;place-items:center;font:9px monospace;color:var(--muted);flex:none}.file-body{flex:1;min-width:0}.file-body strong{font-size:11px;font-weight:500}.file-body p{font-size:10px;margin:4px 0 0}.ghost{border-style:dashed;border-color:#ffffff35;background:repeating-linear-gradient(135deg,#ffffff02,#ffffff02 5px,transparent 5px,transparent 10px)}.ghost .file-icon{border-style:dashed}.spinner{display:inline-block;vertical-align:middle;width:10px;height:10px;border:1px solid #a78bfa30;border-top-color:var(--lime);border-radius:100%;animation:spin 1.6s linear infinite;flex:none}.status{font:9px monospace;color:var(--lime);display:flex;align-items:center;gap:6px}.comment{border-left:2px solid #ffffff20;background:var(--surface);padding:11px 13px;border-radius:0 7px 7px 0;margin-bottom:9px;font-size:11px}.comment.agent-comment{border-left-color:#a78bfa4a}.comment-head{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);margin-bottom:8px}.comment-head .status{margin-left:auto}.comment p{font-size:11px;line-height:1.6;margin:0}.comment details{font-size:11px;line-height:1.6}.comment details summary{color:var(--muted);font-size:10px;margin-top:6px;cursor:pointer}.history{font-size:10px;color:var(--muted);margin:8px 0}.history summary{cursor:pointer}.history p{font-size:10px;padding:8px;background:var(--raised);border-radius:6px}.inline-feedback{font-size:10px;color:var(--lime);margin-top:8px;line-height:1.5}.checklist{display:grid;gap:9px;margin-top:8px}.check-row{font-size:10px;display:flex;align-items:center;gap:8px;color:var(--muted)}.check-row.active{color:var(--text)}.check-box{width:11px;height:11px;display:inline-grid;place-items:center;border:1px solid #ffffff30;border-radius:3px;font-size:8px;color:var(--lime)}.check-row.done .check-box{background:var(--soft);border-color:#a78bfa44}.edge{position:absolute;z-index:7;top:65px;bottom:28px;width:12px;border:0;border-radius:0;background:transparent;padding:0;display:flex;flex-direction:column;align-items:center;gap:6px}.edge.left-edge{left:0}.edge.right-edge{right:0}.edge:before{content:"";position:absolute;top:0;bottom:0;width:1px;background:#ffffff0d}.signal{width:2px;background:#8c7bab;height:34px;border-radius:3px;z-index:1}.signal:first-child{margin-top:45px}.edge.busy .signal:nth-child(2){height:66px;background:var(--lime);box-shadow:0 0 9px #a78bfa30;animation:signal 2.5s ease-in-out infinite}.edge.busy .signal:nth-child(3){height:22px;background:#a78bfa90;animation:signal 2.5s .4s ease-in-out infinite}.edge.waiting .signal:nth-child(2){background:var(--amber);height:48px}.edge-note{position:absolute;right:20px;bottom:15px;color:var(--muted);font:9px monospace;display:flex;align-items:center;gap:7px;pointer-events:none}.items{grid-column:1;grid-row:1;min-width:0;padding:54px 15px 18px 10px;overflow:auto;border-right:1px solid var(--line);display:none;background:#0c0e11}.app.left-shown .items{display:block}.app.left-overlay .items{display:block;position:absolute;left:12px;top:0;bottom:0;width:28.6%;z-index:8;box-shadow:18px 0 60px #0007}.items-head{display:flex;justify-content:space-between;gap:4px;align-items:center;font-size:11px;margin-bottom:14px}.item-controls{display:flex;gap:2px}.item-add{opacity:0;transition:opacity .15s}.items:hover .item-add,.items:focus-within .item-add{opacity:1}.tabs{display:flex;gap:5px;margin:0 0 12px}.tabs button{font-size:9px;padding:6px;border-color:transparent;background:transparent;color:var(--muted)}.tabs .selected{color:var(--text);border-color:var(--line);background:var(--hover)}.thread-card{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:12px;margin-bottom:9px;display:block;width:100%;text-align:left;cursor:pointer}.thread-card.selected{border-color:#a78bfa66;background:#a78bfa06}.thread-card h5{font-size:11px;font-weight:500;margin:0 0 6px;line-height:1.4}.thread-card .description{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:10px;color:var(--muted);margin-bottom:12px}.latest-widget{border-top:1px solid var(--line);padding-top:9px;display:flex;align-items:center;gap:6px;font-size:9px;color:var(--muted)}.thread-card .active-users{float:right;color:var(--lime);font-size:8px}.items.table-view .thread-card{display:grid;grid-template-columns:1fr auto;gap:5px;border-radius:0;border:0;border-bottom:1px solid var(--line);padding:10px 4px;background:transparent}.items.table-view .thread-card h5{margin:0}.items.table-view .description{display:none}.items.table-view .latest-widget{border:0;padding:0;font-size:8px}.older{color:var(--muted);font-size:10px;margin:15px 0}.older summary{cursor:pointer}.older p{font-size:10px;line-height:1.5}.channel{position:absolute;right:12px;top:0;bottom:0;width:calc((100% - 24px)/3.5);padding:54px 15px 18px;background:#101216fa;border-left:1px solid var(--strong);z-index:8;display:none;overflow:auto;box-shadow:-15px 0 50px #0004}.app.channel-open .channel,.app.channel-pinned .channel{display:block}.app.channel-pinned .channel{box-shadow:none}.channel-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;margin-bottom:10px}.private-label{font:9px monospace;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:22px}.channel-message{font-size:11px;line-height:1.7;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line)}.channel-message strong{display:block;font-size:10px;color:var(--lime);font-weight:500;margin-bottom:7px}.channel details{font-size:10px;color:var(--muted);margin:14px 0}.channel details summary{cursor:pointer}.channel-composer{font-size:10px;color:var(--muted);padding:11px;border:1px solid var(--line);border-radius:7px;margin-top:26px}.app.artifact .center{grid-column:2 / 4;padding:49px 26px 20px}.app.artifact.channel-pinned .center{grid-column:2}.app.items-max .workspace{grid-template-columns:2.5fr 1fr}.app.items-max .center{grid-column:2;padding:48px 15px 20px;width:auto}.app.items-max .items{display:block}.app.items-max .thread-card{padding:17px}.app.items-max .channel{width:calc((100% - 24px)/3.5)}.workspace>.channel{grid-row:1}.app.empty-thread .center{padding-top:70px}.project-list{display:grid;gap:9px;text-align:left}.project-row{padding:15px;border:1px solid var(--line);border-radius:10px;display:flex;justify-content:space-between;align-items:center;background:var(--surface)}.project-row h5{font-size:12px;margin:0 0 6px;font-weight:500}.project-row p{font-size:10px;color:var(--muted);margin:0}.form-widget{max-width:410px;margin:34px auto 0;text-align:left;padding:22px}.form-widget label{margin-bottom:14px}.form-widget .primary{width:100%;margin-top:8px}.repo-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;padding:9px 0;border-top:1px solid var(--line)}.repo-row span{overflow:hidden;text-overflow:ellipsis}.member-row{display:flex;align-items:center;gap:8px;font-size:10px}.member-row button{margin-left:auto}.mini-preview{height:87px;margin-top:12px;overflow:hidden;border-radius:6px;background:#14191c;border:1px solid var(--line);padding:12px}.preview-nav{height:7px;width:42%;background:#6e5d93;border-radius:3px;margin-bottom:11px}.preview-cols{display:flex;gap:7px;height:50px}.preview-col{flex:1;border-radius:4px;background:#252c31;border:1px solid #ffffff09;padding:6px}.preview-col:before{content:"";display:block;height:3px;width:60%;background:#8c7bab;border-radius:2px}.preview-col:after{content:"";display:block;height:20px;margin-top:6px;background:#171d20;border-radius:2px}.document-preview{font-family:Georgia,serif;font-size:13px!important;color:#c4c8cd!important}.document-preview strong{font-size:15px;font-weight:500;display:block;color:var(--text);margin:4px 0 9px}.image-canvas{position:relative;touch-action:none;user-select:none;width:100%;aspect-ratio:1.65;border:1px solid var(--strong);border-radius:7px;overflow:hidden;background:#101517}.image-canvas svg{display:block;width:100%;height:100%;pointer-events:none}.image-toolbar{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:12px;color:var(--muted);font-size:10px}.selection{position:absolute;left:68%;top:72%;width:24%;height:17%;border:1px solid var(--lime);background:#a78bfa15;pointer-events:none}.selection:before,.selection:after{content:"";position:absolute;width:5px;height:5px;background:var(--lime);border:1px solid #111}.selection:before{left:-3px;top:-3px}.selection:after{right:-3px;bottom:-3px}.annotation-form{position:absolute;right:6%;top:27%;width:57%;padding:12px;border:1px solid var(--strong);border-radius:9px;background:#191c21;box-shadow:0 12px 40px #0008;z-index:2}.annotation-form label{font-size:9px}.annotation-form input{font-size:10px;margin:7px 0;padding:9px}.annotation-form .primary{font-size:9px}.annotation-form p{font-size:9px;color:var(--muted);margin:0}.annotation-marker{position:absolute;right:5%;top:68%;border-radius:50%;border-color:var(--lime);background:var(--lime);color:#191625;width:25px;height:25px;padding:0;font-size:10px;z-index:3}.annotation-bubble{position:absolute;right:6%;top:25%;width:61%;padding:14px;border:1px solid var(--strong);border-radius:8px;background:#191c21;box-shadow:0 10px 35px #0007;font-size:11px;z-index:2}.annotation-bubble p{margin:7px 0 0;font-size:11px}.annotation-help{font-size:10px;color:var(--muted);margin-top:12px}.schedule-row{display:flex;justify-content:space-between;gap:8px;font-size:9px;color:var(--lime);padding-top:8px;border-top:1px solid var(--line)}.layout-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.layout-toolbar button{font-size:11px}.layout-state{font:10px monospace;color:var(--lime);padding:10px 0 0;min-height:26px}.callout{font-size:12px;color:var(--muted);padding:15px 18px;border-left:2px solid var(--lime);background:var(--surface);line-height:1.65;margin:24px 0}.layers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:24px 0}.layers>div{border:1px solid var(--line);border-radius:10px;padding:17px;font-size:12px}.layers small{display:block;margin-top:7px}.footer{padding:60px 0 80px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:25px;font-size:12px;color:var(--muted)}.footer h2{font-size:28px;font-weight:500;color:var(--text);letter-spacing:-.04em}.footer p{max-width:630px}.legend{display:flex;gap:20px;font-size:10px;color:var(--muted);flex-wrap:wrap;margin-top:20px}.legend span{display:flex;align-items:center;gap:7px}.legend i{width:4px;height:18px;background:var(--lime);border-radius:3px}.legend span:nth-child(2) i{background:var(--amber)}.legend span:nth-child(3) i{background:#68717b}.add-widget-row{display:flex;justify-content:flex-end;margin:-5px 0 10px}.widget-picker{padding:10px;border:1px solid var(--line);border-radius:8px;font-size:10px;background:var(--raised);margin-bottom:12px}.widget-picker summary{cursor:pointer;color:var(--muted)}.widget-picker button{font-size:10px;margin-top:10px}.notice{font-size:11px;color:var(--muted);padding:10px 0;border-top:1px solid var(--line)}dialog{color:var(--text);background:var(--surface);border:1px solid var(--strong);border-radius:14px;width:min(860px,90vw);max-height:85vh;padding:30px}dialog::backdrop{background:#000b;backdrop-filter:blur(4px)}dialog header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:20px}dialog h2{font-size:22px;font-weight:500;letter-spacing:-.03em;margin:0}dialog p{color:var(--muted);font-size:13px}.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}[hidden]{display:none!important}
+    .image-canvas{width:min(100%,660px);margin-inline:auto}.app.simple.channel-pinned .center{grid-column:1 / 3;width:88%}.app.simple.items-max .center{grid-column:2;width:auto}.app.top-open:not(.top-pinned) .top-edge{display:block;height:8px}.app.top-open .top-edge:after{opacity:0}
+    .app.simple.preview-open .center{grid-column:2;width:auto;max-width:none;justify-self:stretch}
+    .attachment-title{border:0;background:transparent;padding:0;text-align:left;font-size:11px}
+    .attachment-thumbnail{display:block;width:100%;padding:0;border:0;background:transparent}
+    .attachment-thumbnail .mini-preview{margin:0}
+    .artifact-preview{position:absolute;right:12px;top:0;bottom:0;width:calc((100% - 24px)/3.5);padding:54px 16px 24px;border-left:1px solid var(--line);background:var(--surface);overflow:auto;z-index:3}
+    .artifact-preview-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:20px}
+    .artifact-preview-head strong{font-size:11px;font-weight:500;overflow-wrap:anywhere}
+    .artifact-preview .preview-actions{display:flex;gap:4px}
+    .artifact-preview .eyebrow{font-size:9px;margin-bottom:10px}
+    .artifact-preview-content{font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+    .artifact-preview-content h2{font-size:21px;letter-spacing:-.025em;line-height:1.3;font-weight:500}
+    .artifact-preview-content h3{font-size:15px;font-weight:500;margin-top:24px}
+    .artifact-preview-content p{font-size:12px;color:var(--muted)}
+    .artifact-preview-content svg{width:100%;height:auto;border:1px solid var(--strong);border-radius:7px}
+    .artifact-preview-content .preview-caption{font:10px monospace;color:var(--muted);margin-top:12px}
+    .artifact-expanded .artifact-preview,.artifact-expanded .center:not(.expanded-artifact),.artifact-expanded .items>:not(.artifact-peers){display:none}
+    .app.artifact-expanded .center.expanded-artifact{grid-column:2 / 4;width:auto;max-width:none;justify-self:stretch;padding:54px 30px 24px}
+    .expanded-artifact .artifact-preview-content{max-width:700px;margin:auto}
+    .expanded-artifact h4{font-size:18px;font-weight:500;margin:0 0 25px}
+    .artifact-peers{padding-top:0}
+    .artifact-peers button{font-size:11px;overflow-wrap:anywhere}
+    .app .workspace,.app.items-max .workspace{grid-template-columns:var(--items-size,0px) minmax(0,1fr) var(--preview-size,0px);height:calc(100% - 28px);transition:none}
+    .app .workspace>.center{grid-column:2;grid-row:1;width:auto;max-width:none;justify-self:stretch;min-height:0}
+    .app.solo:not(.artifact):not(.artifact-expanded) .workspace>.center{width:64%;max-width:680px;justify-self:center}
+    .app .artifact-preview{width:var(--preview-size);min-width:0;bottom:28px}
+    .app .items{grid-column:1;grid-row:1;min-height:0}
+    .app.left-overlay .items{width:var(--items-overlay-size,28.6%)}
+    .app.left-shown .items{position:static;width:auto}
+    .app.items-max .workspace>.center{grid-column:2}
+    .app.artifact-expanded .center.expanded-artifact{grid-column:2}
+    .split-handle{position:absolute;top:48px;bottom:28px;width:12px;transform:translateX(-50%);z-index:6;cursor:col-resize;touch-action:none;outline-offset:1px}
+    .split-handle::after{content:"";position:absolute;top:0;bottom:0;left:5px;width:2px;background:var(--lime);border-radius:2px;opacity:0;transition:opacity .15s}
+    .split-handle:hover::after,.split-handle:focus-visible::after,.split-handle.dragging::after{opacity:1}
+    .split-handle:focus-visible{outline:1px solid var(--lime)}
+    .app.resizing,.app.resizing *{cursor:col-resize!important;user-select:none!important}
+    .focus-example{margin:44px 0 30px}
+    .focus-example h3{font-size:24px;letter-spacing:-.025em;font-weight:500;margin:10px 0}
+    .focus-example>p{max-width:820px;font-size:13px;color:var(--muted)}
+    .project-members{display:flex;align-items:center;gap:9px;flex:none}
+    .titlebar{visibility:hidden}.app.home .titlebar,.app.top-open .titlebar,.app.top-pinned .titlebar{visibility:visible}
+    .owner-divider{width:1px;height:23px;background:var(--strong);margin-inline:2px}
+    .member-invite{width:27px;height:27px;border:1px dashed #ffffff40;border-radius:50%;padding:0;color:var(--muted);background:transparent}
+    .impact{border-color:#a78bfa45;background:linear-gradient(145deg,#a78bfa07,var(--surface))}
+    .impact-trigger{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap;border:0;padding:0;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:help}
+    .impact-label{border-bottom:1px dotted var(--muted)}
+    .impact-count{display:inline-flex;gap:6px;white-space:nowrap;font-family:monospace}
+    .impact-trigger:hover .impact-label,.impact-trigger:focus-visible .impact-label{color:var(--lime)}
+    .impact-hover{position:fixed;inset:auto;margin:0;width:min(370px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:17px;border:1px solid var(--strong);border-radius:10px;background:var(--surface);color:var(--text);box-shadow:0 14px 45px #0009;font:12px/1.6 system-ui}
+    .impact-hover>strong{display:block;font-size:12px;margin-bottom:12px}
+    .impact-hover>p{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:10px}
+    .impact-hover .impact-dirs{padding:0;border:0}
+    .impact-hover .impact-dirs>div{align-items:baseline;font-size:11px}
+    .impact-hover code{overflow-wrap:anywhere;min-width:0}
+    .impact-hover .impact-count{flex:none}
+    .completed-card-link{display:block;color:inherit;text-decoration:none}
+    .thread-card .impact-trigger{font-size:10px;gap:5px}
+    .thread-card .latest-widget:has(.impact-trigger){flex-wrap:wrap}
+    .impact-badge{display:inline-block;font:9px monospace;color:var(--lime);border:1px solid #a78bfa40;border-radius:20px;padding:5px 8px;margin-bottom:12px}
+    .impact-link{display:block;font-size:13px;line-height:1.5;color:var(--text);margin:0 0 10px;text-decoration:underline;text-underline-offset:4px}
+    .diff-stats{display:flex;gap:15px;align-items:center;font:11px monospace;margin:15px 0}
+    .diff-add{color:var(--lime)}.diff-remove{color:#e6a295}
+    .diff-bar{height:4px;border-radius:5px;overflow:hidden;display:flex;margin-bottom:16px}
+    .diff-bar span:first-child{width:81.58%;background:#a78bfa90}.diff-bar span:last-child{flex:1;background:#e6a29590}
+    .impact-dirs{display:grid;gap:9px;padding-top:12px;border-top:1px solid var(--line)}
+    .impact-dirs>div{display:flex;justify-content:space-between;gap:10px;font-size:10px}
+    .impact-dirs code{color:var(--muted)}.impact-footer{border-top:1px solid var(--line);padding-top:10px;margin-top:13px!important}
+    .pr-example{margin:0 0 42px;padding:22px;border:1px solid var(--line);background:var(--surface);border-radius:12px}
+    .pr-example>summary{cursor:pointer;font-size:13px;color:var(--muted)}
+    .pr-example h3{font-size:22px;font-weight:500;margin:20px 0 10px}
+    .pr-example p{font-size:13px;color:var(--muted)}
+    .pr-example pre{overflow:auto;font:12px/1.9 monospace;background:var(--bg);padding:17px;border-radius:7px}
+    #invite-dialog{max-width:420px}
+    .mobile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;margin:35px 0}
+    .mobile-study{min-width:0}
+    .mobile-study>h3{font-size:16px;font-weight:500;margin-bottom:10px}
+    .mobile-study>p{font-size:12px;color:var(--muted);min-height:58px;line-height:1.6}
+    .phone{width:100%;max-width:380px;margin:auto;border:1px solid #ffffff30;border-radius:30px;background:#090a0c;box-shadow:0 15px 60px #0006;padding:8px;overflow:hidden}
+    .phone-status{height:28px;display:flex;justify-content:space-between;padding:6px 14px 0;font:10px monospace;color:var(--muted)}
+    .phone-header{display:flex;align-items:center;gap:7px;padding:5px 5px 9px;border-bottom:1px solid var(--line)}
+    .phone-header>a,.phone-header>button{display:grid;place-items:center;min-width:44px;min-height:44px;font-size:21px;background:transparent;border:0}
+    .phone-header strong{font-size:12px;font-weight:500;display:block;line-height:1.6}
+    .phone-header small{font-size:9px}.phone-header .avatar{margin-left:auto}
+    .phone-nav{display:flex;gap:3px;padding:8px 4px;border-bottom:1px solid var(--line)}
+    .phone-nav button{flex:1;min-width:0;min-height:44px;font-size:11px;border-color:transparent;background:transparent;color:var(--muted);padding:5px}
+    .phone-nav button[aria-pressed="true"]{background:var(--hover);color:var(--lime);border-color:var(--strong)}
+    .mobile-unread{color:var(--amber);font-size:9px;margin-left:3px}
+    .phone-content{height:465px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+    .mobile-pane{padding:20px 12px;min-height:100%}
+    .mobile-pane:focus{outline:none}
+    .phone h4{font-size:22px;letter-spacing:-.04em;font-weight:500;line-height:1.25;margin:7px 0 10px}
+    .phone p{font-size:12px;color:var(--muted);line-height:1.7}
+    .phone .widget-head{font-size:12px}.phone .widget p{font-size:12px}
+    .phone .thread-card{padding:16px}.phone .thread-card h5{font-size:13px}
+    .phone .thread-card .description{font-size:11px}.phone .latest-widget{font-size:10px}
+    .phone .choices{display:grid}.phone .choices button{min-height:44px;text-align:left;font-size:12px}
+    .phone .widget-tools{display:none}.phone .check-row{font-size:11px}
+    .phone-action{display:block;width:100%;min-height:44px;font-size:12px;text-align:center;margin:10px 0}
+    .phone .channel-message{font-size:12px}.phone .private-label{font-size:10px;margin-bottom:16px}
+    .phone .mobile-message{padding:11px 13px;background:var(--raised);border-radius:9px;font-size:12px;margin-bottom:20px}
+    .phone .mobile-file{border:1px solid var(--line);background:var(--surface);padding:15px;border-radius:10px;text-align:left;width:100%;font-size:12px;min-height:44px}
+    .phone .mobile-file small{display:block;margin-top:8px}
+    .phone summary{min-height:44px;display:flex;align-items:center}
+    .phone{position:relative}
+    .phone-header .mobile-agent-trigger{font-size:10px;margin-left:auto;line-height:1.6}
+    .mobile-agent{position:absolute;inset:74px 8px 8px;z-index:20;padding:20px;background:#101216;border:1px solid var(--strong);border-radius:14px;overflow:auto;box-shadow:0 0 0 6px #0005,0 20px 60px #000a}
+    .mobile-agent-close{float:right;min-height:44px;min-width:44px}
+    .mobile-agent-state{font:10px monospace;color:var(--lime);padding:12px 0;display:flex;align-items:center;gap:6px}
+    .mobile-answer-record{margin:14px 0;font-size:11px;color:var(--muted)}.mobile-answer-record summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+    .phone .image-canvas{aspect-ratio:1.65;touch-action:pan-y}.phone .annotation-marker{width:44px;height:44px}
+    .phone .annotation-bubble{top:5%;width:85%;font-size:10px;padding:10px}
+    .phone .annotation-bubble p{font-size:11px;margin:4px 0}.phone .annotation-bubble .status{font-size:8px}
+    .mobile-compose summary{font-size:12px;color:var(--lime);cursor:pointer;padding:14px 0;min-height:44px}
+    .mobile-compose textarea{font-size:16px}
+    .mobile-presence{display:flex;align-items:center;gap:8px;padding:12px 0;border-top:1px solid var(--line);margin-top:16px}
+    .mobile-presence .member-invite{width:44px;height:44px}
+    .mobile-flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:var(--muted);font:11px monospace}
+    .mobile-flow span{padding:10px 13px;border:1px solid var(--strong);border-radius:7px}
+    @media(max-width:1050px){.mobile-grid{grid-template-columns:1fr;gap:35px}.mobile-study{max-width:450px;margin:auto;width:100%}.mobile-study>p{min-height:0}}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes signal{50%{opacity:.35;transform:scaleY(.8)}}@keyframes enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    @media(min-width:1450px){.wrap{width:1240px}.app{height:550px}}
+    @media(max-width:900px){.wrap{width:calc(100% - 36px)}.hero{padding:50px 0}.hero h1{font-size:58px}.intro-grid{gap:10px}.intro-card{padding:17px}.chapter-head{display:block}.chapter-head p{max-width:650px}.step-heading{grid-template-columns:40px 1fr}.step-heading .tag{grid-column:2;justify-self:start}.notes{gap:20px}.nav .wrap{gap:20px}.screen{min-width:860px}.stage-scroll{scrollbar-width:thin}.layers{grid-template-columns:1fr}}
+    @media(max-width:600px){.mast{height:65px}.mast>span{font-size:10px}.hero h1{font-size:45px}.hero-intro{font-size:16px}.hero-meta{gap:23px}.hero-meta b{font-size:17px}.intro-grid{grid-template-columns:1fr;padding-top:28px}.intro-card{padding:20px}.intro-card h3{margin-top:10px}.chapter{padding-top:30px}.chapter h2{font-size:29px}.step-heading{gap:12px}.step-heading h3{font-size:21px}.step-heading p{font-size:13px}.notes{grid-template-columns:1fr;gap:12px}.step{margin-bottom:48px}.footer{display:block}.nav .wrap{font-size:11px}.stage-scroll{position:relative}.layout-toolbar button{font-size:10px}.hero-meta{flex-wrap:wrap}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+    @media print{.nav,.layout-toolbar,.widget-tools,.edge,.top-edge{display:none!important}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.wrap{width:100%}.step{break-inside:avoid}.stage-scroll{overflow:visible;box-shadow:none}.screen{min-width:0}.app{height:540px}.hero{padding:30px 0}.chapter{break-before:page}}
+  </style>
+  <link rel="stylesheet" href="workbench-concepts.css?v=20260923-2">
+</head>
+<body>
+  <header class="mast wrap"><a class="brand" href="#top" aria-label="Workbench"><img class="workbench-logo" src="workbench-logo.svg" alt=""></a><span class="muted">WORKBENCH / FORMAT + INFORMATION ARCHITECTURE</span></header>
+  <main id="top">
+    <section class="hero wrap">
+      <h1>Projects, Threads, and Widgets</h1>
+      <p class="hero-intro">Reimagining the Workbench UI format and Information Architecture</p>
+    </section>
+    <nav class="nav" aria-label="Walkthrough chapters"><div class="wrap"><a href="workbench-journey.html">Current journey ↗</a><a href="#architecture">The model</a><a href="#layout">Shell study</a><a href="#step-1">Original journey</a><a href="#mobile">Mobile</a></div></nav>
+    <section id="architecture" class="wrap">
+      <div class="intro-grid">
+        <article class="intro-card"><span class="rule-num">01 / ORGANIZE AROUND THE WORK</span><h3>Tenants become Projects</h3><p>The Tenant concept being added to Workbench becomes a work-centric Project, not a user-centric container. Project-level artifacts give context and outputs a home that spans Threads.</p></article>
+        <article class="intro-card"><span class="rule-num">02 / CONTEXT WITHOUT THE BACKLOG</span><h3>Threads, not Tasks</h3><p>A Thread can hold a subject or long-running work without becoming an endless task backlog. Incomplete work, unread updates, and sleep are independent signals, not one Status. Requests come and go; older Threads leave the default view.</p></article>
+        <article class="intro-card"><span class="rule-num">03 / ROOM FOR THE SIGNAL</span><h3>Recognizable From a Distance</h3><p>Cards with generated icons make Threads easy to recognize and leave room for changing progress and Impact widgets. Automatically filtering older Threads reduces the need for compact lists that compete with the work for horizontal space.</p></article>
+      </div>
+      <p class="callout"><b>Earlier three-column concept.</b> This page preserves the original journey for comparison. <a href="workbench-journey.html">The current grid-first design is on its own page.</a></p>
+    </section>
+    <div id="earlier-concept">
+      <p class="wrap"><a href="workbench-journey.html">Return to the current journey →</a></p>
+      <p class="wrap">Historical comparison. These examples retain the earlier use of “Attachments” for directly connected files.</p>
+    <section id="layout" class="chapter wrap">
+      <div class="chapter-head"><div><div class="eyebrow">Shell study</div><h2>Give the space back to the work.</h2></div><p>Both sidebars open: 1 : 1.5 : 1. Collapse either side and Center takes its space. Collapse both for the wider, centered reading layout. Agent conversation always floats.</p></div>
+      <div class="layout-toolbar" role="group" aria-label="Layout examples"><button data-layout="preview">1 / Three columns</button><button data-layout="normal">2 / Items + Work</button><button data-layout="focus">3 / Work + Artifact</button><button data-layout="solo">4 / Work only</button><button data-layout="hover">5 / Float Agent</button><button data-layout="expand">6 / Expand Artifact</button><button data-layout="max">7 / Maximize Items</button></div>
+      <div id="layout-example"></div>
+      <div class="layout-state" id="layout-state" role="status">Items, Work, and Artifact preview are open. Hover a divider to resize.</div>
+      <div class="notes"><div><b>Collapse and focus</b>Use the Items header's collapse button to give its width to Center. Close the Artifact preview to reclaim the right side. Hover the left edge to peek; click it or Dock Items to keep Items open.</div><div><b>Resize the visible splits</b>Hover a divider for the resize cursor and accent line, then drag. Keyboard: focus a divider and use Left/Right arrows; Shift makes larger adjustments. Double-click to reset its width. The Agent Channel never resizes the layout.</div></div>
+      <article class="focus-example" id="thread-focus"><div class="eyebrow">Focus study / Items collapsed</div><h3>A Thread and its artifact. Nothing between them.</h3><p>The left sidebar is hidden. Thread detail takes the left + middle space, with the image on the right. Hover the split to resize, or open Items from the left edge without leaving the Thread.</p><div id="focus-example"></div></article>
+      <div class="layers"><div><span class="eyebrow">Layer 3 / Foreground</span><br><br>Blocking modal<small>Login and catastrophic errors. Recovery details remain open.</small></div><div><span class="eyebrow">Layer 2</span><br><br>Full-screen content modal<small>Above the shell. Specific uses remain open; Artifact context is navigation.</small></div><div><span class="eyebrow">Layer 1 / Foundation</span><br><br>Items · Center · Artifact preview<small>Titlebar above; private Agent Channel floats at the right edge. There is no channel pinning.</small></div></div>
+    </section>
+    <div id="journey"></div>
+    <section id="mobile" class="chapter wrap">
+      <div class="chapter-head"><div><div class="eyebrow">07 / Mobile experience</div><h2>Three columns. Three screens.</h2></div><p>Items, Work, and Artifact preview become full-width screens. Your private Agent Channel floats above the current screen when you tap Agent.</p></div>
+      <div class="mobile-flow"><span>Left → Items</span><span>Center → Work</span><span>Right → Preview</span><span>Agent → Floating conversation</span></div>
+      <p class="callout"><b>Gutter navigation.</b> Three slim, unlabeled targets map left to Items, middle to Work, and right to Preview. Violet marks the current screen; orange marks an off-screen Question waiting on Work. The compact header keeps an icon-free Back arrow, the Project, and Agent access in your own view. Opening an Attachment shows Preview; Expand enters Artifact context.</p>
+      <div id="mobile-examples" class="mobile-grid"></div>
+      <div class="notes"><div><b>Context travels with you</b>Switching screens preserves the selected Thread, scroll positions, answers, and drafts. Expanding a preview replaces Work with Artifact content and switches Items to peers. Back restores the Thread; dismissing Agent simply reveals the screen underneath.</div><div><b>Touch and keyboard</b>The gutter targets are 24px high with full third-screen widths, accessible names, and visible keyboard focus. Other buttons retain 44px touch targets. Pick files or photos rather than relying on drag-and-drop; annotations use a preselected region in this study.</div></div>
+      <div class="layers"><div><span class="eyebrow">Top / Project</span><br><br>Start on Work<small>At Top, Work contains New Project and existing Projects. Items is available only for System Messages; Preview and Agent are absent. Project Attachments open Preview.</small></div><div><span class="eyebrow">Thread / Artifact</span><br><br>Preview before navigating<small>Thread selection opens Work. Attachments open Preview; Expand opens Artifact context. The floating Agent always follows the owning Project or Thread.</small></div><div><span class="eyebrow">Presence / interruptions</span><br><br>Visible people, private conversations<small>Owner-separated avatars and + invites live in Items. Pending Questions badge Work; activity badges Agent. No automatic screen switching steals focus.</small></div></div>
+    </section>
+    <section id="features" class="chapter wrap">
+      <div class="chapter-head"><div><div class="eyebrow">Feature explainers / Outside the journey</div><h2>More context. Less hunting.</h2></div><p>These are working feature studies, not later steps in the story. Floating surfaces are shown open below so the ideas are visible without discovering every hover.</p></div>
+      <div class="feature-copy"><h3>Your work, or a read-only view through someone else's eyes.</h3><p>Select a member to see the Threads they created, were assigned, or edited, using their own sleep preferences. Search overrides all filters. Other-member views are live and read-only, with a subtle orange glow inset at the content edges, inside the browser frame. Agent access is unavailable: the empty right edge explains that agents can only be used in your own view. Only the assigned user can edit a Thread.</p></div>
+      <div id="feature-example"></div>
+      <div class="feature-copy"><h3>A checklist with room for the work underneath.</h3><p>Each row can hold a tree of subitems, line additions and deletions, and links to the artifacts produced along the way. Counts on a parent roll up from its leaves, without counting the same change twice. Thread cards keep this compact: hover or focus Checklist for a floating preview, or use its chevron to expand inline. Expanding is navigation, so it also works in another member's read-only view.</p></div>
+      <div id="checklist-explainer" class="feature-stage"></div>
+      <div class="feature-copy"><h3>Activity that you can follow into the work.</h3><p>The titlebar shows the busiest three members over 24 hours. The open vertical view below shows up to 15. Select a user, then a Thread icon; hover a white bar for the work behind that activity. Change the time span or go Back without losing your place.</p></div>
+      <div id="timeline-explainer" class="feature-stage"></div>
+      <div class="feature-grid"><article><h3>A familiar shape for every subject.</h3><p>Project and Thread icons are generated monochrome SVGs. Hover an icon to regenerate it with optional guidance. This local study generates deterministic SVG variations, not a real AI request.</p><div id="icon-explainer" class="feature-stage"></div></article><article><h3>Peek before changing your view.</h3><p>Hover an unselected member for their recently updated Threads. This is the same live list selecting that member would show, not a separate activity feed.</p><div id="member-explainer" class="feature-stage"></div></article></div>
+      <div class="feature-copy"><h3>Gutters are the panel, compressed.</h3><p>Each mark aligns with the element it represents, including while the panel is hidden. The top gutter stays visible when the titlebar opens.</p></div>
+      <div class="gutter-key"><div><b>Titlebar</b><p><i class="signal-key green"></i>You selected · <i class="signal-key yellow"></i>Another member selected<br><i class="signal-key white"></i>Other active members · <i class="signal-key gray"></i>Inactive</p></div><div><b>Threads</b><p><i class="signal-key green"></i>Unread, work complete · <i class="signal-key yellow"></i>Unread, waiting / idle<br><i class="signal-key white"></i>Read, incomplete · <i class="signal-key gray"></i>Read, complete</p></div><div><b>Artifacts / Agent Channel</b><p><i class="signal-key green"></i>Artifact changed since opened · <i class="signal-key gray"></i>Already read<br><i class="signal-key white"></i>User message · <i class="signal-key gray"></i>Agent message</p></div></div>
+    </section>
+    </div>
+    <footer class="footer wrap"><div><div class="eyebrow">A starting point, not a frozen specification</div><h2>The work is visible.<br>The machinery is optional.</h2><p>Projects frame the work. Threads open from the grid. Artifacts are curated outputs; Attachments stay with the Comments that introduced them.</p><p>Still to explore: multi-Project monitoring, multi-user Question ownership, recurring-run semantics, and production persistence. The complete decisions are recorded in <code>WORKBENCH_PLAN.md</code>.</p></div><a href="#top">Back to top ↑</a></footer>
+  </main>
+  <dialog id="invite-dialog" aria-labelledby="invite-title"><header><h2 id="invite-title">Invite to On Deck evolution</h2><button data-action="close-invite" aria-label="Close invitation preview">✕</button></header><p>Members share Threads, Comments, and Artifacts. Each person has their own private Agent Channels.</p><label>Email address<input type="email" placeholder="teammate@example.com"></label><p>Invitation form concept only. No invitation will be sent.</p><button class="primary" data-action="close-invite">Done</button></dialog>
+  <noscript><p class="wrap">Enable JavaScript to render the journey snapshots and local example interactions. The complete written plan is in WORKBENCH_PLAN.md.</p></noscript>
+  <script src="workbench-concepts.js?v=20260923-2"></script>
+  <script>
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const avatar = (name = 'you') => `<img class="avatar" src="${name === 'you' ? 'workbench-avatar-you' : `avatar-${name}`}.svg" alt="${name === 'you' ? 'You, project owner' : name === 'mira' ? 'Mira Chen' : 'Theo Grant'}">`;
+    const avatars = () => `<span class="avatars">${avatar()}${avatar('mira')}${avatar('theo')}</span>`;
+    const projectMembers = () => `<span class="project-members" aria-label="Project members: you, owner; Mira Chen and Theo Grant">${avatar()}<span class="owner-divider" role="separator" aria-orientation="vertical" aria-label="Project owner / other members"></span><span class="avatars">${avatar('mira')}${avatar('theo')}</span><button class="member-invite" data-action="invite-members" aria-label="Invite project members" title="Invite project members">+</button></span>`;
+    const spinner = '<span class="spinner" aria-hidden="true"></span>';
+    const status = (text = 'In progress') => `<span class="status">${spinner}${text}</span>`;
+    const tools = () => `<span class="widget-tools"><button data-action="pin-widget" aria-label="Pin widget" aria-pressed="false">${WorkbenchConcept.pin()}</button><button data-action="move-widget" aria-label="Move pinned widget up" disabled>↑</button></span>`;
+    const section = (title, content, count = '', open = true) => content ? `<details class="section" ${open ? 'open' : ''}><summary>${title}${count ? `<span class="count">${count}</span>` : ''}</summary><div class="section-body">${content}</div></details>` : '';
+    const title = (name = 'On Deck evolution', description = 'A quieter workspace for human intent and agent-led work.', scope = 'Project') => `<div class="context-title"><div class="scope">${scope}</div><h4>${WorkbenchConcept.icon(name)}<span class="entity-name">${name}</span></h4><p>${description}</p></div>`;
+    const comment = (text, {agent = false, state = '', more = '', archive = false} = {}) => `<div class="comment ${agent ? 'agent-comment' : ''}"><div class="comment-head">${agent ? '<span class="activity-dot"></span>Facilitator' : `${avatar()}You`}<span>· shared</span>${state ? state === 'Addressed' ? '<span class="status">✓ Addressed</span>' : status(state) : ''}</div><p>${text}</p>${more ? `<details><summary>More...</summary><p>${more}</p></details>` : ''}${archive ? '<button class="text-button" data-action="archive-comment">Archive suggestion</button>' : ''}</div>`;
+    const history = text => `<details class="history"><summary>Hidden / old Comments · 1</summary><p>${text}</p></details>`;
+    const newComment = (placeholder = 'Give the agent an instruction...') => `<details class="comment-compose"><summary class="text-button">+ New Comment</summary><form class="local-comment"><label>Shared Comment<textarea required placeholder="${placeholder}"></textarea></label><button class="primary" type="submit">Post example Comment</button></form></details>`;
+    const comments = (content, old = '', collapsed = false) => section('Comments', `${content}${old ? history(old) : ''}${newComment()}`, '', !collapsed);
+    const preview = '<div class="mini-preview" aria-label="On Deck interface thumbnail"><div class="preview-nav"></div><div class="preview-cols"><div class="preview-col"></div><div class="preview-col"></div><div class="preview-col"></div></div></div>';
+    const upload = (next = 0, simple = false) => {
+      const content = `<div class="dropzone"><span class="plus" aria-hidden="true">+</span><b>Add Attachments</b><br><small>Drop a file or paste text here</small>${next ? `<div class="upload-links"><a class="text-button" href="#step-${next}">Show ${next === 5 ? 'pasted text' : 'image upload'} result →</a></div>` : '<div class="upload-links"><span class="muted">Upload / paste concept</span></div>'}</div>`;
+      return simple ? content : section('Add Attachments', content);
+    };
+    const file = (name, {image = false, ghost = false, simple = false, detail = ''} = {}) => `<article class="widget ${ghost ? 'ghost' : 'attachment-widget'}" data-name="${name}"><div class="widget-head">${ghost ? `<span>▤ &nbsp;${name}</span>${status('Writing')}` : `<button class="attachment-title" data-action="open-artifact" data-file="${name}" aria-label="Preview ${name}">${image ? '▧' : '▤'} &nbsp;${name} →</button>${simple ? '' : tools()}`}</div>${ghost ? `<div class="file-row"><span class="file-icon">MD</span><div class="file-body"><p>Announced by agent. File not created yet.</p><p>${detail || 'Preparing the first draft...'}</p></div></div><button class="tiny" disabled>Not available yet</button>` : image ? `<button class="attachment-thumbnail" data-action="open-artifact" data-file="${name}" aria-label="Preview image ${name}">${preview}</button>` : `<p class="document-preview">${detail || '<strong>Intent, before implementation.</strong>Make the work legible without making the conversation the workspace.'}</p>`}</article>`;
+    const initialFiles = simple => file('workspace-reference.png', {image:true,simple}) + file('project-brief.md', {simple,detail:'<strong>A calm place to work.</strong>Keep artifacts in the foreground. Let agents move the work forward without demanding constant attention.'});
+    const todo = (options = {}) => `<article class="widget tree-widget" data-name="todo"><div class="widget-head">${options.complete ? 'Completed checklist' : 'Planning checklist'}${tools()}</div><div class="checklist">${WorkbenchConcept.checklist({imageReady:false,...options})}</div></article>`;
+    const impactDirectories = [
+      {path:'src/onboarding/',added:88,removed:18,files:3},
+      {path:'src/components/shell/',added:44,removed:12,files:2},
+      {path:'src/styles/',added:18,removed:8,files:1},
+      {path:'tests/onboarding/',added:36,removed:4,files:2}
+    ];
+    const impactTotals = impactDirectories.reduce((total,dir) => ({added:total.added+dir.added,removed:total.removed+dir.removed,files:total.files+dir.files}),{added:0,removed:0,files:0});
+    const diffCount = ({added,removed}) => `<span class="impact-count"><span class="diff-add">+${added}</span><span class="diff-remove">−${removed}</span></span>`;
+    const impactTrigger = () => `<button type="button" class="impact-trigger" data-impact-trigger aria-expanded="false" aria-controls="impact-directory-hover" aria-describedby="impact-directory-hover"><span class="impact-label">Impact</span>${diffCount(impactTotals)}</button>`;
+    const impact = () => `<article class="widget impact" data-name="impact"><div class="widget-head">${impactTrigger()}${tools()}</div><span class="impact-badge">✓ Complete · PR merged</span><a class="impact-link" href="#merged-pr-example">↗ PR #42 · Ship a quieter first-run flow</a><p>Merged into <code>main</code> · completion policy satisfied</p><div class="diff-stats"><span>${impactTotals.files} files changed</span></div><div class="diff-bar" aria-hidden="true"><span></span><span></span></div><p>Replaced the setup wizard with inline onboarding, added Question widgets, and kept Back visible when the Titlebar hides.</p><p class="impact-footer">Illustrative PR and diff, not a real repository change. Hover Impact or its diff count for every affected directory. Open the PR link for the local merged-PR example.</p></article>`;
+    const question = (prompt, choices, freeform = false) => `<article class="widget question"><div class="widget-head"><span>◇ &nbsp;Question for you</span>${tools()}</div><p style="color:var(--text)">${prompt}</p><div class="choices">${choices.map(choice => `<button data-action="answer">${choice}</button>`).join('')}</div>${freeform ? '<form class="answer-form"><input required aria-label="Your own answer" placeholder="Or write your own answer..."><button class="primary" type="submit">Send</button></form>' : ''}</article>`;
+    const repo = (attached = false) => `<article class="widget repo-widget"><div class="widget-head">⌘ &nbsp;Project Repos${tools()}</div><div class="repo-list">${attached ? '<div class="repo-row"><span title="https://github.com/dvroommicrosoft/taskspace-wireframe">dvroommicrosoft / taskspace-wireframe</span><button class="tiny" data-action="remove-repo" aria-label="Remove example repo reference">Remove</button></div>' : '<p class="empty-repos">No Repos attached.</p>'}</div><form class="repo-form answer-form"><input type="url" required aria-label="Repository git URL" placeholder="https://github.com/owner/repo"><button class="primary" type="submit">Attach</button></form><div class="inline-feedback" role="status"></div></article>`;
+    const members = () => `<article class="widget"><div class="widget-head">◎ &nbsp;Project members${tools()}</div><div class="member-row">${avatar()}<span>You <small>· owner</small></span><button class="tiny" data-action="invite">Invite example member</button></div><p>Keep working. Invitations are optional.</p></article>`;
+    const widgetPicker = () => `<details class="widget-picker"><summary>+ Add a widget</summary><p>Pre-configured widgets not yet on this surface.</p><button data-action="add-widget">Add output chart</button></details>`;
+    const threadCard = (name, description, latest, {selected = false, target = 12, schedule = false, complete = false} = {}) => {
+      const heading = `<h5>${name}<span class="active-users" title="You are active">●</span></h5><div class="description">${description}</div>`;
+      if (complete) return `<article class="thread-card ${selected ? 'selected' : ''}"><a class="completed-card-link" href="#step-${target}">${heading}</a><div class="latest-widget"><span class="diff-add">✓</span>${impactTrigger()}<span>${latest}</span></div></article>`;
+      return `<a class="thread-card ${selected ? 'selected' : ''}" href="#step-${target}">${heading}${schedule ? `<div class="schedule-row"><span>Weekly</span><span>${latest}</span></div>` : `<div class="latest-widget">${spinner}${latest}</div>`}</a>`;
+    };
+    const activeCards = selected => threadCard('Research table foundations','Explore an open-source foundation for Items.',selected === 'research-start' ? 'Question · Planning ideas?' : 'research.md · Writing',{selected:selected === 'research' || selected === 'research-start',target:19}) + threadCard('Design the first-run experience','Make project setup feel like beginning the work.','Todo · Planning in progress',{selected:selected === 'design'});
+    const recurringCards = () => threadCard('Maintain & prune tests','Keep the suite useful, focused, and fast.','Mon · 09:00',{target:21,schedule:true}) + threadCard('Explore the project UX','Walk key journeys and flag rough edges.','Wed · 09:00',{target:21,schedule:true}) + threadCard('Find dead code','Identify unused paths and propose removals.','Fri · 09:00',{target:21,schedule:true});
+    const items = (kind = 'threads', selected = '', two = false, repeatables = false, empty = false) => `<aside class="items" aria-label="Items panel"><div class="items-head"><span>${kind === 'system' ? 'System Messages' : kind === 'peers' ? 'Attachments' : 'Threads'}</span><div class="item-controls">${kind === 'threads' ? '<a class="icon item-add" href="#step-17" aria-label="Create a Thread">+</a>' : ''}<button class="icon" data-action="table" aria-label="Toggle cards and table" aria-pressed="false">☷</button><button class="icon" data-action="maximize-items" aria-label="Maximize Items" aria-pressed="false">⤢</button></div></div>${kind === 'system' ? '<div class="widget"><small>SEP 21 / RELEASE NOTES</small><p style="color:var(--text)">A quieter way to work</p><p>Projects, shared artifacts, and agents at the edge.</p></div>' : kind === 'peers' ? '<div class="thread-card selected"><h5>button-study.png</h5><div class="description">Image · added just now</div><div class="latest-widget">Selected Attachment</div></div><p class="notice">plan.md is still a ghost, not a file.</p>' : `<div class="tabs"><button class="${selected === 'repeat' ? '' : 'selected'}" data-action="tab-active">Active</button><button class="${selected === 'repeat' ? 'selected' : ''}" data-action="tab-repeat">Repeatable</button></div><div class="active-list" ${selected === 'repeat' ? 'hidden' : ''}>${empty ? '<p class="notice">No Threads yet.</p>' : `${selected === 'new' ? threadCard('Untitled Thread','Add a description to begin.','Waiting for your description',{selected:true,target:17}) : ''}${two ? activeCards(selected) : threadCard('Design the first-run experience','Make project setup feel like beginning the work.','Todo · Planning in progress',{selected:selected === 'design'})}`}</div><div class="repeat-list" ${selected === 'repeat' ? '' : 'hidden'}>${repeatables ? recurringCards() : '<p class="notice">No repeatable Threads yet.</p>'}<small>Example timezone: America/Los_Angeles</small></div><details class="older"><summary>Older Threads · collapsed</summary><p>No older Threads in this new Project. A populated Project would show those beyond the recent-activity threshold here.</p></details>`}</aside>`;
+    const channel = (scope, message, record = '', busy = true, waiting = false) => `<aside class="channel" aria-label="Your private Agent Channel"><div class="channel-head"><span>${scope === 'Project' ? 'Facilitator' : 'Thread agent'}</span><button class="icon" data-action="close-channel" aria-label="Close channel">✕</button></div><div class="private-label">◉ Only you · ${scope} channel · floating</div>${busy ? `<div class="channel-message"><strong>${scope === 'Project' ? 'Facilitator' : 'Thread agent'}</strong>${message || 'I am moving the work forward. Shared progress appears in your widgets and Comments.'}</div>` : '<p class="notice">No messages yet. Starting work creates your private channel.</p>'}${record ? `<details><summary>✓ ${record}</summary><p>Your response is recorded here; the Question no longer needs space in the Center.</p></details>` : ''}<div class="channel-records"></div><div class="status channel-status">${busy ? waiting ? '◇ Waiting for your answer' : `${spinner}Working in this channel` : 'Channel quiet'}</div><div class="channel-composer">Private conversation lives here.<br>This walkthrough does not send messages.</div></aside>`;
+    const projectDescription = 'A quieter workspace for human intent and agent-led work.';
+    function shell(content, options = {}) {
+      const {context = 'Project', simple = false, home = false, left = false, artifact = false, two = false, repeatables = false, empty = false, selected = '', message = '', record = '', busy = true, waiting = false, tall = false, route = '', back = 1} = options;
+      const scope = context === 'Thread' || artifact ? 'Thread' : 'Project';
+      const classes = [home ? 'home' : '',simple ? 'simple' : '',left ? 'left-shown' : '',artifact ? 'artifact' : '',tall ? 'tall' : ''].filter(Boolean).join(' ');
+      return `<div class="stage-scroll"><div class="screen"><div class="browser-bar"><i class="browser-dot"></i><i class="browser-dot"></i><i class="browser-dot"></i><span class="route">workbench.local${route || (home ? '/' : artifact ? '/on-deck-evolution/threads/first-run/artifacts/button-study' : context === 'Thread' ? '/on-deck-evolution/threads/first-run' : '/on-deck-evolution')}</span><span class="screen-label">CONCEPT</span></div><div class="app ${classes}" data-scope="${scope}">
+        ${!home ? `<a class="back" href="#step-${back}" aria-label="Back to ${artifact ? 'Thread' : context === 'Thread' ? 'Project' : 'Top'}">‹</a><button class="top-edge" data-action="top" aria-label="Reveal Titlebar"></button>` : ''}
+        <header class="titlebar"><span class="product" aria-label="Workbench"><img class="workbench-logo" src="workbench-logo.svg" alt=""></span>${!home ? `<span class="divider"></span><span class="project-choice">${WorkbenchConcept.icon('On Deck evolution')}<button class="project-select" aria-label="Select Project">On Deck evolution${WorkbenchConcept.chevron()}</button></span><span class="avatar-group">${projectMembers()}</span><button class="activity-summary" aria-label="Activity over the last 24 hours"></button><button class="icon titlebar-pin" data-action="pin-top" aria-label="Pin Titlebar" aria-pressed="false">${WorkbenchConcept.pin()}</button>` : ''}<span class="account-divider" role="separator" aria-orientation="vertical"></span><details class="account"><summary aria-label="Account and Settings"><span class="account-gear">${WorkbenchConcept.gear()}${avatar()}</span></summary><div class="account-menu"><b>Your account</b><p>Settings</p><small>Menu concept only</small></div></details></header>
+        <div class="workspace">${items(home ? 'system' : artifact ? 'peers' : 'threads',selected,two,repeatables,empty || simple)}<div class="center">${content}</div></div>
+        <button class="edge left-edge" data-action="left" aria-label="Reveal Items panel"><span class="signal"></span><span class="signal"></span></button>
+        ${!home ? `<button class="edge right-edge ${busy ? 'busy' : ''} ${waiting ? 'waiting' : ''}" data-action="channel" aria-label="Reveal your private ${scope} Agent Channel"><span class="signal"></span><span class="signal"></span><span class="signal"></span><span class="signal"></span></button>${channel(scope,message,record,busy,waiting)}<span class="edge-note">${busy ? spinner : '<span class="activity-dot"></span>'}${waiting ? 'Your answer requested' : busy ? `${scope} agent active` : 'Channel quiet'}</span>` : ''}
+      </div></div></div>`;
+    }
+    const threadTitle = () => title('Design the first-run experience','Make project setup feel like beginning the work.','Thread · On Deck evolution');
+    const researchTitle = () => title('Research table foundations','Explore an open-source foundation for Items.','Thread · On Deck evolution');
+    const imageSVG = `<svg viewBox="0 0 660 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A product screen reference with three work cards and a Create project button"><rect width="660" height="400" fill="#101517"/><rect x="28" y="22" width="25" height="25" rx="6" fill="#a78bfa"/><text x="65" y="40" fill="#e9edef" font-family="system-ui" font-size="15">On Deck</text><circle cx="610" cy="34" r="12" fill="#596474"/><path d="M28 65H632" stroke="#30383d"/><text x="34" y="102" fill="#e9edef" font-family="system-ui" font-size="21">Your work, in motion.</text><text x="34" y="125" fill="#859099" font-family="system-ui" font-size="11">Keep the outcomes close. Leave the noise behind.</text><g fill="#1b2227" stroke="#343c42"><rect x="34" y="151" width="187" height="122" rx="9"/><rect x="237" y="151" width="187" height="122" rx="9"/><rect x="440" y="151" width="187" height="122" rx="9"/></g><g fill="#c0c7cb" font-family="system-ui" font-size="12"><text x="49" y="178">First-run experience</text><text x="251" y="178">Table foundations</text><text x="455" y="178">Project explanation</text></g><g stroke="#435048" stroke-width="4" stroke-linecap="round"><path d="M50 201h123M50 214h95M50 227h106"/><path d="M252 201h120M252 214h99M252 227h110"/><path d="M456 201h120M456 214h90M456 227h113"/></g><rect x="460" y="302" width="148" height="40" rx="7" fill="#728ad8"/><text x="480" y="327" fill="#fff" font-family="system-ui" font-size="12">Create project</text><text x="34" y="328" fill="#89939d" font-family="system-ui" font-size="11">A quieter workspace starts here.</text></svg>`;
+    const imageView = (annotated = false) => `<div class="image-toolbar"><span>▧ button-study.png <small>· Thread Attachment</small></span><span>Fit · 100%</span></div><div class="image-canvas" data-annotated="${annotated}">${imageSVG}<div class="selection"></div>${annotated ? '<button class="annotation-marker" data-action="annotation" aria-label="Expand image Comment">1</button><div class="annotation-bubble" hidden><small>You · shared annotation</small><p>Make this button our violet accent rather than blue. It should feel like the next clear action.</p><span class="status">✓ Sent to your Thread agent</span></div>' : '<form class="annotation-form"><label>Comment on this region<input required aria-label="Image region Comment" placeholder="What should change?"></label><button class="primary" type="submit">Post Comment ↵</button><p>Shared on this image · handled by your agent</p></form>'}</div><div class="annotation-help">${annotated ? 'The Comment is anchored to the selected region. Click marker 1 to expand it.' : 'Drag on the image to move the selection, or use the preselected button region. Type a Comment and press Enter.'}</div>`;
+    const startText = 'Help me turn this project into actionable work. Read the attachments, connect the right repos, and help me decide where to begin.';
+    const startMore = 'Ask how I want work to be considered complete. Offer member invitations without blocking progress. Suggest a first Thread from the project context, then hand it to a Thread agent for planning.';
+    const completedRepo = 'Facilitator · Add a repo by URL so I can understand the code. Completed after the repo was attached.';
+    const nextSteps = 'Your project is ready. Open the first Thread to shape its plan, or add another Thread when a new idea comes up.';
+    const completionQuestion = () => question('How should we decide that work is complete?', ['Merged to a local branch','Merged PR','Pushed branch','No definition'],true);
+    const completionRecord = 'Completion policy · Merged PR';
+    const stepData = [
+      {id:1,chapter:'arrive',name:'Begin with the projects, not the machinery.',context:'Top / Simple',description:'Open the base URL. The first action is centered; existing Projects follow below. System Messages are available at the left edge, but there is no Agent Channel.',human:'Choose New Project. The Titlebar stays visible at Top.',system:'Existing Project rows show descriptions and owner-first member avatars.',content:()=>shell(`<div class="simple-primary"><h4>What are we working on?</h4><p>Give the work a place to begin.</p><a class="primary" style="display:inline-block;padding:11px 18px;border-radius:7px" href="#step-2">+ New Project</a></div><div class="project-list"><div class="project-row"><div><h5>Design system</h5><p>Patterns for a calmer product.</p></div>${avatars()}</div><div class="project-row"><div><h5>Release readiness</h5><p>Everything that needs to land, together.</p></div><span class="avatars">${avatar('mira')}${avatar()}</span></div></div>`,{home:true,simple:true,busy:false})},
+      {id:2,name:'A name, a description, a beginning.',context:'Top / Simple',description:'New Project expands in place. Keep creation small: a human-readable name and a description of the intent.',human:'Edit the sample fields, then Create to jump to the next snapshot.',system:'The name derives the first URL path element. Collision and rename rules are still open.',content:()=>shell(`<article class="widget form-widget"><div class="widget-head">New Project</div><form class="create-project"><label>Project name<input required name="name" value="On Deck evolution"></label><label>Description<textarea required name="description">${projectDescription}</textarea></label><small class="slug-preview">workbench.local/on-deck-evolution</small><button class="primary" type="submit">Create Project →</button></form></article>`,{home:true,simple:true,busy:false})},
+      {id:3,name:'Nothing competing for your attention.',context:'Project / Simple',description:'The new Project opens with Titlebar, Items, and Agent Channel hidden. Back survives outside the hidden Titlebar. The Center is always present.',human:'Get Started is the centered primary widget. Add context before starting.',system:'No Threads and no channel messages means Simple mode. No section headers or widget pin controls.',content:()=>shell(`${title()}<div class="simple-primary"><a class="primary" style="display:inline-block;padding:11px 23px;border-radius:7px" href="#step-6">Get Started</a><p>Bring a little context. We will take it from there.</p></div>${upload(4,true)}`,{simple:true,busy:false})},
+      {id:4,name:'An image becomes shared context.',context:'Project / Simple',description:'Drag a reference image into Add Attachments. Its default image widget appears below the upload area, without changing the fresh-Project mode.',human:'Drop workspace-reference.png. This snapshot shows the resulting Attachment.',system:'It is a durable Project Attachment, not a channel upload or a Thread file.',content:()=>shell(`${title()}<div class="simple-primary" style="margin-top:28px"><a class="primary" style="display:inline-block;padding:10px 20px;border-radius:7px" href="#step-6">Get Started</a></div>${upload(5,true)}${file('workspace-reference.png',{image:true,simple:true})}`,{simple:true,busy:false})},
+      {id:5,name:'Pasted intent becomes a document.',context:'Project / Simple',description:'Paste a short brief into the same Add Attachments area. Workbench creates a Markdown document with that text and places it after the image.',human:'The initial image and written brief will guide the Facilitator.',system:'Attachments alone do not start a channel or switch the Project into Complex mode.',content:()=>shell(`${title()}<div class="simple-primary" style="margin-top:18px"><a class="primary" style="display:inline-block;padding:10px 20px;border-radius:7px" href="#step-6">Get Started →</a></div>${upload(0,true)}${initialFiles(true)}`,{simple:true,busy:false,tall:true})},
+      {id:6,chapter:'onboard',name:'Get Started is a real request.',context:'Project / Complex',description:'Clicking Get Started creates a canned User Comment. It is long, so only the opening lines show. The agent marks it in progress; a thin right-edge signal comes alive.',human:'Expand More... to inspect the onboarding request. The request is shared; the channel is private.',system:'The Facilitator begins using tools to attach widgets. The Project now uses Complex mode.',content:()=>shell(`${title()}${comments(comment(startText,{state:'In progress',more:startMore}))}${upload()}${section('Attachments',initialFiles(false),'2')}`,{message:'I have read your project brief and reference image. I will connect the repo, establish a completion policy, then propose the first Thread.',tall:true})},
+      {id:7,name:'Configuration arrives where it is needed.',context:'Project / Complex',description:'The Facilitator attaches Repo Config and posts an Agent Comment asking for a repo URL. The widget starts empty and supports adding and removing references.',human:'Try attaching a sample git URL. This changes only this local snapshot.',system:'The agent is reacting to the shared onboarding Comment. Tools create the Dynamic; the channel stays out of the way.',content:()=>shell(`${title()}${comments(comment('Add a repo by URL so I can understand the code this project will work with.',{agent:true}))}${section('Controls',repo(false))}${upload()}${section('Attachments',initialFiles(false),'2')}`,{waiting:true,message:'I attached the Repo Config widget. Add a repository reference there; you do not need to configure this in chat.',tall:true})},
+      {id:8,name:'Agree on what “done” means.',context:'Project / Complex',description:'After a repo is attached, the agent completes and hides its own repo-request Comment. A Question widget asks how work should be considered complete.',human:'Choose a policy or type your own answer. The Question leaves the Center; open the right edge to find its collapsed record.',system:'Local branch merge, merged PR, pushed branch, no definition, and freeform are all first-class answers.',content:()=>shell(`${title()}${comments('',completedRepo)}${section('Questions',completionQuestion(),'1')}${section('Controls',repo(true))}${upload()}`,{waiting:true,message:'The repository is connected. Before planning, I need your definition of complete.',tall:true})},
+      {id:9,name:'Invite people without blocking the work.',context:'Project / Complex',description:'The answer is now a collapsed line in your channel. A Member Control widget and a shared invitation suggestion appear, but the Facilitator continues.',human:'Invitations are optional. The widget persists independently of its suggestion Comment.',system:'Members share work, not private channels. Each member can have their own Project and Thread channels.',content:()=>shell(`${title()}${comments(comment('You can invite teammates now or later. I will keep going with the context you have already provided.',{agent:true,archive:true}),completedRepo)}${section('Controls',members()+repo(true))}${upload()}`,{record:completionRecord,message:'Merged PR is the completion policy. I am using the reference image and project brief to suggest a first Thread.',tall:true})},
+      {id:10,name:'Let the user choose the first direction.',context:'Project / Complex',description:'The Facilitator uses the initial attachments to suggest Thread subjects. The user archives the invitation suggestion and writes their own response instead of picking a canned option.',human:'Archive the suggestion and answer: “Start with the first-run experience. Keep setup quiet and artifact-led.”',system:'Archiving a Comment does not remove Member Control. Answering the Question triggers Thread creation.',content:()=>shell(`${title()}${comments(comment('Consider inviting a teammate to shape the first plan.',{agent:true,archive:true}))}${section('Questions',question('Based on your reference image and brief, where should the first Thread begin?', ['First-run experience','Thread navigation','Artifact review'],true),'1')}${section('Controls',members())}`,{waiting:true,record:completionRecord,tall:true})},
+      {id:11,name:'A new Thread starts moving.',context:'Project / Complex',description:'The Facilitator creates the first Thread and sends planning instructions to its new private channel. The Project onboarding is complete; the new card shows its latest widget.',human:'Reveal Items, then open the first Thread. Its card shows title, one description line, and Planning in progress.',system:'The onboarding Comment is addressed. The Thread agent can work while the user remains in Project context.',content:()=>shell(`${title()}${comments(comment('Project onboarding is complete.',{state:'Addressed'})+comment(nextSteps,{agent:true}))}${section('Controls',repo(true)+members())}${section('Attachments',initialFiles(false),'2')}`,{left:true,message:'I created “Design the first-run experience” and asked your Thread agent to start planning. Project onboarding is complete.',record:completionRecord,tall:true})},
+      {id:12,chapter:'plan',name:'An output can be promised before it exists.',context:'Thread / Complex',description:'Open the Thread. The Agent Channel is hidden. The Center shows the todo list, Add Attachments, and a dotted plan.md placeholder with a spinner.',human:'Read progress without reading a conversation. The ghost cannot be opened.',system:'A ghost announces intent. It becomes a normal Attachment only when a durable file is available.',content:()=>shell(`${threadTitle()}${section('Controls',todo())}${upload(14)}${section('Attachments',file('plan.md',{ghost:true,detail:'Synthesizing the first-run journey.'}),'1 pending')}`,{context:'Thread',left:true,selected:'design',back:11,message:'I have the project brief, reference image, and repo context. I am drafting a first-run plan.',tall:true})},
+      {id:13,name:'A question interrupts the page, not the flow.',context:'Thread / Complex',description:'The Thread agent asks a focused question. It animates into Questions. After the user answers, it disappears and activity resumes at the right edge.',human:'Pick “First-time solo user.” The channel receives a collapsed answer record.',system:'The answer updates planning. Channel activity is represented by edge segments, not a permanently open transcript.',content:()=>shell(`${threadTitle()}${section('Questions',question('Who should this first-run flow serve first?', ['First-time solo user','An existing team','Both from day one']),'1')}${section('Controls',todo())}${upload()}${section('Attachments',file('plan.md',{ghost:true}),'1 pending')}`,{context:'Thread',selected:'design',back:11,waiting:true,message:'One decision will sharpen this plan: the first user we should optimize for.',tall:true})},
+      {id:14,name:'Preview the next reference beside the work.',context:'Thread / Preview',description:'Drop a second image into this Thread, then click its Attachment. The right-hand preview opens beside the Thread widgets. Collapse Items to give more space to Thread detail, or resize either split.',human:'Inspect button-study.png on the right. Use Expand to enter Artifact context and work directly on the image.',system:'Opening a preview does not change the Thread or its channel. Only durable Thread Attachments appear in the expanded peer list.',content:()=>shell(`${threadTitle()}${section('Controls',todo())}${upload()}${section('Attachments',file('plan.md',{ghost:true})+file('button-study.png',{image:true}),'1 file · 1 pending')}`,{context:'Thread',left:true,selected:'design',back:11,record:'Audience · First-time solo user',tall:true})},
+      {id:15,name:'Comment on the thing itself.',context:'Artifact / Image',description:'Expand the image preview into Artifact context. The left side becomes a peer-attachment list with one real file. Full image content now occupies the middle and right sections.',human:'Drag a box around the button, then enter a color instruction. Keyboard users can use the preselected region.',system:'The floating composer anchors a shared Comment to the image region, while routing its update to your private Thread agent.',content:()=>shell(imageView(),{artifact:true,left:true,back:14,message:'I am still drafting the plan. Image annotations will reach me automatically.'})},
+      {id:16,name:'The annotation stays. The composer leaves.',context:'Artifact / Image',description:'Enter submits the Comment and replaces the floating form with an anchored marker. The right gutter responds as the agent receives the update.',human:'Click marker 1 to read the Comment. Back returns to the Thread, not the Project.',system:'Shared annotation: “Make this button our violet accent rather than blue.” Private agent processing stays in your channel.',content:()=>shell(imageView(true),{artifact:true,left:true,back:14,message:'I received your image annotation. I will use the violet accent for the primary Create action and reflect that in the plan.'})},
+      {id:17,chapter:'redirect',name:'Start another Thread with intent, not a title.',context:'Thread / New',description:'Back returns to the Thread. Hover or focus Items to reveal +. Creating a Thread prepends it to the list and opens an expanded Description field in the otherwise empty Center.',human:'Type the description and Save. “Focus description” demonstrates the creation-time cursor without stealing focus while reading this long page.',system:'No generated artifacts or canned content yet. The title will be generated after the description is saved.',content:()=>shell(`<div class="context-title"><div class="scope">New Thread · On Deck evolution</div><h4>Untitled Thread</h4></div><form class="description-form"><label>Description<textarea required placeholder="What should this Thread explore?">Explore options for the Items panel and its table presentation.</textarea></label><div class="choices"><button class="primary" type="submit">Save description →</button><button class="secondary" type="button" data-action="focus-description">Focus description</button></div></form><p class="notice" style="margin-top:25px">A description is enough to get started.</p>`,{context:'Thread',left:true,selected:'new',back:11,busy:false,route:'/on-deck-evolution/threads/new'})},
+      {id:18,name:'The agent offers a direction.',context:'Thread / Complex',description:'Saving wakes the Thread agent. It generates the title and asks whether to begin planning different ideas.',human:'A Question is not a demand to stop everything. The user can give a different instruction instead.',system:'The new Thread appears above the first. The first Thread continues planning independently.',content:()=>shell(`${researchTitle()}${section('Questions',question('Should I start planning a few different ideas for the Items panel?', ['Yes, explore ideas','Not yet']),'1')}${comments('')}${upload()}`,{context:'Thread',left:true,two:true,selected:'research',back:11,waiting:true,route:'/on-deck-evolution/threads/table-foundations',message:'I named this Thread “Research table foundations.” I can explore a few possible directions before we choose one.'})},
+      {id:19,name:'A new instruction can supersede a question.',context:'Thread / Complex',description:'Instead of answering, the user posts a New Comment asking for open-source research. The agent retracts the pending planning Question and registers research.md.',human:'The instruction collapses under Comments with an in-progress state. Expand it to read the research request.',system:'Retraction is not an answer. research.md is a non-openable ghost; the right edge shows the agent working.',content:()=>shell(`${researchTitle()}${comments(comment('Research TanStack Table and explain how we could leverage it for the Items panel. Focus on the tradeoffs between wide cards and a table view.',{state:'In progress'}),'',true)}<p class="notice">Planning Question retracted · superseded by your research instruction</p>${upload()}${section('Attachments',file('research.md',{ghost:true,detail:'Researching capabilities, integration, and tradeoffs.'}),'1 pending')}`,{context:'Thread',left:true,two:true,selected:'research',back:20,route:'/on-deck-evolution/threads/table-foundations',message:'Your research instruction supersedes my planning Question, so I retracted it. I will write research.md with a recommendation and supporting tradeoffs.'})},
+      {id:20,chapter:'coordinate',name:'Repeat the useful work.',context:'Project / Complex',description:'Back opens the Project. The user posts a shared Comment requesting repeatable Threads for tests, UX exploration, and dead code, each on a different weekday morning.',human:'One instruction describes three ongoing practices, rather than three manually recreated tasks.',system:'The Facilitator creates repeatable definitions and schedules. This page illustrates them; it does not schedule real work.',content:()=>shell(`${title()}${comments(comment('Create repeatable Threads for maintaining and pruning tests, exploring the project UX, and finding dead code. Schedule each once a week in the morning, on different weekdays.',{state:'In progress'}))}${section('Controls',repo(true))}${upload()}`,{left:true,two:true,message:'I am creating three repeatable Thread definitions. I will separate their weekly runs across weekday mornings.',tall:true})},
+      {id:21,name:'See the rhythm taking shape.',context:'Project / Repeatable',description:'Switch Items to Repeatable. Three compact cards appear with their schedules, separate from the two active one-off Threads.',human:'Try the Active / Repeatable tabs and cards / table control. Each repeatable card shows its latest schedule widget.',system:'Monday, Wednesday, and Friday at 09:00 are illustrative choices in America/Los_Angeles, not fixed defaults.',content:()=>shell(`${title()}${comments(comment('Three repeatable Threads are ready: tests on Monday, UX on Wednesday, and dead code on Friday. All at 09:00 in the example project timezone.',{agent:true})+comment('Create weekly maintenance Threads.',{state:'Addressed'}))}${section('Controls',repo(true))}`,{left:true,two:true,selected:'repeat',message:'The repeatable definitions and example schedules are visible in Items. The two active Threads continue independently.'})},
+      {id:22,name:'Give the Project agent the wider view.',context:'Project / Complex',description:'The user asks the Facilitator to monitor the two in-progress Threads, keep them aligned, and explain the Project.',human:'Coordination is Project-level work. No need to copy both private transcripts into a shared conversation.',system:'Shared Thread state and artifacts provide coordination context. Cross-agent permissions and monitoring lifetime still need definition.',content:()=>shell(`${title()}${comments(comment('Monitor the two in-progress Threads and keep them aligned. Write an explanation of this project: what we are building, why, and how the work fits together.',{state:'In progress'}))}${section('Controls',repo(true)+members())}${upload()}`,{left:true,two:true,message:'I will watch the first-run planning and table research for alignment, and write a shared project explanation.',tall:true})},
+      {id:23,name:'The Project grows its own explanation.',context:'Project / Complex',description:'A Project-level explanation.md ghost appears. The Facilitator is writing while the two Thread agents continue their work.',human:'A placeholder signals an upcoming output, not a broken document link.',system:'The attachment belongs to the Project. Once opened, it must inherit your Project channel, not a Thread channel.',content:()=>shell(`${title()}${comments(comment('Monitor both Threads and explain the Project.',{state:'In progress'}),'',true)}${upload()}${section('Attachments',file('explanation.md',{ghost:true,detail:'Connecting the project intent, first-run plan, and table research.'})+initialFiles(false),'2 files · 1 pending')}`,{left:true,two:true,message:'I am synthesizing the shared context into explanation.md. The first-run Thread and table research are complementary; I am watching their assumptions.',tall:true})},
+      {id:24,name:'An artifact becomes the shared understanding.',context:'Project / Complex',description:'The ghost resolves into a real document. Its preview becomes readable and its expanded presentation becomes available. The explanation is ready; monitoring is still ongoing.',human:'Open explanation.md, or try pinning widgets, moving a pinned widget up, and adding a pre-configured chart.',system:'Do not mark an ongoing monitoring request completely addressed just because one deliverable is done.',content:()=>shell(`${title()}${comments(comment('The project explanation is ready. I am continuing to monitor both Threads for alignment.',{agent:true})+comment('Monitor both Threads and explain the Project.',{state:'Monitoring'}))}${widgetPicker()}${section('Attachments',file('explanation.md',{detail:'<strong>A place for the work.</strong>Workbench connects human intent to agent-led work through Projects, Threads, and shared artifacts. The first-run plan shapes how work begins; table research shapes how it stays visible.'})+initialFiles(false),'3')}`,{left:true,two:true,message:'explanation.md is available. I am continuing the monitoring part of your request; its stop conditions and cadence are still to be defined.',tall:true})}
+    ];
+    stepData.push({id:25,chapter:'complete',name:'Done should say what changed.',context:'Thread / Complete',description:'Later, the first-run work is implemented and its PR is merged. The Thread is complete. An Impact Dynamic replaces activity as the most useful summary of the work.',human:'See the merged PR, the size of the diff, and the directories involved without opening the agent transcript.',system:'The Thread completion policy is satisfied by the merged PR. Project-level monitoring remains separate. All PR and diff data here is illustrative.',content:()=>shell(`${threadTitle()}<span class="impact-badge">Thread complete</span>${comments(comment('Implement the first-run flow and merge the reviewed PR.',{state:'Addressed'}),'',true)}${section('Controls',impact())}`,{context:'Thread',left:true,two:true,selected:'design',back:24,busy:false,tall:true})});
+    const chapters = {
+      arrive:['01 / Arrive','Give the work a home.','Project creation should feel smaller than the work it enables. Begin with intent and useful context.'],
+      onboard:['02 / Onboard','Let the interface meet the work.','The agent creates the controls it needs, asks only the next useful question, and keeps the conversation optional.'],
+      plan:['03 / Plan','Move from conversation to evidence.','A plan in progress, a targeted question, an annotated image. Work stays tangible as the context becomes more focused.'],
+      redirect:['04 / Redirect','Make room for a different thought.','A new Thread starts from a description. A fresh instruction can change direction without completing an obsolete prompt.'],
+      coordinate:['05 / Coordinate','Step back without losing the thread.','The Project becomes the place to establish recurring work, align parallel Threads, and build shared understanding.'],
+      complete:['06 / Impact','Make the outcome legible.','A completed Thread leaves evidence: the change that landed, where it landed, and why it matters.']
+    };
+    let currentChapter;
+    for (const step of stepData) {
+      if (step.chapter) {
+        const [eyebrow, heading, description] = chapters[step.chapter];
+        currentChapter = document.createElement('section');
+        currentChapter.id = step.chapter;
+        currentChapter.className = 'chapter wrap';
+        currentChapter.innerHTML = `<div class="chapter-head"><div><div class="eyebrow">${eyebrow}</div><h2>${heading}</h2></div><p>${description}</p></div>`;
+        $('#journey').append(currentChapter);
+      }
+      const article = document.createElement('article');
+      article.id = `step-${step.id}`;
+      article.className = 'step';
+      article.innerHTML = `<div class="step-heading"><span class="step-no">${String(step.id).padStart(2,'0')}</span><div><h3>${step.name}</h3><p>${step.description}</p></div><span class="tag">${step.context}</span></div>${step.content()}<div class="notes"><div><b>Human / visible result</b>${step.human}</div><div><b>Agent / system consequence</b>${step.system}</div></div>`;
+      if (step.id >= 6 && step.id <= 10) $('.active-list',article).innerHTML = '<p class="notice">No Threads yet.</p>';
+      if (step.id >= 21) $('.repeat-list',article).innerHTML = `${recurringCards()}<small>Example timezone: America/Los_Angeles</small>`;
+      if (step.id === 18) $('.active-list',article).innerHTML = activeCards('research-start');
+      if (step.id === 25) {
+        $('.active-list',article).innerHTML = threadCard('Design the first-run experience','Make project setup feel like beginning the work.','PR #42 merged',{selected:true,target:25,complete:true}) + threadCard('Research table foundations','Explore an open-source foundation for Items.','research.md · Writing',{target:19});
+        $('.channel .notice',article).outerHTML = '<div class="channel-message"><strong>Thread agent</strong>The example PR is merged into main. The Thread is complete; its Impact widget summarizes the result.</div>';
+        $('.edge-note',article).textContent = '✓ Thread complete · channel quiet';
+      }
+      currentChapter.append(article);
+    }
+    $('#complete').insertAdjacentHTML('beforeend',`<details id="merged-pr-example" class="pr-example"><summary>PR #42 · Local merged-PR example · open to inspect</summary><h3>Ship a quieter first-run flow</h3><span class="impact-badge">Merged into main</span><p>Illustrative repository: workbench/product. This is a local design fixture, not a claim about an actual GitHub PR.</p><p><b>8 files changed · +186 / −42.</b> Three onboarding files, two shell files, one stylesheet, and two journey tests. The changes move setup into the Center and preserve navigation when chrome is hidden.</p><pre aria-label="Illustrative code diff"><span class="muted">src/onboarding/ProjectStart.tsx</span>
++ &lt;InlineOnboarding project={project} /&gt;
+- &lt;SetupWizard project={project} /&gt;
++
++ &lt;QuestionWidgets channel={currentUserChannel} /&gt;
++
+  <span class="muted">src/components/shell/Titlebar.tsx</span>
++ &lt;PersistentBack target={parentContext} /&gt;</pre><a class="text-button" href="#step-25">Return to the completed Thread ↑</a></details>`);
+    function mobilePhone(initialView, index) {
+      const id = `phone-${index}`;
+      return `<div class="phone" data-view="${initialView}" data-artifact="false"><div class="phone-status"><span>9:41</span><span>5G · 100%</span></div><header class="phone-header"><a href="#step-20" class="mobile-project-back" aria-label="Back to Project snapshot">‹</a><button class="mobile-artifact-back" data-mobile-view="work" data-mobile-exit-artifact hidden aria-label="Back to Thread">‹</button><div><strong>On Deck evolution</strong><small class="mobile-context">Thread · First-run experience</small></div><button class="mobile-agent-trigger" data-mobile-channel aria-expanded="false" aria-controls="${id}-agent">Agent<br><span class="diff-add">active</span></button></header><nav class="phone-nav" aria-label="Mobile workspace screens"><button data-mobile-view="items" aria-pressed="${initialView === 'items'}" aria-controls="${id}-items">Items</button><button data-mobile-view="work" aria-pressed="${initialView === 'work'}" aria-controls="${id}-work">Work <span class="mobile-unread">1 question</span></button><button data-mobile-view="preview" aria-pressed="${initialView === 'preview'}" aria-controls="${id}-preview">Preview</button></nav><div class="phone-content">
+        <section id="${id}-items" class="mobile-pane" data-pane="items" aria-label="Items screen" tabindex="-1" ${initialView !== 'items' ? 'hidden' : ''}><div class="mobile-thread-list"><div class="eyebrow">Left column / Items</div><h4>Threads</h4><p>Recently updated in this Project.</p><button class="thread-card selected" data-mobile-view="work"><h5>Design the first-run experience</h5><div class="description">Make project setup feel like beginning the work.</div><div class="latest-widget">${spinner}Todo · Planning in progress</div></button><a class="thread-card" href="#step-19"><h5>Research table foundations</h5><div class="description">Explore an open-source foundation for Items.</div><div class="latest-widget">${spinner}research.md · Writing</div></a><a class="secondary phone-action" href="#step-17">+ New Thread</a><details class="older"><summary>Older Threads</summary><p>No older Threads in this example.</p></details></div><div class="mobile-peer-list" hidden><div class="eyebrow">Artifact / Peers</div><h4>Attachments</h4><button class="thread-card selected" data-mobile-view="artifact"><h5>button-study.png</h5><div class="latest-widget">Selected image · Thread Attachment</div></button><p>plan.md is still a ghost, so it is not in the peer list.</p></div><div class="mobile-presence">${projectMembers()}</div><small>Owner | Members · 2 active<br>Illustrative member presence</small></section>
+        <section id="${id}-work" class="mobile-pane" data-pane="work" aria-label="Work screen" tabindex="-1" ${initialView !== 'work' ? 'hidden' : ''}><div class="eyebrow">Center column / Work</div><h4>Design the first-run experience</h4><p>Make project setup feel like beginning the work.</p><article class="widget question mobile-question"><div class="widget-head">◇ Question for you</div><p>Who should this first-run flow serve first?</p><div class="choices"><button data-mobile-answer>First-time solo user</button><button data-mobile-answer>An existing team</button></div></article><div class="mobile-answer-feedback" role="status"></div>${todo()}<button class="mobile-file" data-mobile-view="preview">▧ button-study.png${preview}<small>Open Artifact preview →</small></button><details class="mobile-compose"><summary>+ New Comment</summary><form class="mobile-comment-form"><label>Shared Comment<textarea required placeholder="Give your agent an instruction..."></textarea></label><button type="submit" class="primary phone-action">Post example Comment</button></form></details><div class="mobile-shared-comments"></div><p class="notice">Add Attachments uses a file / photo picker or pasted text. Picker concept only in this study.</p></section>
+        <section id="${id}-agent" class="mobile-agent" aria-label="Private Agent Channel overlay" tabindex="-1" hidden><button class="mobile-agent-close" data-mobile-channel aria-label="Close Agent Channel">✕</button><div class="eyebrow">Floating / Private</div><h4>Thread agent</h4><div class="private-label">◉ Only you · Thread channel</div><div class="mobile-message">Plan the first-run experience from the Project brief and reference image.</div><div class="channel-message"><strong>Thread agent</strong>I have read the shared context. I am drafting plan.md. One audience decision will sharpen the plan; the Question is on Work.</div><div class="mobile-records"></div><div class="mobile-agent-state">${spinner}Planning · answer requested on Work</div><button class="secondary phone-action" data-mobile-channel>Dismiss conversation</button><p class="notice">Mira and Theo cannot see this conversation. Your shared outputs remain visible to them.</p></section>
+        <section id="${id}-preview" class="mobile-pane" data-pane="preview" aria-label="Artifact preview screen" tabindex="-1" ${initialView !== 'preview' ? 'hidden' : ''}><div class="eyebrow">Right column / Preview</div><h4>button-study.png</h4><div class="artifact-preview-content">${imageSVG}</div><p>Preview this Thread Attachment without leaving the Thread context.</p><button class="primary phone-action" data-mobile-view="artifact">Expand into Artifact context ↗</button><button class="secondary phone-action" data-mobile-view="work">Return to Work</button></section>
+        <section id="${id}-artifact" class="mobile-pane" data-pane="artifact" aria-label="Artifact screen" tabindex="-1" hidden><div class="eyebrow">Artifact / Thread Attachment</div><h4>button-study.png</h4><p>The full image, with the same Thread channel one tap away.</p>${imageView(true)}<p>On touch, use an explicit Mark region tool rather than accidental drag gestures. This example starts with the button selected.</p><button class="secondary phone-action" data-mobile-view="work" data-mobile-exit-artifact>Back to Thread</button></section>
+      </div></div>`;
+    }
+    const mobileExamples = [
+      ['items','01 / Choose the work','The left column becomes a full screen. Select a Thread to open Work; member presence stays separate from private chat.'],
+      ['work','02 / Work on the outcome','Questions, todo lists, and files retain their hierarchy. Answer a Question, write a Comment, or open the image.'],
+      ['preview','03 / Inspect the artifact','The right column becomes Preview. Expand for Artifact context, or tap Agent to float the private conversation over it.']
+    ];
+    $('#mobile-examples').innerHTML = mobileExamples.map(([view,heading,description],index) => `<article class="mobile-study"><h3>${heading}</h3><p>${description}</p>${mobilePhone(view,index)}</article>`).join('');
+    $$('.phone').forEach(phone => {
+      phone.append($('.mobile-agent',phone));
+      phone.addEventListener('keydown',event => {
+        if (event.key === 'Escape' && !$('.mobile-agent',phone).hidden) toggleMobileChannel(phone);
+      });
+    });
+    function toggleMobileChannel(phone) {
+      const overlay = $('.mobile-agent',phone);
+      overlay.hidden = !overlay.hidden;
+      const trigger = $('.mobile-agent-trigger',phone);
+      trigger.setAttribute('aria-expanded',String(!overlay.hidden));
+      if (overlay.hidden) trigger.focus({preventScroll:true});
+      else overlay.focus({preventScroll:true});
+    }
+    function showMobileView(phone, requestedView, exitArtifact = false) {
+      const scroller = $('.phone-content',phone);
+      const currentPane = $('.mobile-pane:not([hidden])',phone);
+      currentPane.dataset.scrollTop = String(scroller.scrollTop);
+      if (requestedView === 'artifact') phone.dataset.artifact = 'true';
+      if (exitArtifact) phone.dataset.artifact = 'false';
+      const view = requestedView === 'work' && phone.dataset.artifact === 'true' ? 'artifact' : requestedView;
+      phone.dataset.view = view;
+      $$('.mobile-pane',phone).forEach(pane => { pane.hidden = pane.dataset.pane !== view; });
+      $$('.phone-nav button',phone).forEach(button => button.setAttribute('aria-pressed',String(button.dataset.mobileView === (view === 'artifact' ? 'work' : view))));
+      const artifact = phone.dataset.artifact === 'true';
+      $('.phone-nav [data-mobile-view="preview"]',phone).disabled = artifact;
+      $('.mobile-thread-list',phone).hidden = artifact;
+      $('.mobile-peer-list',phone).hidden = !artifact;
+      $('.mobile-project-back',phone).hidden = artifact;
+      $('.mobile-artifact-back',phone).hidden = !artifact;
+      $('.mobile-context',phone).textContent = artifact ? 'Artifact · button-study.png' : 'Thread · First-run experience';
+      $('.phone-nav [data-mobile-view="work"]',phone).setAttribute('aria-controls',$(`[data-pane="${artifact ? 'artifact' : 'work'}"]`,phone).id);
+      const pane = $(`[data-pane="${view}"]`,phone);
+      pane.focus({preventScroll:true});
+      scroller.scrollTop = Number(pane.dataset.scrollTop || 0);
+      WorkbenchConcept.updateMobileNav(phone);
+    }
+    $('#layout-example').innerHTML = shell(`${title()}${section('Questions',question('Which part of the experience needs the most attention?', ['First-run flow','Daily triage']))}${section('Attachments',file('project-brief.md')+file('workspace-reference.png',{image:true}))}`,{left:true,two:true,message:'This is your private Project channel. It floats over the Artifact preview without changing the layout.',tall:true});
+    const layoutApp = $('#layout-example .app');
+    $('#feature-example').innerHTML = shell(`${title()}${comments('')}${section('Attachments',initialFiles(false),'2')}`,{left:true,two:true,repeatables:true,tall:true});
+    $('#feature-example .app').classList.add('feature-app','top-pinned');
+    $('#focus-example').innerHTML = shell(`${threadTitle()}${section('Controls',todo())}${comments(comment('Keep the first-run experience quiet and make the primary action unmistakable. Use the image as the reference.'))}${section('Attachments',file('button-study.png',{image:true})+file('plan.md',{ghost:true}),'1 file · 1 pending')}`,{context:'Thread',selected:'design',back:11,message:'I am using the image to refine the first-run plan. Inspect the Thread and reference side by side.',tall:true});
+    const layoutMessages = {normal:'Items is open; Center takes the middle + right space.',preview:'Items, Center, and Artifact preview are open. Hover a divider to resize.',focus:'Items is collapsed; Center takes the left + middle space beside its Artifact.',solo:'Both sidebars are collapsed. Work uses the wider, centered reading layout.',max:'Items is maximized; Center docks on the right. Opening an Attachment restores normal Items width.',hover:'Your private Agent Channel floats over the content without resizing or docking.',expand:'Artifact context: full content and peer Attachments, with the same owner channel. Back restores the work.'};
+    function setLayout(mode) {
+      if (artifactStates.has(layoutApp)) restoreArtifactOwner(layoutApp);
+      closeArtifactPreview(layoutApp);
+      layoutApp.classList.remove('items-max','channel-open','left-overlay');
+      layoutApp.classList.add('left-shown');
+      if (mode === 'solo' || mode === 'focus') layoutApp.classList.remove('left-shown');
+      if (mode === 'max') layoutApp.classList.add('items-max');
+      if (['preview','hover','expand','focus'].includes(mode)) openArtifactPreview(layoutApp,'project-brief.md',false);
+      if (mode === 'hover') layoutApp.classList.add('channel-open');
+      if (mode === 'expand') expandArtifact(layoutApp);
+      $('#layout-state').textContent = layoutMessages[mode];
+      syncPanelButtons(layoutApp);
+    }
+    function syncPanelButtons(app) {
+      updatePanelLayout(app);
+      $('[data-action="maximize-items"]',app).setAttribute('aria-pressed',String(app.classList.contains('items-max')));
+      const leftShown = app.classList.contains('left-shown');
+      $('.left-edge',app).setAttribute('aria-expanded',String(leftShown || app.classList.contains('left-overlay')));
+      $('.left-edge',app).setAttribute('aria-label',leftShown ? 'Collapse Items panel' : 'Open Items panel');
+      $$('[data-action="toggle-items"]',app).forEach(button => {
+        button.textContent = leftShown ? '‹' : '→';
+        button.title = leftShown ? 'Collapse Items' : 'Dock Items';
+        button.setAttribute('aria-label',button.title);
+        button.setAttribute('aria-expanded',String(leftShown));
+      });
+      if (app === layoutApp) {
+        const maximized = app.classList.contains('items-max');
+        const floating = app.classList.contains('channel-open');
+        $('#layout-state').textContent = floating ? layoutMessages.hover : app.classList.contains('artifact-expanded') ? layoutMessages.expand : maximized ? layoutMessages.max : app.classList.contains('preview-open') ? layoutMessages[leftShown ? 'preview' : 'focus'] : layoutMessages[leftShown ? 'normal' : 'solo'];
+      }
+      app.dispatchEvent(new Event('workbench-layout'));
+    }
+    const panelSizes = new WeakMap();
+    const clamp = (value, min, max) => Math.min(max,Math.max(min,value));
+    function updatePanelLayout(app) {
+      const width = app.clientWidth - 24;
+      if (width <= 0) return;
+      const sizes = panelSizes.get(app) || {left:1/3.5,right:1/3.5,max:2.5/3.5};
+      panelSizes.set(app,sizes);
+      const leftShown = app.classList.contains('left-shown');
+      const rightShown = app.classList.contains('preview-open') && !app.classList.contains('artifact-expanded');
+      const maximized = app.classList.contains('items-max');
+      const left = leftShown ? clamp(width*(maximized ? sizes.max : sizes.left),200,width-280-(rightShown ? 200 : 0)) : 0;
+      const right = rightShown ? clamp(width*sizes.right,200,width-left-280) : 0;
+      app.style.setProperty('--items-size',`${left}px`);
+      app.style.setProperty('--preview-size',`${right}px`);
+      app.style.setProperty('--items-overlay-size',`${clamp(width*sizes.left,200,width-280)}px`);
+      app.classList.toggle('solo',!leftShown && !rightShown);
+      for (const handle of $$('.split-handle',app)) {
+        const isLeft = handle.dataset.split === 'left';
+        const value = isLeft ? left : right;
+        handle.hidden = isLeft ? !leftShown : !rightShown;
+        handle.style.left = `${12 + (isLeft ? left : width-right)}px`;
+        handle.setAttribute('aria-valuemin','200');
+        handle.setAttribute('aria-valuemax',String(Math.round(width-280-(isLeft ? right : left))));
+        handle.setAttribute('aria-valuenow',String(Math.round(value)));
+        handle.setAttribute('aria-valuetext',`${Math.round(value)} pixels`);
+      }
+    }
+    function resizePanel(app,side,value) {
+      const width = app.clientWidth-24;
+      const sizes = panelSizes.get(app);
+      const opposite = parseFloat(app.style.getPropertyValue(side === 'left' ? '--preview-size' : '--items-size'));
+      sizes[side === 'left' && app.classList.contains('items-max') ? 'max' : side] = clamp(value,200,width-opposite-280)/width;
+      updatePanelLayout(app);
+    }
+    function initializeSplitHandles(app) {
+      for (const side of ['left','right']) {
+        const handle = document.createElement('div');
+        handle.className = 'split-handle';
+        handle.dataset.split = side;
+        handle.tabIndex = 0;
+        handle.setAttribute('role','separator');
+        handle.setAttribute('aria-orientation','vertical');
+        handle.setAttribute('aria-label',side === 'left' ? 'Resize Items and Center' : 'Resize Center and Artifact preview');
+        handle.title = 'Drag to resize · Arrow keys adjust · Double-click resets';
+        app.append(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown',event => {
+          if (event.button !== 0 || !event.isPrimary) return;
+          event.preventDefault();
+          handle.focus({preventScroll:true});
+          drag = {x:event.clientX,width:Number(handle.getAttribute('aria-valuenow')),pointerId:event.pointerId};
+          handle.setPointerCapture(event.pointerId);
+          handle.classList.add('dragging');
+          app.classList.add('resizing');
+        });
+        handle.addEventListener('pointermove',event => {
+          if (!drag || drag.pointerId !== event.pointerId) return;
+          resizePanel(app,side,drag.width+(event.clientX-drag.x)*(side === 'left' ? 1 : -1));
+        });
+        const finish = () => {
+          drag = null;
+          handle.classList.remove('dragging');
+          app.classList.remove('resizing');
+        };
+        handle.addEventListener('pointerup',event => {
+          if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+          finish();
+        });
+        handle.addEventListener('pointercancel',finish);
+        handle.addEventListener('lostpointercapture',finish);
+        handle.addEventListener('keydown',event => {
+          if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+          event.preventDefault();
+          const current = Number(handle.getAttribute('aria-valuenow'));
+          const delta = (event.shiftKey ? 40 : 10)*(event.key === 'ArrowLeft' ? -1 : 1)*(side === 'left' ? 1 : -1);
+          resizePanel(app,side,event.key === 'Home' ? 200 : event.key === 'End' ? Number(handle.getAttribute('aria-valuemax')) : current+delta);
+        });
+        handle.addEventListener('dblclick',() => {
+          const sizes = panelSizes.get(app);
+          if (side === 'left' && app.classList.contains('items-max')) sizes.max = 2.5/3.5;
+          else sizes[side] = 1/3.5;
+          updatePanelLayout(app);
+        });
+      }
+      new ResizeObserver(() => updatePanelLayout(app)).observe(app);
+    }
+    function toggleItems(app) {
+      if (app.classList.contains('left-shown')) {
+        app.classList.remove('left-shown','left-overlay','items-max');
+        const center = $('.expanded-artifact',app) || $('.center',app);
+        center.tabIndex = -1;
+        center.focus({preventScroll:true});
+      } else {
+        app.classList.add('left-shown');
+        app.classList.remove('left-overlay');
+      }
+      syncPanelButtons(app);
+    }
+    function answerQuestion(widget, answer) {
+      const app = widget.closest('.app');
+      const sectionNode = widget.closest('.section');
+      const record = document.createElement('details');
+      const summary = document.createElement('summary');
+      summary.textContent = `✓ Answered · ${answer}`;
+      const body = document.createElement('p');
+      body.textContent = 'Your response was received. The agent continues in this local example.';
+      record.append(summary,body);
+      $('.channel-records',app).append(record);
+      widget.remove();
+      if (!$('.widget',sectionNode)) sectionNode.remove();
+      $('.right-edge',app).classList.remove('waiting');
+      $('.channel-status',app).innerHTML = `${spinner}Working in this channel`;
+      $('.edge-note',app).innerHTML = `${spinner}Answer received · agent working`;
+      $('.edge-note',app).setAttribute('role','status');
+    }
+    const expandedContents = {
+      'explanation.md':'<h2>A place for the work.</h2><p>Workbench organizes agent-assisted work into Projects and Threads. Shared Comments capture human intent. Attachments hold durable outputs. Dynamics turn decisions and configuration into contextual controls.</p><h3>Two Threads, one direction</h3><p>The first-run Thread shapes a quiet beginning: context first, onboarding second, visible artifacts throughout. Table research explores a complementary way to scan the same work without replacing the default cards.</p><h3>Privacy and shared understanding</h3><p>Each human has a private channel with their own agents. Shared artifacts, Comments, and presence make collaboration visible without exposing private conversation.</p><h3>A continuing practice</h3><p>Repeatable Threads establish a weekly rhythm for tests, UX, and dead code. Project-level monitoring keeps parallel work aligned; its cadence and stop conditions still need definition.</p>',
+      'project-brief.md':'<h2>A calm place to work.</h2><p>Keep artifacts in the foreground. Let agents move the work forward without demanding constant attention.</p><p>Preserve On Deck’s quiet dark surfaces and violet activity. Projects should start with intent, not a long configuration form. Thread planning and research should stay visible without opening a transcript.</p>'
+    };
+    const artifactStates = new WeakMap();
+    function artifactContent(name, expanded = false) {
+      if (name === 'button-study.png') return expanded ? imageView(false) : `${imageSVG}<p class="preview-caption">Thread Attachment · Expand to annotate</p>`;
+      if (name === 'workspace-reference.png') return `${imageSVG}<p class="preview-caption">Project Attachment · Reference image</p>`;
+      if (Object.hasOwn(expandedContents,name)) return expandedContents[name];
+      throw new Error(`No preview content defined for ${name}`);
+    }
+    function closeArtifactPreview(app) {
+      $('.artifact-preview',app)?.remove();
+      app.classList.remove('preview-open');
+    }
+    function openArtifactPreview(app, name, focus = true) {
+      if (artifactStates.has(app)) restoreArtifactOwner(app);
+      closeArtifactPreview(app);
+      app.classList.remove('items-max','channel-open');
+      app.classList.add('preview-open');
+      const pane = document.createElement('aside');
+      pane.className = 'artifact-preview';
+      pane.dataset.file = name;
+      pane.setAttribute('aria-label',`Artifact preview: ${name}`);
+      pane.tabIndex = -1;
+      pane.innerHTML = `<div class="eyebrow">${app.dataset.scope} Attachment</div><div class="artifact-preview-head"><strong>${escapeHTML(name)}</strong><div class="preview-actions"><button class="tiny" data-action="expand-artifact" aria-label="Expand ${escapeHTML(name)} into Artifact context">Expand ↗</button><button class="icon" data-action="close-preview" aria-label="Close Artifact preview">✕</button></div></div><div class="artifact-preview-content">${artifactContent(name)}</div>`;
+      app.append(pane);
+      if (focus) pane.focus({preventScroll:true});
+      syncPanelButtons(app);
+    }
+    function expandArtifact(app, name = $('.artifact-preview',app)?.dataset.file) {
+      if (!name) throw new Error('An Attachment must be selected before expanding.');
+      if (!artifactStates.has(app)) {
+        const back = $('.back',app);
+        const owner = $('.center',app);
+        artifactStates.set(app,{route:$('.route',app.closest('.screen')).textContent,backHref:back.getAttribute('href'),backLabel:back.getAttribute('aria-label'),backContent:back.innerHTML,leftShown:app.classList.contains('left-shown'),scrollTop:owner.scrollTop,focus:document.activeElement,owner});
+      }
+      const state = artifactStates.get(app);
+      app.classList.remove('items-max','channel-open','left-overlay');
+      app.classList.add('artifact-expanded','left-shown');
+      $('.expanded-artifact',app)?.remove();
+      const center = document.createElement('div');
+      center.className = 'center expanded-artifact';
+      center.tabIndex = -1;
+      center.innerHTML = `<div class="scope eyebrow">Artifact · ${app.dataset.scope} Attachment</div><h4>${escapeHTML(name)}</h4><div class="artifact-preview-content">${artifactContent(name,true)}</div>`;
+      $('.workspace',app).append(center);
+      $('.artifact-peers',app)?.remove();
+      const peers = document.createElement('div');
+      peers.className = 'artifact-peers';
+      const names = $$('.attachment-widget',state.owner).map(widget => widget.dataset.name);
+      peers.innerHTML = `<div class="items-head">Attachments<button class="icon" data-action="toggle-items" aria-label="Collapse Items">‹</button></div>${names.map(peer => `<button class="thread-card ${peer === name ? 'selected' : ''}" data-action="select-peer" data-file="${escapeHTML(peer)}" aria-pressed="${peer === name}">${escapeHTML(peer)}</button>`).join('')}<p class="notice">Available ${app.dataset.scope.toLowerCase()} Attachments only. Pending files are not listed.</p>`;
+      $('.items',app).append(peers);
+      const back = $('.back',app);
+      back.dataset.action = 'back-artifact';
+      back.setAttribute('aria-label',`Back to ${app.dataset.scope}`);
+      back.innerHTML = `‹${WorkbenchConcept.glyph(app.dataset.scope === 'Project' ? 'On Deck evolution' : $('.entity-name',state.owner)?.textContent || 'Design the first-run experience')}`;
+      $('.route',app.closest('.screen')).textContent = `${state.route}/artifacts/${encodeURIComponent(name)}`;
+      const image = $('.image-canvas',center);
+      if (image) initializeImageCanvas(image);
+      center.focus({preventScroll:true});
+      syncPanelButtons(app);
+    }
+    function restoreArtifactOwner(app) {
+      const state = artifactStates.get(app);
+      if (!state) return;
+      $('.expanded-artifact',app).remove();
+      $('.artifact-peers',app).remove();
+      app.classList.remove('artifact-expanded');
+      app.classList.toggle('left-shown',state.leftShown);
+      const back = $('.back',app);
+      delete back.dataset.action;
+      back.setAttribute('href',state.backHref);
+      back.setAttribute('aria-label',state.backLabel);
+      back.innerHTML = state.backContent;
+      $('.route',app.closest('.screen')).textContent = state.route;
+      artifactStates.delete(app);
+      syncPanelButtons(app);
+      state.owner.scrollTop = state.scrollTop;
+      if (state.focus?.isConnected) state.focus.focus({preventScroll:true});
+    }
+    document.addEventListener('click',event => {
+      const prLink = event.target.closest('a[href="#merged-pr-example"]');
+      if (prLink) $('#merged-pr-example').open = true;
+      const phone = event.target.closest('.phone');
+      if (phone && event.target.closest('[data-mobile-channel]')) { toggleMobileChannel(phone); return; }
+      const mobileView = event.target.closest('[data-mobile-view]');
+      if (phone && mobileView) { showMobileView(phone,mobileView.dataset.mobileView,mobileView.hasAttribute('data-mobile-exit-artifact')); return; }
+      if (phone && event.target.closest('[data-mobile-answer]')) {
+        const answer = event.target.closest('button').textContent;
+        $('.mobile-question',phone).remove();
+        $('.mobile-unread',phone).hidden = true;
+        WorkbenchConcept.updateMobileNav(phone);
+        $('.mobile-answer-feedback',phone).textContent = 'Answer received. Planning continues.';
+        $('.mobile-agent-state',phone).innerHTML = `${spinner}Planning · answer received`;
+        $('.channel-message',phone).innerHTML = '<strong>Thread agent</strong>I recorded your audience decision. Planning continues; I will incorporate it into plan.md.';
+        const record = document.createElement('details');
+        record.className = 'mobile-answer-record';
+        record.innerHTML = `<summary>✓ Audience · ${escapeHTML(answer)}</summary><p>The answer is recorded in your private Thread channel.</p>`;
+        $('.mobile-records',phone).append(record);
+        return;
+      }
+      const layoutButton = event.target.closest('[data-layout]');
+      if (layoutButton) { setLayout(layoutButton.dataset.layout); return; }
+      let button = event.target.closest('[data-action]');
+      if (!button && !event.target.closest('button,a,input,textarea,summary')) button = event.target.closest('.attachment-widget')?.querySelector('[data-action="open-artifact"]');
+      if (!button) return;
+      const action = button.dataset.action;
+      const app = button.closest('.app');
+      if (action === 'invite-members') { $('#invite-dialog').showModal(); return; }
+      if (action === 'close-invite') { $('#invite-dialog').close(); return; }
+      if (phone && action === 'annotation') {
+        const bubble = $('.annotation-bubble',phone);
+        bubble.hidden = !bubble.hidden;
+        button.setAttribute('aria-expanded',String(!bubble.hidden));
+        return;
+      }
+      if (action === 'open-artifact') {
+        openArtifactPreview(app,button.dataset.file);
+        return;
+      }
+      if (!app) return;
+      if (action === 'expand-artifact') { expandArtifact(app); return; }
+      if (action === 'select-peer') { expandArtifact(app,button.dataset.file); return; }
+      if (action === 'back-artifact') { event.preventDefault(); restoreArtifactOwner(app); return; }
+      if (action === 'close-preview') closeArtifactPreview(app);
+      if (action === 'top') app.classList.add('top-open');
+      if (action === 'pin-top') {
+        const pinned = app.classList.toggle('top-pinned');
+        button.innerHTML = WorkbenchConcept.pin();
+        button.setAttribute('aria-label',pinned ? 'Unpin Titlebar' : 'Pin Titlebar');
+        button.setAttribute('aria-pressed',String(pinned));
+        app.classList.remove('top-open');
+      }
+      if (action === 'left' || action === 'toggle-items') { toggleItems(app); return; }
+      if (action === 'channel') app.classList.add('channel-open');
+      if (action === 'close-channel') app.classList.remove('channel-open');
+      if (action === 'maximize-items') {
+        if (artifactStates.has(app)) restoreArtifactOwner(app);
+        const maximized = app.classList.toggle('items-max');
+        app.classList.add('left-shown');
+        app.classList.remove('left-overlay');
+        if (maximized) { app.classList.remove('channel-open'); closeArtifactPreview(app); }
+      }
+      if (action === 'table') {
+        const table = $('.items',app).classList.toggle('table-view');
+        button.setAttribute('aria-pressed',String(table));
+      }
+      if (action === 'tab-active' || action === 'tab-repeat') {
+        const repeat = action === 'tab-repeat';
+        $('.active-list',app).hidden = repeat;
+        $('.repeat-list',app).hidden = !repeat;
+        $$('.tabs button',app).forEach(tab => tab.classList.toggle('selected',tab === button));
+      }
+      if (action === 'answer') answerQuestion(button.closest('.question'),button.textContent);
+      if (action === 'archive-comment') {
+        const node = button.closest('.comment');
+        const old = document.createElement('details');
+        old.className = 'history';
+        const summary = document.createElement('summary');
+        summary.textContent = 'Hidden / old Comments · archived suggestion';
+        const text = document.createElement('p');
+        text.textContent = $('p',node).textContent;
+        old.append(summary,text);
+        node.replaceWith(old);
+      }
+      if (action === 'pin-widget') {
+        const widget = button.closest('.widget');
+        const pinned = widget.classList.toggle('pinned');
+        button.innerHTML = WorkbenchConcept.pin();
+        button.setAttribute('aria-label',pinned ? 'Unpin widget' : 'Pin widget');
+        button.setAttribute('aria-pressed',String(pinned));
+        $('[data-action="move-widget"]',widget).disabled = !pinned;
+      }
+      if (action === 'move-widget') {
+        const widget = button.closest('.widget');
+        const prior = [...widget.parentElement.children].slice(0,[...widget.parentElement.children].indexOf(widget)).reverse().find(sibling => sibling.classList.contains('pinned'));
+        if (prior) prior.before(widget);
+      }
+      if (action === 'remove-repo') {
+        const widget = button.closest('.repo-widget');
+        button.closest('.repo-row').remove();
+        $('.inline-feedback',widget).textContent = 'Example reference removed. No repository or files were deleted.';
+        if (!$('.repo-row',widget)) $('.repo-list',widget).innerHTML = '<p class="empty-repos">No Repos attached.</p>';
+      }
+      if (action === 'invite') {
+        button.textContent = 'Invitation previewed';
+        button.disabled = true;
+        const feedback = document.createElement('p');
+        feedback.className = 'inline-feedback';
+        feedback.textContent = 'Example only: a member invitation form would open here. No invitation was sent.';
+        button.closest('.widget').append(feedback);
+      }
+      if (action === 'annotation') {
+        const bubble = $('.annotation-bubble',button.closest('.image-canvas'));
+        bubble.hidden = !bubble.hidden;
+        button.setAttribute('aria-expanded',String(!bubble.hidden));
+      }
+      if (action === 'focus-description') $('.description-form textarea',app).focus();
+      if (action === 'add-widget') {
+        const widget = document.createElement('article');
+        widget.className = 'widget';
+        widget.innerHTML = `<div class="widget-head">Output chart${tools()}</div><p>Illustrative outputs by Thread</p><div style="display:flex;align-items:end;height:65px;gap:12px" aria-label="Example chart: planning 2, research 1, explanation 1"><div style="height:100%;width:25%;background:#a78bfa66"></div><div style="height:50%;width:25%;background:#a78bfa33"></div><div style="height:50%;width:25%;background:#a78bfa33"></div></div><small>Planning · Research · Explanation</small>`;
+        button.closest('.widget-picker').after(widget);
+        button.disabled = true;
+        button.textContent = 'Output chart already present';
+      }
+      syncPanelButtons(app);
+    });
+    document.addEventListener('submit',event => {
+      const form = event.target;
+      event.preventDefault();
+      const app = form.closest('.app');
+      if (form.matches('.mobile-comment-form')) {
+        const text = $('textarea',form).value.trim();
+        if (!text) return;
+        const phone = form.closest('.phone');
+        const shared = document.createElement('div');
+        shared.innerHTML = comment(escapeHTML(text),{state:'In progress'});
+        $('.mobile-shared-comments',phone).append(shared.firstElementChild);
+        form.reset();
+        form.closest('details').open = false;
+        $('.mobile-agent-state',phone).innerHTML = `${spinner}Working on your new Comment`;
+        return;
+      }
+      if (form.matches('.answer-form') && form.closest('.question')) answerQuestion(form.closest('.question'),$('input',form).value.trim());
+      if (form.matches('.repo-form')) {
+        const input = $('input',form);
+        const url = new URL(input.value);
+        if (!['https:','http:','ssh:','git:'].includes(url.protocol)) { input.setCustomValidity('Use an http, https, ssh, or git URL.'); input.reportValidity(); return; }
+        const widget = form.closest('.widget');
+        const list = $('.repo-list',widget);
+        $('.empty-repos',widget)?.remove();
+        const row = document.createElement('div');
+        row.className = 'repo-row';
+        row.innerHTML = `<span>${escapeHTML(url.host + url.pathname)}</span><button class="tiny" data-action="remove-repo">Remove</button>`;
+        list.append(row);
+        input.value = '';
+        $('.inline-feedback',widget).textContent = 'Example repo attached. The agent can now ask about your completion policy (step 08).';
+      }
+      if (form.matches('.local-comment')) {
+        const text = $('textarea',form).value.trim();
+        if (!text) return;
+        const node = document.createElement('div');
+        node.innerHTML = comment(escapeHTML(text),{state:'In progress'});
+        form.closest('.comment-compose').before(node.firstElementChild);
+        form.reset();
+        form.closest('details').open = false;
+        $('.edge-note',app).innerHTML = `${spinner}Example Comment received`;
+      }
+      if (form.matches('.create-project')) {
+        const name = form.elements.name.value.trim();
+        const description = form.elements.description.value.trim();
+        if (!name || !description) return;
+        $('#step-3 .context-title h4').innerHTML = `${WorkbenchConcept.icon(name)}<span class="entity-name">${escapeHTML(name)}</span>`;
+        $('#step-3 .project-select').innerHTML = `${escapeHTML(name)}${WorkbenchConcept.chevron()}`;
+        $('#step-3 .project-choice .entity-icon').outerHTML = WorkbenchConcept.icon(name);
+        $('#step-3 .context-title p').textContent = description;
+        $('#step-3 .route').textContent = `workbench.local/${slug(name)}`;
+        location.hash = 'step-3';
+      }
+      if (form.matches('.description-form')) {
+        $('#step-18 .context-title p').textContent = $('textarea',form).value;
+        location.hash = 'step-18';
+      }
+      if (form.matches('.annotation-form')) {
+        const value = $('input',form).value.trim();
+        if (!value) return;
+        const canvas = form.closest('.image-canvas');
+        const marker = document.createElement('button');
+        marker.className = 'annotation-marker';
+        marker.dataset.action = 'annotation';
+        marker.setAttribute('aria-label','Expand image Comment');
+        marker.textContent = '1';
+        const selection = $('.selection',canvas);
+        marker.style.left = `calc(${selection.style.left || '68%'} + ${selection.style.width || '24%'} - 12px)`;
+        marker.style.top = `calc(${selection.style.top || '72%'} - 12px)`;
+        marker.style.right = 'auto';
+        const bubble = document.createElement('div');
+        bubble.className = 'annotation-bubble';
+        bubble.hidden = true;
+        bubble.innerHTML = `<small>You · shared annotation</small><p>${escapeHTML(value)}</p><span class="status">✓ Sent to your Thread agent</span>`;
+        form.remove();
+        canvas.append(marker,bubble);
+        canvas.dataset.annotated = 'true';
+        $('.edge-note',app).innerHTML = `${spinner}Annotation received · agent working`;
+        $('.channel-message',app).innerHTML = '<strong>Thread agent</strong>I received your image annotation and will incorporate it into the plan.';
+      }
+    });
+    const slug = name => name.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'new-project';
+    document.addEventListener('input',event => {
+      if (event.target.matches('.create-project [name="name"]')) $('.slug-preview',event.target.closest('form')).textContent = `workbench.local/${slug(event.target.value)}`;
+      if (event.target.matches('.repo-form input')) event.target.setCustomValidity('');
+    });
+    $$('.app').forEach(app => {
+      $('.item-controls',app).insertAdjacentHTML('beforeend','<button class="icon" data-action="toggle-items" aria-label="Collapse Items">‹</button>');
+      initializeSplitHandles(app);
+      const reveal = (selector, className) => {
+        const edge = $(selector,app);
+        if (!edge) return;
+        const show = () => {
+          if (className !== 'left-overlay' || !app.classList.contains('left-shown')) app.classList.add(className);
+          syncPanelButtons(app);
+        };
+        edge.addEventListener('pointerenter',event => { if (event.pointerType === 'mouse') show(); });
+        edge.addEventListener('focus',show);
+      };
+      const topEdge = $('.top-edge',app);
+      const titlebar = $('.titlebar',app);
+      if (topEdge) {
+        const topTargets = [topEdge,titlebar];
+        let hideTimer;
+        const closeTitlebar = () => {
+          if (app.dataset.headerFloating === 'true') return;
+          app.classList.remove('top-open');
+          if (!app.classList.contains('top-pinned')) $$('details[open]',titlebar).forEach(details => { details.open = false; });
+        };
+        const scheduleHide = () => {
+          clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => {
+            const keyboardFocus = topTargets.some(target => target.contains(document.activeElement)) && document.activeElement?.matches(':focus-visible');
+            if (!topTargets.some(target => target.matches(':hover')) && !keyboardFocus) closeTitlebar();
+          },100);
+        };
+        topTargets.forEach(target => {
+          target.addEventListener('pointerenter',event => {
+            if (event.pointerType !== 'mouse') return;
+            clearTimeout(hideTimer);
+            app.classList.add('top-open');
+          });
+          target.addEventListener('pointerleave',scheduleHide);
+          target.addEventListener('focusin',() => { clearTimeout(hideTimer); app.classList.add('top-open'); });
+          target.addEventListener('focusout',event => {
+            if (!topTargets.some(target => target.contains(event.relatedTarget))) {
+              clearTimeout(hideTimer);
+              closeTitlebar();
+            }
+          });
+        });
+        document.addEventListener('pointerdown',event => {
+          if (!topTargets.some(target => target.contains(event.target))) { clearTimeout(hideTimer); closeTitlebar(); }
+        });
+        window.addEventListener('blur',() => { clearTimeout(hideTimer); closeTitlebar(); });
+      }
+      reveal('.right-edge','channel-open');
+      reveal('.left-edge','left-overlay');
+      const hideWhenLeaving = (selector, className) => {
+        $(selector,app)?.addEventListener('pointerleave',event => {
+          if (event.pointerType === 'mouse' && !$(selector,app).contains(document.activeElement)) app.classList.remove(className);
+          syncPanelButtons(app);
+        });
+      };
+      hideWhenLeaving('.channel','channel-open');
+      hideWhenLeaving('.items','left-overlay');
+      app.addEventListener('keydown',event => {
+        if (event.key === 'Escape') {
+          app.classList.remove('top-open','left-overlay','channel-open');
+          syncPanelButtons(app);
+        }
+      });
+      syncPanelButtons(app);
+    });
+    function initializeImageCanvas(canvas) {
+      let start = null;
+      const point = event => {
+        const bounds = canvas.getBoundingClientRect();
+        return {x:Math.max(0,Math.min(100,(event.clientX-bounds.left)/bounds.width*100)),y:Math.max(0,Math.min(100,(event.clientY-bounds.top)/bounds.height*100))};
+      };
+      canvas.addEventListener('pointerdown',event => {
+        if (event.target.closest('form,button') || canvas.dataset.annotated === 'true') return;
+        start = point(event);
+        canvas.setPointerCapture(event.pointerId);
+        const selection = $('.selection',canvas);
+        selection.style.left = `${start.x}%`;
+        selection.style.top = `${start.y}%`;
+        selection.style.width = '0%';
+        selection.style.height = '0%';
+        $('.annotation-form',canvas).hidden = true;
+      });
+      canvas.addEventListener('pointermove',event => {
+        if (!start) return;
+        const end = point(event);
+        const selection = $('.selection',canvas);
+        Object.assign(selection.style,{left:`${Math.min(start.x,end.x)}%`,top:`${Math.min(start.y,end.y)}%`,width:`${Math.abs(end.x-start.x)}%`,height:`${Math.abs(end.y-start.y)}%`});
+      });
+      const finish = () => { if (!start) return; start = null; $('.annotation-form',canvas).hidden = false; $('input',canvas).focus(); };
+      canvas.addEventListener('pointerup',finish);
+      canvas.addEventListener('pointercancel',finish);
+    }
+    function initializeImpactHover() {
+      const hover = document.createElement('div');
+      hover.id = 'impact-directory-hover';
+      hover.className = 'impact-hover';
+      hover.setAttribute('popover','auto');
+      hover.setAttribute('role','tooltip');
+      hover.innerHTML = `<strong>Affected directories</strong><div class="impact-dirs">${impactDirectories.map(dir => `<div><code>${dir.path}</code>${diffCount(dir)}</div>`).join('')}</div><p>${impactTotals.files} files · ${impactDirectories.length} directories · illustrative diff</p>`;
+      document.body.append(hover);
+      let activeTrigger = null;
+      let hideTimer;
+      const hide = () => { clearTimeout(hideTimer); hover.hidePopover(); };
+      const scheduleHide = () => {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          if (!hover.matches(':hover') && !activeTrigger?.matches(':hover,:focus-visible')) hide();
+        },160);
+      };
+      const show = trigger => {
+        clearTimeout(hideTimer);
+        activeTrigger?.setAttribute('aria-expanded','false');
+        activeTrigger = trigger;
+        hover.showPopover();
+        trigger.setAttribute('aria-expanded','true');
+        const bounds = trigger.getBoundingClientRect();
+        const width = hover.offsetWidth;
+        const height = hover.offsetHeight;
+        hover.style.left = `${Math.max(12,Math.min(bounds.left,innerWidth-width-12))}px`;
+        const below = bounds.bottom+8;
+        hover.style.top = `${Math.max(12,below+height <= innerHeight-12 ? below : bounds.top-height-8)}px`;
+      };
+      document.addEventListener('pointerover',event => {
+        const trigger=event.target.closest('[data-impact-trigger]');
+        if (trigger && !trigger.contains(event.relatedTarget) && event.pointerType !== 'touch') show(trigger);
+      });
+      document.addEventListener('pointerout',event => { if (event.target.closest('[data-impact-trigger]')) scheduleHide(); });
+      document.addEventListener('focusin',event => { const trigger=event.target.closest('[data-impact-trigger]'); if (trigger) show(trigger); });
+      document.addEventListener('focusout',event => { if (event.target.closest('[data-impact-trigger]')) scheduleHide(); });
+      document.addEventListener('click',event => { const trigger=event.target.closest('[data-impact-trigger]'); if (trigger) show(trigger); });
+      hover.addEventListener('pointerenter',() => clearTimeout(hideTimer));
+      hover.addEventListener('pointerleave',scheduleHide);
+      hover.addEventListener('toggle',() => {
+        if (!hover.matches(':popover-open')) activeTrigger?.setAttribute('aria-expanded','false');
+      });
+      document.addEventListener('scroll',event => { if (!hover.contains(event.target)) hide(); },true);
+      window.addEventListener('resize',hide);
+      window.addEventListener('blur',hide);
+    }
+    initializeImpactHover();
+    $$('.app .image-canvas').forEach(initializeImageCanvas);
+    openArtifactPreview($('#step-14 .app'),'button-study.png',false);
+    openArtifactPreview(layoutApp,'project-brief.md',false);
+    openArtifactPreview($('#focus-example .app'),'button-study.png',false);
+  </script>
+</body>
+</html>

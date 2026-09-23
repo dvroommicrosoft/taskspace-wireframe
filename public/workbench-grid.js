@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   document.querySelector('#grid-journey').innerHTML=moments.map(([mode,n,title,copy])=>`<article class="gw-moment" id="grid-${mode}"><header class="gw-moment-heading"><span>${n}</span><div><h3>${title}</h3><p>${copy}</p></div></header><div class="grid-workbench" data-grid-mode="${mode}" id="${mode==='full'?'grid-workbench':`workspace-${mode}`}"></div></article>`).join('');
   document.querySelector('#grid-mobile-examples').innerHTML=[['first','Project context'],['thread','Thread detail'],['full','Browse the work']].map(([mode,name],i)=>`<article class="mobile-study"><h3>${i+1} / ${name}</h3><div class="grid-workbench gw-phone" data-grid-mode="${mode}" id="workspace-mobile-${i}"></div></article>`).join('');
-  document.querySelectorAll('[data-grid-mode]').forEach(root => {
+  function initializeWorkspace(root) {
+  root.dataset.initialized='true';
   const $ = (selector, scope = root) => scope.querySelector(selector);
   const all = (selector, scope = root) => [...scope.querySelectorAll(selector)];
   const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -22,13 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const squiggle=svg('<path d="M0 12q3-8 6 0t6 0t6 0t6 0"/>').replace('viewBox','preserveAspectRatio="none" viewBox');
   const searchIcon=svg('<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>');
   const sendIcon=svg('<path d="m3 3 18 9-18 9 4-9Zm4 9h14"/>');
+  const editIcon=svg('<path d="M8 4h8M12 4v16M8 20h8M4 8h3m10 8h3"/>');
+  const expandIcon=svg('<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>');
+  const restoreIcon=svg('<path d="M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5"/>');
+  const rankIcon=svg('<path d="m5 12 7-6 7 6M5 18l7-6 7 6"/>');
+  const folderShape=()=>`<svg class="gw-folder-shape" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M.5 39.5V8Q.5 .5 8 .5H92L99.5 39.5" vector-effect="non-scaling-stroke"/><path class="gw-folder-base" d="M.5 39.5h99" vector-effect="non-scaling-stroke"/></svg>`;
   const filterIcons={
     Recent:svg('<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>'),
     Scheduled:svg('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 10h18"/>'),
     Incomplete:svg('<circle cx="12" cy="12" r="9" stroke-dasharray="30 7"/><path d="M12 6v7m0 4v1"/>'),
     Sleeping:svg('<path d="M19 16A8 8 0 0 1 8 5a8 8 0 1 0 11 11Z"/>')
   };
-  const people=[['you','You'],['mira','Mira Chen'],['theo','Theo Grant']];
+  const people=[['mira','Mira Chen',true],['you','You',true],['theo','Theo Grant',false],['inez','Inez',false]];
+  const mobile=()=>root.clientWidth<700;
   const avatar=id=>`<img class="avatar" src="${id==='you'?'workbench-avatar-you':`avatar-${id}`}.svg" alt="">`;
   let serial = 0;
   const objectUrls = new Set();
@@ -72,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })).map((t,i)=>({...t,artifacts:t.artifacts.slice(0,mode==='first'?1:mode==='full'?3+i%5:4).map((f,j)=>({...f,unread:j<2,fresh:j===0}))}));
     if(['first','thread','new'].includes(mode))threads.splice(mode==='first'?1:2);
     if(mode==='new')threads.unshift(subject('draft-thread','', '',{isNew:true,question:false}));
-    state={project:preservedProject || project,threads,active:['empty','setup','first'].includes(mode)?'project':mode==='thread'?'thread-0':null,filter:'Recent',member:'you',query:'',full:false,top:mode==='top',showOlder:false};
+    state={project:preservedProject || project,threads,active:['empty','setup','first'].includes(mode)?'project':mode==='thread'?'thread-0':null,filter:'Recent',member:'you',query:'',full:false,top:mode==='top',showOlder:false,mobileView:mode==='thread'?2:['empty','setup','first'].includes(mode)?0:1,lastThread:threads[0]?.id};
     renderShell();
   }
   const current = () => !state.active || state.active==='project' ? state.project : state.threads.find(t=>t.id===state.active);
@@ -92,27 +99,33 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="gw-shell">
         ${headerMarkup()}
         <div class="gw-top-content"${state.top?'':' hidden'}></div>
+        <nav class="gw-mobile-nav" aria-label="Workspace screens">${['Project details','Thread list','Thread detail'].map((name,index)=>`<button data-g="mobile-view" data-index="${index}" aria-label="${name}" aria-pressed="${state.mobileView===index}"></button>`).join('')}</nav>
+        <div class="gw-mobile-viewport">
         <div class="gw-grid" aria-label="Project Threads"></div>
         <section class="gw-detail" role="dialog" aria-label="Work details" hidden></section>
-        <button class="gw-project-return" data-g="project" aria-label="Open Project context" hidden>${icon(state.project.name)}<span>${escape(state.project.name)}</span></button>
+        <div class="gw-mobile-empty" hidden>Select a Thread from the list to open its details.</div>
+        </div>
+        <button class="gw-new-thread" data-g="new-thread" aria-label="New Thread"${state.top?' hidden':''}>${plus}</button>
+        <button class="gw-project-return" data-g="project" aria-label="Open Project context" hidden>${folderShape()}${icon(state.project.name)}<span>${escape(state.project.name)}</span></button>
         <div class="gw-notice" role="status" aria-live="polite"></div>
       </div>`;
     if(state.top)renderTop();
     renderGrid();
     renderPane();
+    syncMobile();
   }
   function headerMarkup() {
     const account=`<details class="gw-account"><summary aria-label="Account and Settings"><span class="account-gear">${WorkbenchConcept.gear()}${avatar('you')}</span></summary><div><strong>Your workspace</strong><p>Account · You</p><label>Reduce motion<input class="gw-reduce-motion" type="checkbox" aria-label="Reduce motion in this screen"></label><small>Local settings preview</small></div></details>`;
     if(state.top)return `<header class="gw-header gw-top-header"><img class="gw-product" src="workbench-logo.svg" alt="Workbench">${account}</header>`;
-    return `<header class="gw-header" aria-label="Workspace titlebar">
+    return `<header class="gw-header" aria-label="Workspace titlebar"><div class="gw-header-left">
       <button data-g="top" class="gw-reveal gw-back" aria-label="Back to Projects">‹<img src="workbench-logo.svg" alt=""></button>
       <details class="gw-project-switch gw-reveal"><summary aria-label="Switch Project">${icon(state.project.name)}<span>${escape(state.project.name)}</span>${WorkbenchConcept.chevron()}</summary><div><button data-g="project">${escape(state.project.name)}</button><button data-g="top">All Projects</button></div></details>
-      <div class="gw-people" aria-label="Project members">${people.map(([id,name],i)=>`${i===1?'<span class="gw-divider gw-reveal" role="separator" aria-label="Owner and members"></span>':''}<button data-g="member" data-id="${id}" class="gw-person${id===state.member?' selected':' gw-reveal'}" aria-pressed="${id===state.member}" aria-label="View ${name}'s Threads"><i class="gw-person-gutter ${id===state.member?'selected':id==='theo'?'inactive':'active'}"></i>${avatar(id)}</button>`).join('')}</div>
+      <div class="gw-people" aria-label="Project members, active first">${[...people].sort((a,b)=>Number(b[2])-Number(a[2])).map(([id,name,active])=>`<button data-g="member" data-id="${id}" class="gw-person${id===state.member?' selected':' gw-reveal'}" aria-pressed="${id===state.member}" aria-label="View ${name}'s Threads${id==='you'?' · owner':''}"><i class="gw-person-gutter ${id===state.member?'selected':active?'active':'inactive'}"></i>${avatar(id)}</button>`).join('')}</div>
       <button class="activity-summary gw-reveal gw-activity" aria-label="Open activity report">${svg('<path d="M4 3v18h17M8 15v-4m5 4V6m5 9v-7"/>')}</button>
-      <span class="gw-divider gw-reveal" role="separator"></span>
+      </div>
       <div class="gw-filters" role="group" aria-label="Thread views">${Object.entries(filterIcons).map(([name,graphic])=>`<button data-g="filter" data-value="${name}" class="${state.filter===name?'selected':'gw-reveal'}" aria-pressed="${state.filter===name}" aria-label="${name} Threads">${graphic}</button>`).join('')}</div>
-      <form class="gw-search-form" role="search"><button type="button" data-g="search" aria-label="Search Threads">${searchIcon}</button><input class="gw-search gw-reveal" type="search" value="${escape(state.query)}" aria-label="Search Thread names and descriptions"></form>
-      <button data-g="new-thread" class="gw-new-thread" aria-label="New Thread">${plus}</button><span class="gw-divider gw-reveal" role="separator"></span><div class="gw-reveal gw-account-wrap">${account}</div>
+      <div class="gw-header-right"><form class="gw-search-form" role="search"><input class="gw-search gw-reveal" type="search" value="${escape(state.query)}" aria-label="Search Thread names and descriptions"><button type="button" data-g="search" aria-label="Search Threads">${searchIcon}</button></form>
+      <span class="gw-divider gw-reveal" role="separator"></span><div class="gw-reveal gw-account-wrap">${account}</div></div>
     </header>`;
   }
   function updateHeader() {
@@ -122,12 +135,51 @@ document.addEventListener('DOMContentLoaded', () => {
     $('.gw-header').outerHTML=headerMarkup();
     if(expanded)$('.gw-header').classList.add('gw-header-expanded');
   }
+  let shownMobileView;
+  function syncMobile() {
+    const isMobile=mobile(),view=state.mobileView;
+    $('.gw-shell').classList.toggle('gw-mobile',isMobile);
+    $('.gw-mobile-nav').hidden=!isMobile || state.top;
+    $('.gw-mobile-viewport').hidden=state.top;
+    $('.gw-grid').hidden=state.top || isMobile && view!==1;
+    $('.gw-detail').hidden=state.top || isMobile && (view===1 || view===2 && !state.active);
+    $('.gw-mobile-empty').hidden=state.top || !isMobile || view!==2 || !!state.active;
+    $('.gw-new-thread').hidden=state.top || isMobile && view!==1;
+    $('.gw-project-return').hidden=state.top || isMobile || !state.active || state.active==='project';
+    all('.gw-mobile-nav button').forEach((button,i)=>{
+      button.setAttribute('aria-pressed',String(i===view));
+      button.classList.toggle('has-question',i===0?state.project.phase==='setup':i===2 && !!state.threads.find(t=>t.id===state.lastThread)?.question);
+    });
+    if(isMobile && shownMobileView!==undefined && shownMobileView!==view && !matchMedia('(prefers-reduced-motion: reduce)').matches && !$('.gw-shell').classList.contains('gw-no-motion')){
+      const target=view===1?$('.gw-grid'):$('.gw-detail').hidden?$('.gw-mobile-empty'):$('.gw-detail');
+      target.animate([{transform:`translateX(${view>shownMobileView?'':'-'}24px)`,opacity:.4},{transform:'translateX(0)',opacity:1}],{duration:180,easing:'ease-out'});
+    }
+    shownMobileView=view;
+  }
+  function mobileView(index) {
+    if(index===0)open('project',false);
+    else if(index===1)close();
+    else if(state.lastThread)open(state.lastThread,false);
+    else {savePane();state.active=null;state.mobileView=2;syncMobile();}
+  }
   function renderTop() {
     $('.gw-top-content').innerHTML=`<div class="gw-top-primary"><button class="primary" data-g="new-project">+ New Project</button><form class="gw-new-project" hidden><label>Project name<input name="name" required placeholder="What are we working on?"></label><label>Description<textarea name="description" required placeholder="What should this Project achieve?"></textarea></label><div><button type="button" data-g="cancel-project">Cancel</button><button class="primary" type="submit">Create Project</button></div></form></div><div class="gw-project-list">${[['On Deck evolution','A quieter workspace for human intent and agent-led work.'],['Design system','Shared patterns for a coherent product.'],['Release readiness','Coordinate the next release.']].map(([name,desc])=>`<button data-g="existing-project" data-name="${name}">${icon(name)}<span><strong>${name}</strong><small>${desc}</small></span><span class="avatars">${avatar('you')}${avatar('mira')}${avatar('theo')}</span></button>`).join('')}</div>`;
   }
   const prIcon=svg('<circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v10M18 17V9a4 4 0 0 0-4-4h-2m2-2-2 2 2 2"/>');
+  function questionMarkup(owner,prompt,choices,action) {
+    return `<article class="widget question"><div class="widget-head">◇ Question for you</div><p>${prompt}</p><div class="choices">${choices.map(text=>`<button data-g="${action}" data-id="${owner.id}">${text}</button>`).join('')}</div><form class="gw-answer-form" data-action-kind="${action}" data-owner="${owner.id}"><input name="answer" required aria-label="Your own answer" placeholder="Or write your own answer..." value="${escape(owner.questionDraft || '')}"><button type="submit" class="primary" aria-label="Send answer">${sendIcon}</button></form></article>`;
+  }
+  function answerQuestion(owner,action,text) {
+    if(state.member!=='you' || owner.member!=='you'){announce('Only the assignee in their own view can answer this Question.',true);return;}
+    if(!text.trim()){announce('Write an answer before sending.',true);return;}
+    if(action==='validation')owner.phase='ready';else owner.question=false;
+    owner.questionDraft='';
+    owner.comments.push({id:`c${++serial}`,author:'You',text:action==='validation'?`Validation: ${text}`:text,attachments:[]});
+    renderGrid();if(current()===owner)renderBody();syncMobile();
+    announce('Answer recorded in this local example.');
+  }
   function widgetMarkup(thread,kind) {
-    if(kind==='question')return `<article class="widget question"><div class="widget-head">◇ Question for you</div><p>Which direction should we explore first?</p><div class="choices"><button data-g="card-answer" data-id="${thread.id}">Quiet first-run flow</button><button data-g="card-answer" data-id="${thread.id}">Navigation patterns</button></div></article>`;
+    if(kind==='question')return questionMarkup(thread,'Which direction should we explore first?',['Quiet first-run flow','Navigation patterns'],'card-answer');
     if(kind==='impact')return `<article class="widget gw-impact"><div class="widget-head"><strong>Impact <span class="diff-add">+186</span> <span class="diff-remove">−42</span></strong><a href="#merged-pr-example" aria-label="Open illustrative merged PR 42">${prIcon}</a></div><div class="gw-directory-diffs">${[['src/onboarding/','88','18'],['src/components/shell/','44','12'],['src/styles/','18','8'],['tests/onboarding/','36','4']].map(([path,add,remove])=>`<div><span>${path}</span><span class="diff-add">+${add}</span><span class="diff-remove">−${remove}</span></div>`).join('')}</div><small>Merged PR · illustrative diff</small></article>`;
     if(kind==='note')return `<article class="widget"><div class="widget-head">Working notes</div><p>${escape(thread.description)}</p><p class="muted">The latest context stays with the work, not in a second status row.</p></article>`;
     return `<article class="widget gw-carousel-checklist"><div class="widget-head">Planning checklist</div>${WorkbenchConcept.checklist({complete:!thread.incomplete,ready:true})}</article>`;
@@ -137,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const kinds=t.question?['question','checklist']:!t.incomplete?['impact','checklist']:Number(t.id.replace(/\D/g,''))%4===0?['checklist']:t.id==='thread-3'?['note','checklist']:['checklist','note'];
     t.widgetIndex=Math.min(t.widgetIndex || 0,kinds.length-1);
     return `<article class="gw-card ${state.active===t.id?'selected':''}" data-thread="${t.id}">
-      <div class="gw-card-heading">${icon(t.name)}<button data-g="thread" data-id="${t.id}" class="gw-thread-name">${escape(t.name)}</button><button data-g="thread-artifacts" data-id="${t.id}" class="gw-artifact-dots" aria-label="${t.artifacts.length} Artifacts: ${t.artifacts.filter(f=>f.unread&&f.fresh).length} new unread; ${t.artifacts.filter(f=>f.unread&&!f.fresh).length} older unread">${t.artifacts.map(f=>`<i class="${f.unread?f.fresh?'new-unread':'old-unread':'read'}" aria-hidden="true"></i>`).join('')}</button><button class="gw-sleep" data-g="sleep" data-id="${t.id}" aria-label="${t.sleeping?'Wake':'Sleep'} ${escape(t.name)}"${state.member!=='you'?' disabled':''}>${t.sleeping?'☀':'☾'}</button></div>
+      <div class="gw-card-heading">${icon(t.name)}<button data-g="thread" data-id="${t.id}" class="gw-thread-name">${escape(t.name)}</button><div class="gw-artifact-dots" role="group" aria-label="Thread Artifacts">${t.artifacts.map(f=>`<button data-g="thread-artifact" data-id="${t.id}" data-file="${f.id}" class="gw-artifact-dot ${f.unread?f.fresh?'new-unread':'old-unread':'read'}" aria-label="${escape(f.name)} · ${f.unread?f.fresh?'new, unread':'unread':'read'}"></button>`).join('')}</div><button class="gw-sleep" data-g="sleep" data-id="${t.id}" aria-label="${t.sleeping?'Wake':'Sleep'} ${escape(t.name)}"${state.member!=='you'?' disabled':''}>${t.sleeping?'☀':'☾'}</button></div>
       <div class="gw-carousel" aria-label="Thread widgets" tabindex="0" data-index="${t.widgetIndex}">${kinds.map((kind,i)=>`<div class="gw-slide" data-slide="${i}">${widgetMarkup(t,kind)}</div>`).join('')}</div>
       ${kinds.length>1?`<div class="gw-carousel-controls"><button data-g="carousel" data-id="${t.id}" data-dir="-1" aria-label="Previous widget">‹</button><span>${t.widgetIndex+1} / ${kinds.length}</span><button data-g="carousel" data-id="${t.id}" data-dir="1" aria-label="Next widget">›</button></div>`:''}
     </article>`;
@@ -149,8 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
     $('.gw-grid').hidden=state.top;
     const older=threads.filter(t=>t.older && !state.query),recent=threads.filter(t=>!t.older || state.query);
     $('.gw-grid').innerHTML=recent.map(cardMarkup).join('')+(older.length?`<button class="gw-older" data-g="older" aria-expanded="${state.showOlder}">${squiggle}<span>${state.showOlder?'Hide':'Show'} older Threads · ${older.length}</span>${squiggle}</button>${state.showOlder?older.map(cardMarkup).join(''):''}`:'') || (state.threads.length?'<p class="gw-empty">No matching Threads.</p>':'');
+    $('.gw-new-thread').classList.toggle('gw-tucked',recent.length>0 || state.showOlder && older.length>0);
     all('.gw-carousel').forEach(el=>el.scrollLeft=el.clientWidth*Number(el.dataset.index));
     updateHeader();
+    syncMobile();
   }
   function savePane() {
     const owner=current();
@@ -163,15 +217,17 @@ document.addEventListener('DOMContentLoaded', () => {
       $('.gw-detail').getBoundingClientRect();
     }
     state.active=id;state.full=false;
+    state.mobileView=id==='project'?0:2;
+    if(id!=='project')state.lastThread=id;
     if(state.member==='you') current().unread=false;
-    renderGrid();renderPane();
+    renderGrid();renderPane();syncMobile();
     if(focus) ($('.gw-tabs [aria-selected="true"]') || $('.gw-primary-tab')).focus({preventScroll:true});
   }
   function close() {
     const previous=state.active;
-    savePane();state.active=null;state.full=false;
-    renderGrid();renderPane();
-    const target=previous==='project' ? $('.gw-project-toggle') : $(`[data-g="thread"][data-id="${previous}"]`);
+    savePane();state.active=null;state.full=false;state.mobileView=1;
+    renderGrid();renderPane();syncMobile();
+    const target=mobile()?$('.gw-mobile-nav [data-index="1"]'):previous==='project' ? $('.gw-project-toggle') : $(`[data-g="thread"][data-id="${previous}"]`);
     target?.focus({preventScroll:true});
   }
   function fileList(files, context='all') {
@@ -185,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(owner.artifacts.some(f=>f.kind==='image'))files.push(['gallery','Gallery']);
     const attachment=owner.comments.flatMap(c=>c.attachments).find(f=>f.id===owner.tab);
     if(attachment && !owner.artifacts.some(f=>f.id===attachment.id))files.unshift([attachment.id,attachment.name]);
-    const space=width-primaryWidth-80;
+    const space=width-primaryWidth-40;
     const overflow=files.length*tabWidth>space;
     const slots=Math.max(0,Math.floor((space-(overflow?60:0))/tabWidth));
     const visible=files.slice(0,slots);
@@ -194,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabs=[['work',owner.name],...visible];
     if(overflow)tabs.push(['more','More']);
     const selectedTab=!state.active?'work':overflow && files.some(([id])=>id===owner.tab) && !visible.some(([id])=>id===owner.tab)?'more':owner.tab;
-    $('.gw-tabs').innerHTML=`<div role="tablist" aria-label="Work and Artifact tabs">${tabs.map(([id,label])=>`<button role="tab" data-g="${state.active?'tab':'project'}" data-id="${id}" aria-selected="${selectedTab===id}" aria-label="${escape(label)}" class="${id==='more'?'gw-more':id==='work'?'gw-primary-tab gw-project-toggle':''}">${id==='work'?icon(owner.name):''}<span>${escape(label)}</span></button>`).join('')}</div><button data-g="add" class="gw-add" aria-expanded="false" aria-label="Add Artifact: upload files, paste content, or create a new document"${readonly()?' disabled':''}>${plus}</button><button data-g="close" class="gw-close" aria-label="${owner.id==='project'?'Collapse Project context':'Close Thread details'}">×</button>`;
+    $('.gw-tabs').innerHTML=`<div role="tablist" aria-label="Work and Artifact tabs">${tabs.map(([id,label])=>`<button role="tab" data-g="${state.active?'tab':'project'}" data-id="${id}" aria-selected="${selectedTab===id}" aria-label="${escape(label)}" class="${id==='more'?'gw-more':id==='work'?'gw-primary-tab gw-project-toggle':''}">${folderShape()}${id==='work'?icon(owner.name):''}<span>${escape(label)}</span></button>`).join('')}</div><button data-g="add" class="gw-add" aria-expanded="false" aria-label="Add Artifact: upload files, paste content, or create a new document"${readonly()?' disabled':''}>${plus}</button>`;
   }
   function renderPane() {
     const pane=$('.gw-detail'),owner=current();
@@ -212,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="gw-body"></div><input type="file" class="gw-file-input" multiple hidden><input type="file" class="gw-comment-input" multiple hidden></div>`;
     positionPane();renderTabs();renderBody();
     $('.gw-body').scrollTop=owner.scroll[owner.tab] || 0;
+    syncMobile();
   }
   function commentMarkup(comment) {
     const owner=current();
@@ -223,15 +280,29 @@ document.addEventListener('DOMContentLoaded', () => {
   function dropzoneMarkup(locked) {
     return `<div class="dropzone gw-dropzone" tabindex="0" role="group" aria-label="Add Artifacts: drop or paste files"><strong>Add Artifacts</strong><span>Drop or paste files here, or <button data-g="upload"${locked?' disabled':''}>browse</button></span></div>`;
   }
+  function descriptionMarkup(owner,locked) {
+    if(owner.editingDescription)return `<form class="gw-description-editor"><textarea name="description" required aria-label="Project description">${escape(owner.descriptionDraft)}</textarea><button type="submit" class="primary" aria-label="Save description">${sendIcon}</button></form>`;
+    return `<div class="gw-description-row"><p class="gw-description">${escape(owner.description)}</p>${owner.id==='project'?`<button data-g="edit-description" aria-label="Edit Project description"${locked?' disabled':''}>${editIcon}</button>`:''}</div>`;
+  }
+  function projectArtifactButton(file) {
+    if(!file)return '';
+    const promoted=state.project.artifacts.includes(file);
+    const linked=state.threads.some(t=>t.artifacts.includes(file));
+    if(!linked)return '';
+    return `<button data-g="project-artifact" data-id="${file.id}" class="gw-icon-action ${promoted?'gw-demote':''}" aria-label="${promoted?'Demote: remove Project reference; keep Thread Artifact':'Promote to Project artifact: share a reference, not a copy'}"${readonly()?' disabled':''}>${rankIcon}</button>`;
+  }
+  function artifactActions(file) {
+    return `<span class="gw-artifact-actions">${projectArtifactButton(file)}<button data-g="expand" class="gw-icon-action" aria-label="${state.full?'Restore pane size':'Expand Artifact'}">${state.full?restoreIcon:expandIcon}</button></span>`;
+  }
   function renderBody() {
     const owner=current(),body=$('.gw-body'),locked=readonly();
     if(owner.editor) {renderEditor();return;}
     if(owner.tab==='work') {
-      body.innerHTML=`<p class="gw-description">${escape(owner.description)}</p>
-        ${owner.id==='project' && owner.phase==='fresh'?`<form class="gw-intent"><label>Project description<textarea name="description">${escape(owner.description)}</textarea></label><button class="primary" type="submit">Get Started</button></form>`:''}
-        ${owner.id==='project' && owner.phase==='setup'?`<article class="widget question"><div class="widget-head">◇ Question for you</div><p>How should changes be validated?</p><div class="choices"><button data-g="validation">Tests + CI + review</button><button data-g="validation">Tests + manual checks</button><button data-g="validation">Agent proposes per Thread</button></div></article>`:''}
+      body.innerHTML=`${descriptionMarkup(owner,locked)}
+        ${owner.id==='project' && owner.phase==='fresh'?`<form class="gw-intent"><button class="primary" type="submit">Get Started</button></form>`:''}
+        ${owner.id==='project' && owner.phase==='setup'?questionMarkup(owner,'How should changes be validated?',['Tests + CI + review','Tests + manual checks','Agent proposes per Thread'],'validation'):''}
         ${owner.id==='project' && owner.phase==='setup'?controlsMarkup(owner,locked)+dropzoneMarkup(locked):''}
-        ${owner.question && owner.id!=='project'?`<section class="gw-question"><strong>Question for you</strong><p>Who should this first-run flow serve first?</p><button data-g="answer"${locked?' disabled':''}>First-time solo users</button><button data-g="answer"${locked?' disabled':''}>An existing team</button></section>`:''}
+        ${owner.question && owner.id!=='project'?questionMarkup(owner,'Who should this first-run flow serve first?',['First-time solo users','An existing team'],'answer'):''}
         ${owner.id!=='project'?`<details class="gw-work-checklist" open><summary>${owner.incomplete?'Planning checklist':'Completed checklist · +186 / −42'}</summary>${WorkbenchConcept.checklist({complete:!owner.incomplete,ready:true})}</details>`:''}
         <section class="gw-comments"><h4>Comments <small>Attachments stay with their message</small></h4>${owner.comments.map(commentMarkup).join('')}</section>
         <form class="gw-composer"><textarea name="comment" aria-label="New Comment" placeholder="Write an instruction, or paste an image or file..."${locked?' disabled':''}>${escape(owner.draft)}</textarea><div class="gw-pending"></div><div class="gw-compose-actions"><button type="button" data-g="attach" aria-label="Attach files to this Comment; pasted images and files work too"${locked?' disabled':''}>${clip}</button><button type="submit" class="primary" aria-label="Send Comment"${locked?' disabled':''}>${sendIcon}</button></div></form>
@@ -239,16 +310,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ${owner.id!=='project' || owner.phase!=='setup'?dropzoneMarkup(locked):''}`;
       renderPending();
     } else if(owner.tab==='more') {
-      body.innerHTML=`<div class="gw-file-heading"><h4>All Artifacts · ${owner.artifacts.length}</h4><button data-g="add">+ Add Artifact</button></div><label>Find an Artifact<input type="search" class="gw-list-search" placeholder="Search files and images"></label>${fileList(owner.artifacts)}`;
+      body.innerHTML=`<div class="gw-file-heading"><h4>All Artifacts · ${owner.artifacts.length}</h4><button data-g="add" class="gw-icon-action" aria-label="Add Artifact">${plus}</button></div><label>Find an Artifact<input type="search" class="gw-list-search" placeholder="Search files and images"></label>${fileList(owner.artifacts)}`;
     } else if(owner.tab==='gallery') {
       const images=owner.artifacts.filter(f=>f.kind==='image');
       const selected=images.find(f=>f.id===owner.imageId) || images[0];
-      body.innerHTML=`<div class="gw-file-heading"><h4>Gallery · ${images.length} images</h4><button data-g="expand">${state.full?'Restore pane':'Expand'}</button></div>${selected?`<figure class="gw-gallery-view"><img src="${escape(selected.url)}" alt="${escape(selected.name)}"><figcaption>${escape(selected.name)}</figcaption></figure><div class="gw-gallery">${images.map(f=>`<button data-g="image" data-id="${f.id}" aria-label="View ${escape(f.name)}" aria-pressed="${f.id===selected.id}"><img src="${escape(f.url)}" alt=""><span>${escape(f.name)}</span></button>`).join('')}</div>`:'<p>No images yet.</p>'}`;
+      body.innerHTML=`<div class="gw-file-heading"><h4>Gallery · ${images.length} images</h4>${artifactActions(selected)}</div>${selected?`<figure class="gw-gallery-view"><img src="${escape(selected.url)}" alt="${escape(selected.name)}"><figcaption>${escape(selected.name)}</figcaption></figure><div class="gw-gallery">${images.map(f=>`<button data-g="image" data-id="${f.id}" aria-label="View ${escape(f.name)}" aria-pressed="${f.id===selected.id}"><img src="${escape(f.url)}" alt=""><span>${escape(f.name)}</span></button>`).join('')}</div>`:'<p>No images yet.</p>'}`;
     } else {
       const file=getFile(owner.tab);
       if(!file) {announce('This file is no longer available.',true);owner.tab='more';renderTabs();renderBody();return;}
       const attachment=!owner.artifacts.some(f=>f.id===file.id);
-      body.innerHTML=`<div class="gw-file-heading"><div><small>${attachment?'COMMENT ATTACHMENT':'ARTIFACT'}</small><h4>${escape(file.name)}</h4></div><button data-g="expand">${state.full?'Restore pane':'Expand'}</button></div>${file.kind==='image'?`<img class="gw-file-image" src="${escape(file.url)}" alt="${escape(file.name)}">`:file.kind==='text'?`<div class="gw-document">${markdown(file.text)}</div>`:`<p>No inline viewer for this file type. ${escape(file.size || 0)} bytes are held locally in this tab.</p>`}`;
+      body.innerHTML=`<div class="gw-file-heading"><div><small>${attachment?'COMMENT ATTACHMENT':'ARTIFACT'}</small><h4>${escape(file.name)}</h4></div>${artifactActions(file)}</div>${file.kind==='image'?`<img class="gw-file-image" src="${escape(file.url)}" alt="${escape(file.name)}">`:file.kind==='text'?`<div class="gw-document">${markdown(file.text)}</div>`:`<p>No inline viewer for this file type. ${escape(file.size || 0)} bytes are held locally in this tab.</p>`}`;
     }
   }
   function renderPending() {
@@ -258,12 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function positionPane() {
     const pane=$('.gw-detail');if(pane.hidden)return;
     pane.classList.toggle('gw-full',state.full);
-    const shell=$('.gw-shell'),width=shell.clientWidth,height=shell.clientHeight;
+    const shell=$('.gw-mobile-viewport'),width=shell.clientWidth,height=shell.clientHeight;
     const owner=current();
-    const paneWidth=Math.min(660,width-32),paneHeight=height-190;
+    if(mobile()){Object.assign(pane.style,{left:'0px',top:'0px',bottom:'auto',width:`${width}px`,height:'100%'});return;}
+    const paneWidth=Math.min(660,width-32),paneHeight=height-126;
     if(owner.id==='project') {
-      const targetWidth=state.active?paneWidth:Math.min(310,width-32);
-      Object.assign(pane.style,{left:`${(width-targetWidth)/2}px`,top:'auto',bottom:'20px',width:`${targetWidth}px`,height:state.active?`${height-(width<700?135:190)}px`:'44px'});return;
+      const targetWidth=state.active?(state.full?width-16:paneWidth):Math.min(310,width-32);
+      Object.assign(pane.style,{left:`${(width-targetWidth)/2}px`,top:'auto',bottom:'20px',width:`${targetWidth}px`,height:state.active?`${height-(state.full?46:126)}px`:'38px'});return;
     }
     pane.style.bottom='auto';
     if(width<700 || state.full) {Object.assign(pane.style,{left:'8px',top:'76px',width:`${width-16}px`,height:`${height-96}px`});return;}
@@ -274,14 +346,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const space=right?rightSpace:leftSpace;
     const actualWidth=space>=360?Math.min(paneWidth,space):paneWidth;
     const x=space>=360?(right?rect.right-frame.left+10:rect.left-frame.left-actualWidth-10):(width-actualWidth)/2;
-    const y=Math.max(90,Math.min(rect.top-frame.top,height-paneHeight-26));
+    const y=Math.max(26,Math.min(rect.top-frame.top,height-paneHeight-26));
     Object.assign(pane.style,{left:`${x}px`,top:`${y}px`,width:`${actualWidth}px`,height:`${paneHeight}px`});
   }
   function selectTab(id) {
     savePane();current().tab=id;
     current().editor=null;
     if(state.member==='you'){
-      if(id==='gallery') current().artifacts.filter(f=>f.kind==='image').forEach(f=>f.unread=false);
+      if(id==='gallery'){
+        const image=current().artifacts.find(f=>f.id===current().imageId) || current().artifacts.find(f=>f.kind==='image');
+        if(image)image.unread=false;
+      }
       const file=getFile(id);if(file)file.unread=false;
     }
     $('.gw-more-float').hidden=true;$('.gw-add-menu').hidden=true;
@@ -349,6 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const action=button.dataset.g,id=button.dataset.id;
+    if(action==='mobile-view'){mobileView(Number(button.dataset.index));return;}
     if(action==='new-project'){$('.gw-new-project').hidden=false;$('.gw-new-project input').focus();return;}
     if(action==='cancel-project'){$('.gw-new-project').hidden=true;return;}
     if(action==='top'){savePane();state.top=true;state.active=null;renderShell();return;}
@@ -362,28 +438,37 @@ document.addEventListener('DOMContentLoaded', () => {
       carousel.scrollTo({left:carousel.clientWidth*t.widgetIndex,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
       return;
     }
-    if(action==='card-answer'){
-      if(state.member!=='you'){announce('Switch to your own view to answer Questions.',true);return;}
-      const t=state.threads.find(t=>t.id===id);
-      if(t.member!=='you'){announce('Only the assignee can answer this Thread’s Question.',true);return;}
-      t.question=false;t.comments.push({id:`c${++serial}`,author:'You',text:button.textContent,attachments:[]});renderGrid();if(state.active===id)renderBody();announce('Answer recorded. Planning can continue.');return;
+    if(['card-answer','answer','validation'].includes(action)){
+      answerQuestion(id==='project'?state.project:state.threads.find(t=>t.id===id),action,button.textContent);return;
     }
-    if(action==='thread-artifacts'){open(id);const file=current().artifacts[0];selectTab($('.gw-more')?'more':file?file.kind==='image'?'gallery':file.id:'work');return;}
+    if(action==='thread-artifact'){
+      open(id);const file=getFile(button.dataset.file);current().imageId=file.id;
+      selectTab(file.kind==='image'?'gallery':file.id);return;
+    }
     if(!event.target.closest('.gw-add-menu,[data-g="add"]') && $('.gw-add-menu'))$('.gw-add-menu').hidden=true;
     if(!event.target.closest('.gw-more-float,.gw-more') && $('.gw-more-float'))$('.gw-more-float').hidden=true;
-    if(['attach','upload','paste','new-file','promote','remove-pending'].includes(action) && readonly()){announce('This view is read-only.',true);return;}
+    if(['attach','upload','paste','new-file','promote','project-artifact','edit-description','remove-pending'].includes(action) && readonly()){announce('This view is read-only.',true);return;}
+    if(action==='edit-description'){current().editingDescription=true;current().descriptionDraft=current().description;renderBody();$('.gw-description-editor textarea').focus();return;}
+    if(action==='project-artifact'){
+      const file=getFile(id),promoted=state.project.artifacts.includes(file);
+      if(promoted)state.project.artifacts=state.project.artifacts.filter(f=>f!==file);
+      else state.project.artifacts.push(file);
+      if(current().id==='project' && promoted)current().tab='work';
+      renderTabs();renderBody();
+      announce(promoted?'Project reference removed. The Thread Artifact is unchanged.':'Project and Thread now reference the same Artifact. No copy was created.');
+      return;
+    }
     if(action==='thread')open(id);
     if(action==='project'){
       state.projectPeek=false;
       open('project');
     }
-    if(action==='close')close();
     if(action==='tab')selectTab(id);
     if(action==='filter') {state.filter=button.dataset.value;renderGrid();positionPane();}
     if(action==='sleep') {const t=state.threads.find(t=>t.id===id);t.sleeping=!t.sleeping;renderGrid();positionPane();}
     if(action==='new-thread') {
       if(state.member!=='you'){announce('Switch to your own view to create a Thread.',true);return;}
-      savePane();state.active=null;
+      savePane();state.active=null;state.mobileView=1;
       const thread=subject(`thread-${++serial}`,'','',{question:false,isNew:true});
       state.threads.unshift(thread);state.filter='Recent';state.query='';renderGrid();renderPane();
       $('.gw-grid').scrollTop=0;$('.gw-thread-editor input').focus();
@@ -392,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const file=getFile(id);current().imageId=id;selectTab(file.kind==='image'?'gallery':id);
     }
     if(action==='attachment')selectTab(id);
-    if(action==='image'){current().imageId=id;renderBody();}
+    if(action==='image'){current().imageId=id;if(state.member==='you')getFile(id).unread=false;renderBody();renderGrid();}
     if(action==='expand'){state.full=!state.full;positionPane();renderTabs();renderBody();}
     if(action==='add') {
       $('.gw-more-float').hidden=true;
@@ -410,14 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
       current().sleeping=false;current().older=false;
       renderTabs();renderBody();renderGrid();announce(`${file.name} saved as an Artifact. The original stays attached to its Comment.`);
     }
-    if(action==='answer') {
-      if(readonly())return;
-      current().question=false;
-      current().comments.push({id:`c${++serial}`,author:'You',text:`Audience: ${button.textContent}`,attachments:[]});
-      renderBody();renderGrid();announce('Answer recorded in this local example.');
-    }
-    if(['validation','remove-repo','invite'].includes(action) && readonly()){announce('This view is read-only.',true);return;}
-    if(action==='validation'){current().phase='ready';current().comments.push({id:`c${++serial}`,author:'You',text:`Validation: ${button.textContent}`,attachments:[]});renderBody();announce('Validation preference recorded.');}
+    if(['remove-repo','invite'].includes(action) && readonly()){announce('This view is read-only.',true);return;}
     if(action==='remove-repo'){current().repos=current().repos.filter(url=>url!==button.dataset.url);renderBody();}
     if(action==='invite'){$('.gw-invite-form').hidden=false;$('.gw-invite-form input').focus();}
   });
@@ -426,6 +504,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(el.matches('.gw-search')) {state.query=el.value;renderGrid();positionPane();}
     if(el.matches('.gw-composer textarea'))current().draft=el.value;
     if(el.closest('.gw-artifact-editor'))current().editor[el.name]=el.value;
+    if(el.closest('.gw-description-editor'))current().descriptionDraft=el.value;
+    if(el.closest('.gw-answer-form')){
+      const id=el.closest('form').dataset.owner,owner=id==='project'?state.project:state.threads.find(t=>t.id===id);
+      owner.questionDraft=el.value;
+    }
     if(el.closest('.gw-thread-editor'))state.threads.find(t=>t.id===el.closest('form').dataset.id)[el.name]=el.value;
     if(el.matches('.gw-more-search,.gw-list-search')) {
       const target=el.matches('.gw-more-search')?$('.gw-more-float .gw-file-list'):$('.gw-body .gw-file-list');
@@ -456,7 +539,16 @@ document.addEventListener('DOMContentLoaded', () => {
   root.addEventListener('submit',event=>{
     event.preventDefault();
     const form=event.target,owner=current();
+    if(form.matches('.gw-answer-form')){
+      const id=form.dataset.owner;
+      answerQuestion(id==='project'?state.project:state.threads.find(t=>t.id===id),form.dataset.actionKind,form.elements.answer.value.trim());return;
+    }
     if(readonly()){announce('This view is read-only.',true);return;}
+    if(form.matches('.gw-description-editor')){
+      const text=form.elements.description.value.trim();
+      if(!text){announce('A description cannot be empty.',true);return;}
+      owner.description=text;owner.editingDescription=false;renderBody();announce('Project description updated.');return;
+    }
     if(form.matches('.gw-new-project')) {
       const name=form.elements.name.value.trim(),description=form.elements.description.value.trim();
       if(!name || !description){announce('Give the Project a name and description.',true);return;}
@@ -476,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if(form.matches('.gw-invite-form')){owner.invited=form.elements.email.value;renderBody();announce('Example invitation recorded locally; no email was sent.');return;}
     if(form.matches('.gw-intent')) {
-      owner.description=form.elements.description.value;owner.phase='setup';
+      owner.phase='setup';
       owner.comments.push({id:`c${++serial}`,author:'Facilitator',text:'Add a repo by URL so I can understand the code this project will work with. You can invite teammates now or later.',attachments:[]});
       renderBody();announce('Project setup started. Answer the validation Question and connect a repository.');
     }
@@ -527,6 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const id=tabs[next].dataset.id;selectTab(id);$(`.gw-tabs [data-id="${id}"]`).focus();return;
     }
     if(event.key!=='Escape' || !root.contains(document.activeElement))return;
+    if(event.target.closest('.gw-description-editor')){current().editingDescription=false;renderBody();return;}
     if($('.gw-more-float') && !$('.gw-more-float').hidden) {$('.gw-more-float').hidden=true;return;}
     if($('.gw-add-menu') && !$('.gw-add-menu').hidden){$('.gw-add-menu').hidden=true;return;}
     if($('.gw-header').classList.contains('gw-header-expanded')){$('.gw-header').classList.remove('gw-header-expanded');$('.gw-new-thread')?.focus();return;}
@@ -541,17 +634,35 @@ document.addEventListener('DOMContentLoaded', () => {
       if(counter)counter.textContent=`${t.widgetIndex+1} / ${el.children.length}`;
     }
   },true);
-  new ResizeObserver(()=>{positionPane();if(!state.top)renderTabs();all('.gw-carousel').forEach(el=>{const t=state.threads.find(t=>t.id===el.closest('[data-thread]').dataset.thread);el.scrollLeft=el.clientWidth*t.widgetIndex;});}).observe(root);
+  let lastWidth;
+  new ResizeObserver(()=>{
+    if(root.clientWidth===lastWidth)return;
+    lastWidth=root.clientWidth;syncMobile();positionPane();if(!state.top)renderTabs();
+    all('.gw-carousel').forEach(el=>{const t=state.threads.find(t=>t.id===el.closest('[data-thread]').dataset.thread);el.scrollLeft=el.clientWidth*t.widgetIndex;});
+  }).observe(root);
+  let swipe;
+  root.addEventListener('touchstart',event=>{
+    if(!mobile() || event.target.closest('input,textarea,.gw-carousel,.gw-tabs,.gw-people,.gw-header'))return;
+    const touch=event.touches[0];swipe={x:touch.clientX,y:touch.clientY};
+  },{passive:true});
+  root.addEventListener('touchend',event=>{
+    if(!swipe)return;
+    const touch=event.changedTouches[0],dx=touch.clientX-swipe.x,dy=touch.clientY-swipe.y;swipe=null;
+    if(Math.abs(dx)>60 && Math.abs(dy)<40)mobileView(Math.max(0,Math.min(2,state.mobileView+(dx<0?1:-1))));
+  },{passive:true});
+  root.addEventListener('touchcancel',()=>swipe=null,{passive:true});
   reset();
-  });
-  // Old deep links remain usable without presenting the superseded layout first.
-  const revealHistory = () => {
-    const target=document.getElementById(location.hash.slice(1));
-    if(target?.closest('#earlier-concept')){
-      document.querySelector('#earlier-concept').open=true;
-      requestAnimationFrame(()=>target.scrollIntoView());
+  }
+  const observer=new IntersectionObserver(entries=>{
+    for(const entry of entries)if(entry.isIntersecting){
+      observer.unobserve(entry.target);
+      initializeWorkspace(entry.target);
     }
+  },{rootMargin:'250px 0px'});
+  document.querySelectorAll('[data-grid-mode]').forEach(root=>observer.observe(root));
+  const redirectHistory=()=>{
+    if(/^#(?:step-\d+|layout|features|mobile|thread-focus|earlier-concept)$/.test(location.hash))location.replace(`workbench-earlier.html${location.hash}`);
   };
-  window.addEventListener('hashchange',revealHistory);
-  revealHistory();
+  window.addEventListener('hashchange',redirectHistory);
+  redirectHistory();
 });

@@ -646,6 +646,11 @@ window.WorkbenchConcept = (() => {
     }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['title']});
   }
   function initialize() {
+    if (!$('#journey')) {
+      bindInteractions();
+      initializeTooltips();
+      return;
+    }
     $('.nav .wrap').insertAdjacentHTML('beforeend','<a href="#features">Feature explainers</a>');
     attachmentFixtures.filter(item=>!item.image).forEach(item=>{expandedContents[item.name]=item.text;});
     $$('.app').forEach(initializeApp);

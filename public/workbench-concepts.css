@@ -16,6 +16,7 @@
 .primary{background:#a78bfa12;color:var(--lime);border:1px solid var(--lime)}
 .primary:hover{background:#a78bfa20}
 .choices button:hover{background:#a78bfa10}
+.diff-add{color:#79ca92}.diff-remove{color:#e6a295}
 .titlebar .account>summary{display:flex;align-items:center;justify-content:center;line-height:1}
 .titlebar-pin{display:grid;place-items:center;width:32px;height:32px;padding:0;line-height:1;margin-left:auto;flex:none}
 .titlebar .member-invite{display:grid;place-items:center;line-height:1}

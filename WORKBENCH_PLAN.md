@@ -9,8 +9,9 @@ proposal through three contrasts: **Tenants become Projects**, **Threads, not
 Tasks**, and **Recognizable From a Distance**. Projects make the incoming
 Tenant concept work-centric and provide a home for artifacts spanning Threads.
 The companion [visual walkthrough](public/workbench-journey.html) now leads
-with an abbreviated, seven-screen grid-first journey, followed by the earlier independent
-three-column snapshots in a collapsed comparison section. It does not connect
+with an abbreviated, seven-screen grid-first journey. The earlier independent
+three-column snapshots live at [their own URL](public/workbench-earlier.html),
+not in a hidden subtree of the current page. It does not connect
 to agents, git hosts, invitation services, or a scheduler.
 
 ## Current direction: grid-first Project workspace
@@ -25,8 +26,10 @@ not silently presented as current requirements.
 - A Thread pane floats beside its selected card, choosing a side with enough
   room rather than always opening in one fixed position. Keep that card visible
   when space permits; other cards can be covered. Reposition on resize and grid
-  scroll. On a narrow screen, the pane fills the workspace frame.
-- Clicking outside, Escape, or Close dismisses the pane. Comment drafts,
+  scroll. On a narrow screen, details are a separate full-width screen, not
+  an overlay with cards behind them.
+- Clicking away within the canvas or Escape dismisses the pane; titlebar
+  interactions do not count as clicking away. There is no Close button. Comment drafts,
   pending attachments, selected tabs, and per-tab scroll positions survive
   ordinary navigation. Local new-artifact drafts survive closing/reopening too;
   selecting another content tab or Cancel exits that editor.
@@ -35,6 +38,8 @@ not silently presented as current requirements.
   click keeps it open. Opening Project context
   replaces the Thread pane, preserving the Thread's state. Empty Projects
   start with Project context expanded; Get Started exposes onboarding widgets.
+- The Project description appears once. Hover or focus reveals an insertion-bar
+  edit icon, and an inline editor saves changes in place.
 - Folder-shaped tabs sit above the content container, with the first tab flush
   to its left edge. The first tab is the **subject icon and name**, followed by
   individual non-image Artifacts and one **Gallery** for all images.
@@ -46,7 +51,13 @@ not silently presented as current requirements.
   The Add Artifacts drop/paste area remains below the Project controls. No additional
   Artifact sidebar opens automatically. New arrivals mark the collection
   without taking over the selected tab. Expand makes the file view fill the
-  workspace; Restore returns to the floating pane.
+  workspace; Restore returns to the floating pane. Both use a borderless icon.
+  Folder outlines include the slanted edge; the square + joins the content border.
+  The collapsed Project folder has a single bottom border.
+- Promote on a Thread Artifact adds the same file object to Project Artifacts;
+  it does not copy the file or remove the Thread reference. Its icon then becomes
+  Demote, which removes only the Project reference. The same operation is available
+  when viewing the shared Artifact from Project context.
 - **Artifacts** are curated files directly attached to Projects or Threads.
   **Attachments** are files attached to Comments/messages, not another name
   for all files. Both user and agent Comments can show attachments. The
@@ -60,17 +71,27 @@ not silently presented as current requirements.
   truncation. Widget ordering varies, and carousel controls appear on hover or
   keyboard focus only when multiple widgets exist.
 - Artifact indicators are bounded, overlapping dots with no visible count:
-  orange for new/unread, white for older/unread, gray for read. Sleep appears on
+  orange for new/unread, white for older/unread, gray for read. Each dot opens
+  its individual Artifact and has a custom name/status hover description. Sleep appears on
   card hover/focus. Older Threads sit behind a wavy expand/collapse divider.
-- The fixed-height titlebar reveals Project navigation, members (owner first),
+- The fixed-height titlebar has no background or bottom border. It reveals Project
+  navigation and a horizontally scrollable, width-limited member strip, active first,
   the existing activity report, icon filters, and search on hover/focus. Its
-  right side contains New Thread and Account/Settings. At rest only the selected
-  member, selected filter, search magnifier, and New Thread button remain.
+  category multi-button is centered. Search fills the available space from that
+  button group to the divider before Account/Settings, with the magnifier at its
+  inside right edge. At rest only the selected member, selected filter, and search
+  magnifier remain.
   The member activity gutter stays visible. On touch, tapping the header reveals
   controls without changing the height reserved for it.
-- Violet replaces green, and orange replaces yellow, in both Workbench concepts.
-  Background tints are weaker than outlines. Color is supplemented by labels,
-  selection outlines, icons, and accessible descriptions.
+- New Thread is docked to the left canvas edge, aligned with the card grid's top.
+  It is fully exposed without cards and partly tucked away when cards exist;
+  hover or keyboard focus reveals it. It has a violet outline and +, with a faint
+  violet background.
+- Content surfaces retain the earlier neutral gray/black/white palette.
+  Violet is restrained to selection and primary actions; Questions use orange.
+  Accent backgrounds are weaker than outlines. Diffs use normal green/red.
+  Labels, outlines, icons, and accessible descriptions supplement color.
+- Every Question offers a freeform answer in addition to suggested choices.
 - Widgets remain presentations and interactions (Questions, checklists,
   controls), not a reason to call every file an Attachment.
 - The prototype holds files locally in memory, limits individual files to
@@ -84,8 +105,26 @@ an empty Project, onboarding Question plus repo/invite controls, the first
 Thread alongside the Facilitator's original next-steps Comment, progressed
 Thread detail, an editable new Thread card, and the twelve-card recent grid
 with two older Threads behind its divider. Three visible mobile examples use
-the same renderer and independent state. The Comment composer puts icon-only
+the same renderer and independent state, with animated swipe/tap navigation
+between Project details, the Thread list, and Thread detail. Only the active
+screen is displayed; no Project dock or list sits behind a mobile detail screen.
+The Comment composer puts icon-only
 Attach and Send buttons inside its border.
+
+### Rendering budget
+
+Examples initialize only as they approach the viewport, retaining their local
+state once initialized. The earlier journey loads only on its separate page;
+legacy hashes redirect there. The current page does not initialize legacy
+gutters, timelines, or hidden snapshots. Full-pane CSS filters and the chapter
+navigation's backdrop blur are removed. Resize callbacks are width-guarded.
+Reduced-motion preferences apply to pane, edge-button, and mobile transitions.
+Headless profiling found no recurring idle callback loop in the preceding
+revision; its avoidable cost was eager construction of roughly 15,800 elements
+(10,100 in the hidden legacy tree) and ten filtered panes. These changes reduce
+initial construction to roughly 210 elements and one nearby example.
+The embedded host's white-flash failure has not been independently reproduced;
+this is a reduction of observed page workload, not proof of a host-level fix.
 
 ## 1. Confirmed vocabulary and information architecture
 
