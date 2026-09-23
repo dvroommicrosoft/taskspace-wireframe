@@ -83,8 +83,10 @@ not silently presented as current requirements.
   the card: previous/next arrows flank clickable position dots, with the current
   dot white. Clicking the card's content opens its Thread; embedded controls
   retain their own actions.
-- Every established Thread card has a compact Comment composer below its
-  carousel, available across all widget slides. Users can steer agents from
+- Every established Thread card has a compact Comment composer below the widget
+  inside each carousel slide's vertical scroll container. Cards retain their
+  original 230px height; long widget content must be scrolled to reach the
+  composer. Users can steer agents from
   the card view without opening Thread details. Text drafts and pending
   Attachments are shared with the detail composer; file picking and paste work
   in either place. Posting targets that card's Thread, not the open pane, and

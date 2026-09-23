@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ['first','04','The first Thread starts moving.','The Facilitator has completed onboarding. The first card appears while Project context remains open.'],
     ['thread','05','Open the work already in progress.','A Thread opens beside its card. Review its checklist, Comments, and curated Artifacts without an extra side panel.'],
     ['new','06','Start another subject.','The new card is editable immediately. Save its description to start a Thread; existing work continues alongside it.'],
-    ['full','07','A grid that grows with the Project.','Steer agents directly from the card view: add instructions or attach context beneath any carousel without opening the Thread. The same Comment and draft appear in Thread details. Scroll to the wavy divider to reveal older Threads.'],
+    ['full','07','A grid that grows with the Project.','Steer agents directly from the card view: scroll within a carousel slide to add instructions or attach context below its widget, without opening the Thread. The same Comment and draft appear in Thread details. Scroll the grid to the wavy divider to reveal older Threads.'],
     ['member','08','See the work through a teammate’s view.','Mira is selected. Orange marks her avatar and the edges of the content, while the titlebar stays neutral. Browse her Threads and Artifacts read-only; your private agents remain available only in your own view.']
   ];
   document.querySelector('#grid-journey').innerHTML=moments.map(([mode,n,title,copy])=>`<article class="gw-moment" id="grid-${mode}"><header class="gw-moment-heading"><span>${n}</span><div><h3>${title}</h3><p>${copy}</p></div></header><div class="grid-workbench" data-grid-mode="${mode}" id="${mode==='full'?'grid-workbench':`workspace-${mode}`}"></div></article>`).join('');
@@ -225,8 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     t.widgetIndex=Math.max(0,Math.min(t.widgetIndex || 0,kinds.length-1));
     return `<article class="gw-card ${state.active===t.id?'selected':''}" data-thread="${t.id}">
       <div class="gw-card-heading">${icon(t.name)}<button data-g="thread" data-id="${t.id}" class="gw-thread-name">${escape(t.name)}</button><div class="gw-artifact-dots" role="group" aria-label="Thread Artifacts">${t.artifacts.map(f=>`<button data-g="thread-artifact" data-id="${t.id}" data-file="${f.id}" class="gw-artifact-dot ${f.unread?f.fresh?'new-unread':'old-unread':'read'}" aria-label="${escape(f.name)} · ${f.unread?f.fresh?'new, unread':'unread':'read'}"></button>`).join('')}</div><button class="gw-sleep" data-g="sleep" data-id="${t.id}" aria-label="${t.sleeping?'Wake':'Sleep'} ${escape(t.name)}"${state.member!=='you'?' disabled':''}>${t.sleeping?'☀':'☾'}</button></div>
-      <div class="gw-carousel" aria-label="Thread widgets" tabindex="0" data-index="${t.widgetIndex}">${kinds.map((kind,i)=>`<div class="gw-slide" data-slide="${i}">${widgetMarkup(t,kind)}</div>`).join('')}</div>
-      ${composerMarkup(t,true)}
+      <div class="gw-carousel" aria-label="Thread widgets" tabindex="0" data-index="${t.widgetIndex}">${kinds.length?kinds.map((kind,i)=>`<div class="gw-slide" data-slide="${i}">${widgetMarkup(t,kind)}${composerMarkup(t,true)}</div>`).join(''):`<div class="gw-slide" data-slide="0">${composerMarkup(t,true)}</div>`}</div>
       ${kinds.length>1?`<div class="gw-carousel-controls" role="group" aria-label="Choose a card widget"><button data-g="carousel" data-id="${t.id}" data-dir="-1" aria-label="Previous widget">${previousIcon}</button>${kinds.map((kind,i)=>`<button data-g="carousel" data-id="${t.id}" data-index="${i}" class="gw-carousel-dot" aria-current="${t.widgetIndex===i}" aria-label="Show ${kind} widget"></button>`).join('')}<button data-g="carousel" data-id="${t.id}" data-dir="1" aria-label="Next widget">${nextIcon}</button></div>`:''}
     </article>`;
   }
@@ -667,7 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(owner.name==='New Thread' && text)owner.name=text.slice(0,65);
       if(current()===owner)renderPane();
       renderGrid();
-      if(form.classList.contains('gw-card-composer'))$(`[data-thread="${owner.id}"] .gw-composer textarea`)?.focus({preventScroll:true});
+      if(form.classList.contains('gw-card-composer'))$(`[data-thread="${owner.id}"] .gw-slide[data-slide="${owner.widgetIndex}"] .gw-composer textarea`)?.focus({preventScroll:true});
       announce(`Comment posted to this ${owner.id==='project'?'Project':'Thread'} locally. In Workbench, this steers its agents; this demo does not contact agents.`);
     }
     if(form.matches('.gw-artifact-editor')) {

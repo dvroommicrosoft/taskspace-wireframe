@@ -86,7 +86,7 @@
 .gw-mobile-viewport{position:relative;height:calc(100% - 64px)}
 .gw-mobile-nav{display:none}
 .gw-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:38px 18px;padding:26px 22px 100px;height:100%;overflow:auto;align-content:start;scrollbar-width:thin}
-.gw-card{position:relative;background:#13161a;border:1px solid #ffffff25;border-radius:12px;padding:14px 14px 0;min-width:0;height:340px;cursor:pointer}
+.gw-card{position:relative;background:#13161a;border:1px solid #ffffff25;border-radius:12px;padding:14px 14px 0;min-width:0;height:230px;cursor:pointer}
 .gw-new-card{cursor:default}
 .gw-card.selected{border-color:var(--lime);box-shadow:0 0 0 1px #a78bfa20;background:#13161a}
 .gw-card-heading{display:flex;align-items:center;gap:8px;height:45px;min-width:0}
@@ -216,7 +216,6 @@
 .gw-card-composer textarea{display:block;min-height:34px;height:34px;max-height:34px;resize:none;padding:5px;font-size:11px}
 .gw-card-composer .gw-compose-actions button{width:26px;height:26px;padding:4px}
 .gw-card-composer .gw-pending{max-height:25px;overflow:auto;flex-wrap:nowrap}
-.gw-card:has(.gw-card-composer .gw-pending>span){height:365px}
 .gw-pending{display:flex;gap:6px;flex-wrap:wrap}
 .gw-pending>span{display:flex;gap:7px;align-items:center;background:#191c21;border-radius:5px;padding:3px 6px;font-size:10px}
 .gw-pending button{padding:2px 5px;border:0;background:none}
