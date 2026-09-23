@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<article class="widget gw-carousel-checklist"><div class="widget-head">Planning checklist</div>${WorkbenchConcept.checklist({complete:!thread.incomplete,ready:true})}</article>`;
   }
   function cardMarkup(t) {
-    if(t.isNew)return `<article class="gw-card gw-new-card" data-thread="${t.id}"><form class="gw-thread-editor" data-id="${t.id}"><input name="name" aria-label="Thread title" placeholder="Untitled Thread" value="${escape(t.name)}"><textarea name="description" aria-label="Thread description" placeholder="Describe what you want to work on..." required>${escape(t.description)}</textarea><div class="gw-thread-editor-actions"><button type="button" data-g="cancel-thread" data-id="${t.id}" class="gw-icon-action" aria-label="Cancel new Thread">${cancelIcon}</button><button class="primary" type="submit" aria-label="Save Thread"${t.description.trim()?'':' disabled'}>${saveIcon}</button></div></form></article>`;
+    if(t.isNew)return `<article class="gw-card gw-new-card" data-thread="${t.id}"><form class="gw-thread-editor" data-id="${t.id}" data-owner="${t.id}"><div class="gw-thread-editor-heading"><input name="name" aria-label="Thread title" placeholder="Untitled Thread" value="${escape(t.name)}"><button type="button" data-g="cancel-thread" data-id="${t.id}" class="gw-icon-action" aria-label="Cancel new Thread">${cancelIcon}</button></div><div class="gw-thread-description"><textarea name="description" aria-label="Thread description" placeholder="Describe what you want to work on..." required>${escape(t.description)}</textarea><div class="gw-pending">${pendingMarkup(t)}</div><div class="gw-compose-actions"><button type="button" data-g="attach" aria-label="Attach files to the new Thread; pasted images and files work too">${clip}</button><button class="primary" type="submit" aria-label="Save Thread"${t.description.trim()?'':' disabled'}>${saveIcon}</button></div></div><input type="file" class="gw-comment-input" multiple hidden></form></article>`;
     const kinds=(t.question?['question','checklist']:!t.incomplete?['impact','checklist']:Number(t.id.replace(/\D/g,''))%4===0?['checklist']:t.id==='thread-3'?['note','checklist']:['checklist','note'])
       .filter(kind=>!t.widgets[kind]?.removed).sort((a,b)=>Number(!!t.widgets[b]?.pinned)-Number(!!t.widgets[a]?.pinned));
     t.widgetIndex=Math.max(0,Math.min(t.widgetIndex || 0,kinds.length-1));
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   function renderPending(owner) {
-    all('.gw-composer').filter(form=>form.dataset.owner===owner.id).forEach(form=>$('.gw-pending',form).innerHTML=pendingMarkup(owner));
+    all('.gw-composer,.gw-thread-editor').filter(form=>form.dataset.owner===owner.id).forEach(form=>$('.gw-pending',form).innerHTML=pendingMarkup(owner));
   }
   function positionPane() {
     const pane=$('.gw-detail');if(pane.hidden)return;
@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         results.push(entry);
       } catch(error) {failures.push(`Could not read ${file.name}: ${error.message}`);}
     }
-    if(state!==workspace) {
+    if(state!==workspace || owner.id!=='project' && !state.threads.includes(owner)) {
       for(const entry of results) if(entry.url){URL.revokeObjectURL(entry.url);objectUrls.delete(entry.url);}
       return;
     }
@@ -478,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const action=button.dataset.g,id=button.dataset.id;
     if(action==='attach' || action==='remove-pending'){
-      const form=button.closest('.gw-composer'),owner=composerOwner(form);
+      const form=button.closest('.gw-composer,.gw-thread-editor'),owner=composerOwner(form);
       if(readonly(owner)){announce('This view is read-only.',true);return;}
       if(action==='attach')$('.gw-comment-input',form).click();
       else {owner.pending=owner.pending.filter(f=>f.id!==id);renderPending(owner);}
@@ -537,6 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(action==='cancel-thread'){
       const thread=state.threads.find(t=>t.id===id);
       if(!thread?.isNew || readonly(thread)){announce('Only your unsubmitted Threads can be cancelled.',true);return;}
+      for(const file of thread.pending)if(objectUrls.has(file.url)){URL.revokeObjectURL(file.url);objectUrls.delete(file.url);}
       state.threads=state.threads.filter(t=>t!==thread);
       if(state.lastThread===id)state.lastThread=state.threads.find(t=>!t.isNew)?.id;
       if(state.active===id){state.active=null;state.mobileView=1;}
@@ -599,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const id=el.closest('form').dataset.owner,owner=id==='project'?state.project:state.threads.find(t=>t.id===id);
       owner.questionDraft=el.value;
     }
-    if(el.closest('.gw-thread-editor')){
+    if(el.closest('.gw-thread-editor') && el.matches('[name="name"],[name="description"]')){
       const form=el.closest('form'),thread=state.threads.find(t=>t.id===form.dataset.id);
       thread[el.name]=el.value;
       form.querySelector('[type="submit"]').disabled=!thread.description.trim();
@@ -620,8 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   root.addEventListener('paste',event=>{
-    if(!event.target.matches('.gw-composer textarea,.gw-artifact-editor textarea,.gw-dropzone'))return;
-    const attachment=event.target.matches('.gw-composer textarea'),owner=attachment?composerOwner(event.target.closest('form')):current();
+    if(!event.target.matches('.gw-composer textarea,.gw-thread-editor textarea,.gw-artifact-editor textarea,.gw-dropzone'))return;
+    const attachment=event.target.matches('.gw-composer textarea,.gw-thread-editor textarea'),owner=attachment?composerOwner(event.target.closest('form')):current();
     if(readonly(owner))return;
     const files=[...event.clipboardData.files];
     if(files.length) {event.preventDefault();void readFiles(files,owner,attachment);}
@@ -635,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   root.addEventListener('submit',event=>{
     event.preventDefault();
-    const form=event.target,owner=form.matches('.gw-composer')?composerOwner(form):current();
+    const form=event.target,owner=form.matches('.gw-composer,.gw-thread-editor')?composerOwner(form):current();
     if(form.matches('.gw-answer-form')){
       const id=form.dataset.owner;
       answerQuestion(id==='project'?state.project:state.threads.find(t=>t.id===id),form.dataset.actionKind,form.elements.answer.value.trim());return;
@@ -656,7 +657,8 @@ document.addEventListener('DOMContentLoaded', () => {
       t.description=form.elements.description.value.trim();
       if(!t.description){announce('Describe what you want to work on.',true);return;}
       t.name=form.elements.name.value.trim() || t.description.slice(0,65);t.isNew=false;t.widgetIndex=0;
-      t.comments.push({id:`c${++serial}`,author:'You',text:t.description,attachments:[]});renderGrid();announce('Thread created. Its first checklist is ready to shape.');return;
+      t.comments.push({id:`c${++serial}`,author:'You',text:t.description,attachments:t.pending});t.pending=[];
+      renderGrid();announce('Thread created. Its first checklist is ready to shape.');return;
     }
     if(form.matches('.gw-repo-form')){
       const url=form.elements.url.value.trim();

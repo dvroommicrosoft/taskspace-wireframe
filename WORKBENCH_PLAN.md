@@ -110,8 +110,11 @@ not silently presented as current requirements.
 - New Thread is docked to the left canvas edge, aligned with the card grid's top.
   Creating a Thread focuses its description, not its title. The save checkmark
   stays disabled until the description contains non-whitespace text.
-  A borderless cancel icon beside the checkmark discards an unsubmitted Thread
-  and returns focus to New Thread. Submitted Threads do not have this control.
+  A borderless cancel icon in the upper-right corner discards an unsubmitted
+  Thread and returns focus to New Thread. Submitted Threads do not have this
+  control. The description composer contains an attachment icon at lower left
+  and the save checkmark at lower right. File selection and paste attach context
+  to the initial Comment when submitted; cancellation discards those attachments.
   It is fully exposed without cards and partly tucked away when cards exist;
   hover or keyboard focus reveals it. It has a violet outline and +, with a faint
   violet background. The bold + moves from the exposed edge into the button's
