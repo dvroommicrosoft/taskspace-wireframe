@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<article class="widget gw-carousel-checklist"><div class="widget-head">Planning checklist</div>${WorkbenchConcept.checklist({complete:!thread.incomplete,ready:true})}</article>`;
   }
   function cardMarkup(t) {
-    if(t.isNew)return `<article class="gw-card gw-new-card" data-thread="${t.id}"><form class="gw-thread-editor" data-id="${t.id}"><input name="name" aria-label="Thread title" placeholder="Untitled Thread" value="${escape(t.name)}"><textarea name="description" aria-label="Thread description" placeholder="Describe what you want to work on..." required>${escape(t.description)}</textarea><button class="primary" type="submit" aria-label="Save Thread"${t.description.trim()?'':' disabled'}>${saveIcon}</button></form></article>`;
+    if(t.isNew)return `<article class="gw-card gw-new-card" data-thread="${t.id}"><form class="gw-thread-editor" data-id="${t.id}"><input name="name" aria-label="Thread title" placeholder="Untitled Thread" value="${escape(t.name)}"><textarea name="description" aria-label="Thread description" placeholder="Describe what you want to work on..." required>${escape(t.description)}</textarea><div class="gw-thread-editor-actions"><button type="button" data-g="cancel-thread" data-id="${t.id}" class="gw-icon-action" aria-label="Cancel new Thread">${cancelIcon}</button><button class="primary" type="submit" aria-label="Save Thread"${t.description.trim()?'':' disabled'}>${saveIcon}</button></div></form></article>`;
     const kinds=(t.question?['question','checklist']:!t.incomplete?['impact','checklist']:Number(t.id.replace(/\D/g,''))%4===0?['checklist']:t.id==='thread-3'?['note','checklist']:['checklist','note'])
       .filter(kind=>!t.widgets[kind]?.removed).sort((a,b)=>Number(!!t.widgets[b]?.pinned)-Number(!!t.widgets[a]?.pinned));
     t.widgetIndex=Math.max(0,Math.min(t.widgetIndex || 0,kinds.length-1));
@@ -532,6 +532,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if(current().id==='project' && promoted)current().tab='work';
       renderTabs();renderBody();
       announce(promoted?'Project reference removed. The Thread Artifact is unchanged.':'Project and Thread now reference the same Artifact. No copy was created.');
+      return;
+    }
+    if(action==='cancel-thread'){
+      const thread=state.threads.find(t=>t.id===id);
+      if(!thread?.isNew || readonly(thread)){announce('Only your unsubmitted Threads can be cancelled.',true);return;}
+      state.threads=state.threads.filter(t=>t!==thread);
+      if(state.lastThread===id)state.lastThread=state.threads.find(t=>!t.isNew)?.id;
+      if(state.active===id){state.active=null;state.mobileView=1;}
+      renderGrid();renderPane();
+      $('.gw-new-thread').focus({preventScroll:true});
+      announce('New Thread cancelled. Nothing was submitted.');
       return;
     }
     if(action==='thread')open(id);
