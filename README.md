@@ -40,11 +40,16 @@ wireframes:
 
 - [Published Workbench walkthrough](https://dvroommicrosoft.github.io/taskspace-wireframe/workbench-journey.html)
 - [Architecture and journey plan](WORKBENCH_PLAN.md)
-- [Visual journey](public/workbench-journey.html): a grid-first Project monitor
-  with floating Thread details, a fixed Project dock, folder tabs for curated
-  Artifacts, an image Gallery, and searchable More lists. Comment Attachments
-  support local file selection, paste, and Save as Artifact. Five scenario
-  controls demonstrate the connected flow, including the empty Project.
+- [Visual journey](public/workbench-journey.html): seven independent interactive
+  screens, from inline Project creation through onboarding, the first Thread,
+  Thread details, an editable new card, and a scrolling twelve-card grid.
+  Project context expands from a fixed bottom anchor. Floating details have
+  folder tabs for curated Artifacts, a Gallery, and More only on overflow.
+  Cards contain widget carousels with nested checklists, Questions, or Impact.
+  A fixed-height titlebar reveals its full controls on hover or keyboard focus.
+  Comment Attachments support file selection, paste, and Save as Artifact.
+  Three mobile examples use the same renderer. Both Workbench concepts use
+  violet/orange accents with subtle background tints.
   The earlier 25-step three-column journey is retained under a disclosure.
   The **Projects, Threads, and Widgets** concept also includes member-filtered
   Thread views, global search, personal sleep, read-only view-as modes,
@@ -58,4 +63,4 @@ Keep `workbench-grid.js`, `workbench-grid.css`, `workbench-concepts.js`,
 assets beside the HTML when copying it elsewhere. The walkthrough uses
 example data and optional files held locally in the current tab; it does not
 run agents, upload files, send invitations, connect repositories, or schedule jobs.
-Reloading or choosing another scenario clears local changes.
+Each screen has independent in-memory state. Reloading clears local changes.

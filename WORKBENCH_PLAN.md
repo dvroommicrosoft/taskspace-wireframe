@@ -9,7 +9,7 @@ proposal through three contrasts: **Tenants become Projects**, **Threads, not
 Tasks**, and **Recognizable From a Distance**. Projects make the incoming
 Tenant concept work-centric and provide a home for artifacts spanning Threads.
 The companion [visual walkthrough](public/workbench-journey.html) now leads
-with a connected grid-first study, followed by the earlier independent
+with an abbreviated, seven-screen grid-first journey, followed by the earlier independent
 three-column snapshots in a collapsed comparison section. It does not connect
 to agents, git hosts, invitation services, or a scheduler.
 
@@ -30,16 +30,20 @@ not silently presented as current requirements.
   pending attachments, selected tabs, and per-tab scroll positions survive
   ordinary navigation. Local new-artifact drafts survive closing/reopening too;
   selecting another content tab or Cancel exits that editor.
-- Project context has a distinct home: a fixed bottom-center dock. Hover
-  previews shared context; click expands upward. Opening Project context
+- Project context has a distinct home: one bottom-center pane whose collapsed
+  and expanded shapes share the same anchor. Hover opens it temporarily;
+  click keeps it open. Opening Project context
   replaces the Thread pane, preserving the Thread's state. Empty Projects
-  start with Project context expanded; Get Started populates the sample grid.
-- Each pane has folder-shaped tabs: **Work**, individual non-image Artifacts,
-  one **Gallery** for all images, and **More**. More hover shows a searchable
+  start with Project context expanded; Get Started exposes onboarding widgets.
+- Folder-shaped tabs sit above the content container, with the first tab flush
+  to its left edge. The first tab is the **subject icon and name**, followed by
+  individual non-image Artifacts and one **Gallery** for all images.
+  **More** appears only when those tabs exceed the available space. Its hover shows a searchable
   floating list of *all* Artifacts; clicking More puts the same list in the
   content area. Excess document tabs are accessible from More. Selecting an
   overflow document gives it a visible tab when there is room.
-- The **+** beside the tabs offers Upload, Paste, and New document. No additional
+- A square **+ tab** at the far right offers Upload, Paste, and New document.
+  The Add Artifacts drop/paste area remains below the Project controls. No additional
   Artifact sidebar opens automatically. New arrivals mark the collection
   without taking over the selected tab. Expand makes the file view fill the
   workspace; Restore returns to the floating pane.
@@ -49,18 +53,39 @@ not silently presented as current requirements.
   composer supports a paperclip picker and pasted images/files; ordinary
   pasted text stays Comment text. Save as Artifact retains the original
   attachment on its Comment and adds it to the curated collection.
+- Cards have a title/control row and a horizontally scrollable widget carousel,
+  not separate descriptions, status rows, or footers. Checklists lead most cards;
+  blocked work leads with a Question, completed work with directory diff totals
+  and an illustrative PR link. Checklist rows stay single-line with a faded
+  truncation. Widget ordering varies, and carousel controls appear on hover or
+  keyboard focus only when multiple widgets exist.
+- Artifact indicators are bounded, overlapping dots with no visible count:
+  orange for new/unread, white for older/unread, gray for read. Sleep appears on
+  card hover/focus. Older Threads sit behind a wavy expand/collapse divider.
+- The fixed-height titlebar reveals Project navigation, members (owner first),
+  the existing activity report, icon filters, and search on hover/focus. Its
+  right side contains New Thread and Account/Settings. At rest only the selected
+  member, selected filter, search magnifier, and New Thread button remain.
+  The member activity gutter stays visible. On touch, tapping the header reveals
+  controls without changing the height reserved for it.
+- Violet replaces green, and orange replaces yellow, in both Workbench concepts.
+  Background tints are weaker than outlines. Color is supplemented by labels,
+  selection outlines, icons, and accessible descriptions.
 - Widgets remain presentations and interactions (Questions, checklists,
   controls), not a reason to call every file an Attachment.
 - The prototype holds files locally in memory, limits individual files to
   10 MB, renders text and images, and explicitly identifies file types without
   an inline viewer. Nothing is uploaded, sent to an agent, or saved to a server.
-  Reload/scenario reset clears local changes. The historical root demo remains
+  Reload clears local changes. The historical root demo remains
   unchanged.
 
-Five scenario controls demonstrate empty Project, nine-card monitor, open
-Thread, Gallery/artifact browsing, and Project context. These explicitly reset
-the example; navigating within a scenario does not. Responsive layouts use the
-same working prototype rather than a separate static mobile drawing.
+The seven independent snapshots show Top context with inline New Project,
+an empty Project, onboarding Question plus repo/invite controls, the first
+Thread alongside the Facilitator's original next-steps Comment, progressed
+Thread detail, an editable new Thread card, and the twelve-card recent grid
+with two older Threads behind its divider. Three visible mobile examples use
+the same renderer and independent state. The Comment composer puts icon-only
+Attach and Send buttons inside its border.
 
 ## 1. Confirmed vocabulary and information architecture
 
@@ -332,7 +357,7 @@ sleeping/waking, pinning, assignment, icon regeneration, Thread or artifact
 editing, comments, answers, invitations, or agent messages. Navigation,
 search, read access, view tabs, timeline exploration, and panel resizing are
 still available. Do not mark that member's updates read merely because the
-viewer opened them. The selected top-gutter mark becomes yellow; a subtle yellow
+viewer opened them. The selected top-gutter mark becomes orange; a subtle orange
 glow is inset at the browser content edges and clipped inside the frame, not
 cast outside the window. It is a soft edge treatment, without a solid border
 or connector, and does not intercept gutter interactions. A persistent banner
@@ -355,7 +380,7 @@ incoming changes. The top gutter remains visible with the Titlebar open.
 
 | Panel / element | Gutter signal |
 | --- | --- |
-| Selected member | Green for You; yellow when viewing another member |
+| Selected member | Violet for You; orange when viewing another member |
 | Other member | White when active; dark gray when inactive |
 | Unread Thread, no incomplete work | Green |
 | Unread Thread, waiting / idle with incomplete work | Yellow |
@@ -449,7 +474,7 @@ visually distinct.
 
 Preserve On Deck's near-black foundation (`#090a0c`), layered dark surfaces
 (`#0e1013`, `#13161a`, `#191c21`), low-contrast borders, muted supporting text,
-rounded cards, restrained lime (`#b6ff57`) accents, small avatar groups, and
+rounded cards, restrained violet (`#a78bfa`) accents, small avatar groups, and
 content-first controls. Keep agent conversation secondary to artifacts.
 
 The introductory copy contrasts these ideas with the team's current
@@ -598,7 +623,7 @@ This is a proposed mobile interaction design, chosen for this iteration:
   Preview displays the selected Attachment. Agent opens the user's private
   conversation in a floating, dismissible overlay above the current screen.
   There is no Agent tab or pinning.
-- The selected screen's gutter signal is green. Work's signal is yellow when
+- The selected screen's gutter signal is violet. Work's signal is orange when
   a Question is pending and Work is not selected; other signals are unlit.
   Accessible names identify the screens and pending Question. The Agent
   button retains its activity indicator only in your own view.
@@ -733,7 +758,7 @@ and the existing reduced-motion preference continues to suppress animations.
   floating Agent overlay, including Artifact ownership and answer records.
 - Thread lists use all four requested tabs, a global search override, and
   the selected member's creation/assignment/edit and personal sleep rules.
-- Another-member views are live and read-only, with a yellow selected-member
+- Another-member views are live and read-only, with an orange selected-member
   mark and subtle inset glow inside the browser content frame. Their empty agent gutter shows
   an own-view-only explanation instead of opening a channel; read markers
   are not changed on their behalf.
