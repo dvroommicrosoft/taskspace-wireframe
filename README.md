@@ -40,7 +40,7 @@ wireframes:
 
 - [Published Workbench walkthrough](https://dvroommicrosoft.github.io/taskspace-wireframe/workbench-journey.html)
 - [Architecture and journey plan](WORKBENCH_PLAN.md)
-- [Visual journey](public/workbench-journey.html): seven independent interactive
+- [Visual journey](public/workbench-journey.html): eight independent interactive
   screens, from inline Project creation through onboarding, the first Thread,
   Thread details, an editable new card, and a scrolling twelve-card grid.
   Project context expands from a fixed bottom anchor. Floating details have
@@ -52,6 +52,9 @@ wireframes:
   navigation, showing only one screen at a time. Neutral surfaces use violet
   for selection and primary actions, orange for Questions, and standard
   green/red diff counts.
+  Another-member example uses orange selection and a content-only read-only glow.
+  Folder tabs overlap without resizing on selection; card carousels have an
+  attached dot-and-arrow control beneath them.
   Examples initialize progressively near the viewport. The earlier 25-step
   three-column journey has its own [comparison page](public/workbench-earlier.html)
   and is not rendered by the current page.

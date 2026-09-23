@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ['first','04','The first Thread starts moving.','The Facilitator has completed onboarding. The first card appears while Project context remains open.'],
     ['thread','05','Open the work already in progress.','A Thread opens beside its card. Review its checklist, Comments, and curated Artifacts without an extra side panel.'],
     ['new','06','Start another subject.','The new card is editable immediately. Save its description to start a Thread; existing work continues alongside it.'],
-    ['full','07','A grid that grows with the Project.','Hover the titlebar for the full controls. Cards show only their widget carousel below the title. Scroll to the wavy divider to reveal older Threads.']
+    ['full','07','A grid that grows with the Project.','Hover the titlebar for the full controls. Cards show only their widget carousel below the title. Scroll to the wavy divider to reveal older Threads.'],
+    ['member','08','See the work through a teammate’s view.','Mira is selected. Orange marks her avatar and the edges of the content, while the titlebar stays neutral. Browse her Threads and Artifacts read-only; your private agents remain available only in your own view.']
   ];
   document.querySelector('#grid-journey').innerHTML=moments.map(([mode,n,title,copy])=>`<article class="gw-moment" id="grid-${mode}"><header class="gw-moment-heading"><span>${n}</span><div><h3>${title}</h3><p>${copy}</p></div></header><div class="grid-workbench" data-grid-mode="${mode}" id="${mode==='full'?'grid-workbench':`workspace-${mode}`}"></div></article>`).join('');
   document.querySelector('#grid-mobile-examples').innerHTML=[['first','Project context'],['thread','Thread detail'],['full','Browse the work']].map(([mode,name],i)=>`<article class="mobile-study"><h3>${i+1} / ${name}</h3><div class="grid-workbench gw-phone" data-grid-mode="${mode}" id="workspace-mobile-${i}"></div></article>`).join('');
@@ -27,7 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const expandIcon=svg('<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>');
   const restoreIcon=svg('<path d="M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5"/>');
   const rankIcon=svg('<path d="m5 12 7-6 7 6M5 18l7-6 7 6"/>');
-  const folderShape=()=>`<svg class="gw-folder-shape" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M.5 39.5V8Q.5 .5 8 .5H92L99.5 39.5" vector-effect="non-scaling-stroke"/><path class="gw-folder-base" d="M.5 39.5h99" vector-effect="non-scaling-stroke"/></svg>`;
+  const inviteIcon=svg('<circle cx="9" cy="7" r="4"/><path d="M2 21v-3a7 7 0 0 1 13-3m4-4v8m-4-4h8"/>');
+  const uploadIcon=svg('<path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/>');
+  const cancelIcon=svg('<path d="m6 6 12 12M6 18 18 6"/>');
+  const saveIcon=svg('<path d="m5 12 4 4L19 6"/>');
+  const previousIcon=svg('<path d="m14 6-6 6 6 6"/>');
+  const nextIcon=svg('<path d="m10 6 6 6-6 6"/>');
+  const folderShape=()=>`<svg class="gw-folder-shape" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M.5 39.5V8Q.5 .5 8 .5H88Q92 .5 93 5L99.5 39.5" vector-effect="non-scaling-stroke"/><path class="gw-folder-base" d="M.5 39.5h99" vector-effect="non-scaling-stroke"/></svg>`;
   const filterIcons={
     Recent:svg('<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>'),
     Scheduled:svg('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 10h18"/>'),
@@ -80,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(['first','thread','new'].includes(mode))threads.splice(mode==='first'?1:2);
     if(mode==='new')threads.unshift(subject('draft-thread','', '',{isNew:true,question:false}));
     state={project:preservedProject || project,threads,active:['empty','setup','first'].includes(mode)?'project':mode==='thread'?'thread-0':null,filter:'Recent',member:'you',query:'',full:false,top:mode==='top',showOlder:false,mobileView:mode==='thread'?2:['empty','setup','first'].includes(mode)?0:1,lastThread:threads[0]?.id};
+    if(mode==='member'){state.member='mira';state.active='thread-3';state.lastThread='thread-3';state.mobileView=2;}
     renderShell();
   }
   const current = () => !state.active || state.active==='project' ? state.project : state.threads.find(t=>t.id===state.active);
@@ -118,14 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const account=`<details class="gw-account"><summary aria-label="Account and Settings"><span class="account-gear">${WorkbenchConcept.gear()}${avatar('you')}</span></summary><div><strong>Your workspace</strong><p>Account · You</p><label>Reduce motion<input class="gw-reduce-motion" type="checkbox" aria-label="Reduce motion in this screen"></label><small>Local settings preview</small></div></details>`;
     if(state.top)return `<header class="gw-header gw-top-header"><img class="gw-product" src="workbench-logo.svg" alt="Workbench">${account}</header>`;
     return `<header class="gw-header" aria-label="Workspace titlebar"><div class="gw-header-left">
-      <button data-g="top" class="gw-reveal gw-back" aria-label="Back to Projects">‹<img src="workbench-logo.svg" alt=""></button>
+      <button data-g="top" class="gw-back" aria-label="Back to Projects">‹<img src="workbench-logo.svg" alt=""></button>
       <details class="gw-project-switch gw-reveal"><summary aria-label="Switch Project">${icon(state.project.name)}<span>${escape(state.project.name)}</span>${WorkbenchConcept.chevron()}</summary><div><button data-g="project">${escape(state.project.name)}</button><button data-g="top">All Projects</button></div></details>
       <div class="gw-people" aria-label="Project members, active first">${[...people].sort((a,b)=>Number(b[2])-Number(a[2])).map(([id,name,active])=>`<button data-g="member" data-id="${id}" class="gw-person${id===state.member?' selected':' gw-reveal'}" aria-pressed="${id===state.member}" aria-label="View ${name}'s Threads${id==='you'?' · owner':''}"><i class="gw-person-gutter ${id===state.member?'selected':active?'active':'inactive'}"></i>${avatar(id)}</button>`).join('')}</div>
       <button class="activity-summary gw-reveal gw-activity" aria-label="Open activity report">${svg('<path d="M4 3v18h17M8 15v-4m5 4V6m5 9v-7"/>')}</button>
       </div>
       <div class="gw-filters" role="group" aria-label="Thread views">${Object.entries(filterIcons).map(([name,graphic])=>`<button data-g="filter" data-value="${name}" class="${state.filter===name?'selected':'gw-reveal'}" aria-pressed="${state.filter===name}" aria-label="${name} Threads">${graphic}</button>`).join('')}</div>
-      <div class="gw-header-right"><form class="gw-search-form" role="search"><input class="gw-search gw-reveal" type="search" value="${escape(state.query)}" aria-label="Search Thread names and descriptions"><button type="button" data-g="search" aria-label="Search Threads">${searchIcon}</button></form>
-      <span class="gw-divider gw-reveal" role="separator"></span><div class="gw-reveal gw-account-wrap">${account}</div></div>
+      <div class="gw-header-right"><form class="gw-search-form" role="search"><input class="gw-search gw-reveal" type="search" value="${escape(state.query)}" placeholder="Search across ${escape(state.project.name)} Threads..." aria-label="Search Thread names and descriptions"><button type="button" data-g="search" aria-label="Search Threads">${searchIcon}</button></form>
+      <span class="gw-divider" role="separator"></span><div class="gw-account-wrap">${account}</div></div>
     </header>`;
   }
   function updateHeader() {
@@ -134,6 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const expanded=$('.gw-header').classList.contains('gw-header-expanded');
     $('.gw-header').outerHTML=headerMarkup();
     if(expanded)$('.gw-header').classList.add('gw-header-expanded');
+    const selected=$('.gw-person.selected'),strip=$('.gw-people');
+    if(selected && strip)strip.scrollLeft=Math.max(0,selected.offsetLeft+selected.offsetWidth-strip.clientWidth);
   }
   let shownMobileView;
   function syncMobile() {
@@ -163,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else {savePane();state.active=null;state.mobileView=2;syncMobile();}
   }
   function renderTop() {
-    $('.gw-top-content').innerHTML=`<div class="gw-top-primary"><button class="primary" data-g="new-project">+ New Project</button><form class="gw-new-project" hidden><label>Project name<input name="name" required placeholder="What are we working on?"></label><label>Description<textarea name="description" required placeholder="What should this Project achieve?"></textarea></label><div><button type="button" data-g="cancel-project">Cancel</button><button class="primary" type="submit">Create Project</button></div></form></div><div class="gw-project-list">${[['On Deck evolution','A quieter workspace for human intent and agent-led work.'],['Design system','Shared patterns for a coherent product.'],['Release readiness','Coordinate the next release.']].map(([name,desc])=>`<button data-g="existing-project" data-name="${name}">${icon(name)}<span><strong>${name}</strong><small>${desc}</small></span><span class="avatars">${avatar('you')}${avatar('mira')}${avatar('theo')}</span></button>`).join('')}</div>`;
+    $('.gw-top-content').innerHTML=`<div class="gw-top-primary"><div class="gw-start-action"><span>New Project</span><button class="primary" data-g="new-project" aria-label="New Project">${plus}</button></div><form class="gw-new-project" hidden><label>Project name<input name="name" required placeholder="What are we working on?"></label><label>Description<textarea name="description" required placeholder="What should this Project achieve?"></textarea></label><div><button type="button" data-g="cancel-project" aria-label="Cancel Project creation">${cancelIcon}</button><button class="primary" type="submit" aria-label="Create Project">${saveIcon}</button></div></form></div><div class="gw-project-list">${[['On Deck evolution','A quieter workspace for human intent and agent-led work.'],['Design system','Shared patterns for a coherent product.'],['Release readiness','Coordinate the next release.']].map(([name,desc])=>`<button data-g="existing-project" data-name="${name}">${icon(name)}<span><strong>${name}</strong><small>${desc}</small></span><span class="avatars">${avatar('you')}${avatar('mira')}${avatar('theo')}</span></button>`).join('')}</div>`;
   }
   const prIcon=svg('<circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v10M18 17V9a4 4 0 0 0-4-4h-2m2-2-2 2 2 2"/>');
   function questionMarkup(owner,prompt,choices,action) {
@@ -185,13 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<article class="widget gw-carousel-checklist"><div class="widget-head">Planning checklist</div>${WorkbenchConcept.checklist({complete:!thread.incomplete,ready:true})}</article>`;
   }
   function cardMarkup(t) {
-    if(t.isNew)return `<article class="gw-card gw-new-card" data-thread="${t.id}"><form class="gw-thread-editor" data-id="${t.id}"><input name="name" aria-label="Thread title" placeholder="Untitled Thread" value="${escape(t.name)}"><textarea name="description" aria-label="Thread description" placeholder="Describe what you want to work on..." required>${escape(t.description)}</textarea><button class="primary" type="submit">Save Thread</button></form></article>`;
+    if(t.isNew)return `<article class="gw-card gw-new-card" data-thread="${t.id}"><form class="gw-thread-editor" data-id="${t.id}"><input name="name" aria-label="Thread title" placeholder="Untitled Thread" value="${escape(t.name)}"><textarea name="description" aria-label="Thread description" placeholder="Describe what you want to work on..." required>${escape(t.description)}</textarea><button class="primary" type="submit" aria-label="Save Thread">${saveIcon}</button></form></article>`;
     const kinds=t.question?['question','checklist']:!t.incomplete?['impact','checklist']:Number(t.id.replace(/\D/g,''))%4===0?['checklist']:t.id==='thread-3'?['note','checklist']:['checklist','note'];
     t.widgetIndex=Math.min(t.widgetIndex || 0,kinds.length-1);
     return `<article class="gw-card ${state.active===t.id?'selected':''}" data-thread="${t.id}">
       <div class="gw-card-heading">${icon(t.name)}<button data-g="thread" data-id="${t.id}" class="gw-thread-name">${escape(t.name)}</button><div class="gw-artifact-dots" role="group" aria-label="Thread Artifacts">${t.artifacts.map(f=>`<button data-g="thread-artifact" data-id="${t.id}" data-file="${f.id}" class="gw-artifact-dot ${f.unread?f.fresh?'new-unread':'old-unread':'read'}" aria-label="${escape(f.name)} · ${f.unread?f.fresh?'new, unread':'unread':'read'}"></button>`).join('')}</div><button class="gw-sleep" data-g="sleep" data-id="${t.id}" aria-label="${t.sleeping?'Wake':'Sleep'} ${escape(t.name)}"${state.member!=='you'?' disabled':''}>${t.sleeping?'☀':'☾'}</button></div>
       <div class="gw-carousel" aria-label="Thread widgets" tabindex="0" data-index="${t.widgetIndex}">${kinds.map((kind,i)=>`<div class="gw-slide" data-slide="${i}">${widgetMarkup(t,kind)}</div>`).join('')}</div>
-      ${kinds.length>1?`<div class="gw-carousel-controls"><button data-g="carousel" data-id="${t.id}" data-dir="-1" aria-label="Previous widget">‹</button><span>${t.widgetIndex+1} / ${kinds.length}</span><button data-g="carousel" data-id="${t.id}" data-dir="1" aria-label="Next widget">›</button></div>`:''}
+      ${kinds.length>1?`<div class="gw-carousel-controls" role="group" aria-label="Choose a card widget"><button data-g="carousel" data-id="${t.id}" data-dir="-1" aria-label="Previous widget">${previousIcon}</button>${kinds.map((kind,i)=>`<button data-g="carousel" data-id="${t.id}" data-index="${i}" class="gw-carousel-dot" aria-current="${t.widgetIndex===i}" aria-label="Show ${kind} widget"></button>`).join('')}<button data-g="carousel" data-id="${t.id}" data-dir="1" aria-label="Next widget">${nextIcon}</button></div>`:''}
     </article>`;
   }
   function renderGrid() {
@@ -236,14 +246,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderTabs() {
     const owner=current();if(!owner)return;
     const width=parseFloat($('.gw-detail').style.width) || 540;
-    const primaryWidth=Math.min(210,width*.48),tabWidth=100;
+    const primaryWidth=Math.min(210,width*.48),tabWidth=90;
     const files=owner.artifacts.filter(f=>f.kind!=='image').map(f=>[f.id,f.name]);
     if(owner.artifacts.some(f=>f.kind==='image'))files.push(['gallery','Gallery']);
     const attachment=owner.comments.flatMap(c=>c.attachments).find(f=>f.id===owner.tab);
     if(attachment && !owner.artifacts.some(f=>f.id===attachment.id))files.unshift([attachment.id,attachment.name]);
     const space=width-primaryWidth-40;
     const overflow=files.length*tabWidth>space;
-    const slots=Math.max(0,Math.floor((space-(overflow?60:0))/tabWidth));
+    const slots=Math.max(0,Math.floor((space-(overflow?48:0))/tabWidth));
     const visible=files.slice(0,slots);
     const selected=files.find(([id])=>id===owner.tab);
     if(selected && slots && !visible.includes(selected))visible[visible.length-1]=selected;
@@ -272,13 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function commentMarkup(comment) {
     const owner=current();
-    return `<article class="comment gw-comment ${comment.author==='You'?'':'agent-comment'}"><div class="comment-head">${comment.author==='You'?avatar('you'):'<span class="activity-dot"></span>'}${escape(comment.author)}${comment.author==='You'?'<span class="status">Received</span>':''}</div><div>${markdown(comment.text)}</div><div class="gw-comment-files">${comment.attachments.map(f=>`<div><button data-g="attachment" data-id="${f.id}">${f.kind==='image'?`<img src="${escape(f.url)}" alt="">`:'▤'}<span>${escape(f.name)}</span></button><button data-g="promote" data-id="${f.id}" aria-label="Save ${escape(f.name)} as a curated Artifact"${readonly() || owner.artifacts.some(a=>a.id===f.id)?' disabled':''}>${owner.artifacts.some(a=>a.id===f.id)?'Saved as Artifact':'Save as Artifact'}</button></div>`).join('')}</div></article>`;
+    return `<article class="comment gw-comment ${comment.author==='You'?'':'agent-comment'}"><div class="comment-head">${comment.author==='You'?avatar('you'):'<span class="activity-dot"></span>'}${escape(comment.author)}${comment.author==='You'?'<span class="status">Received</span>':''}</div><div>${markdown(comment.text)}</div><div class="gw-comment-files">${comment.attachments.map(f=>`<div><button data-g="attachment" data-id="${f.id}">${f.kind==='image'?`<img src="${escape(f.url)}" alt="">`:'▤'}<span>${escape(f.name)}</span></button><button data-g="promote" data-id="${f.id}" aria-label="${owner.artifacts.some(a=>a.id===f.id)?'Saved':'Save'} ${escape(f.name)} as a curated Artifact"${readonly() || owner.artifacts.some(a=>a.id===f.id)?' disabled':''}>${owner.artifacts.some(a=>a.id===f.id)?saveIcon:rankIcon}</button></div>`).join('')}</div></article>`;
   }
   function controlsMarkup(owner,locked) {
-    return `<section class="gw-controls"><h4>Controls</h4><article class="widget repo-widget"><div class="widget-head">⌘ Project Repos</div><div class="repo-list">${(owner.repos||[]).map(url=>`<div class="repo-row"><span>${escape(url.replace('https://github.com/',''))}</span><button class="tiny" data-g="remove-repo" data-url="${escape(url)}" aria-label="Remove repository ${escape(url)}"${locked?' disabled':''}>×</button></div>`).join('') || '<p>No Repos attached.</p>'}</div><form class="gw-repo-form"><input type="url" name="url" required placeholder="https://github.com/owner/repo" aria-label="Repository git URL"${locked?' disabled':''}><button type="submit"${locked?' disabled':''}>Attach</button></form></article><article class="widget"><div class="widget-head">◎ Project members</div><div class="member-row">${avatar('you')}<span>You <small>· owner</small></span><button class="tiny" data-g="invite"${locked?' disabled':''}>Invite member</button></div>${owner.invited?`<p>${escape(owner.invited)} · invitation pending</p>`:''}<form class="gw-invite-form" hidden><input type="email" name="email" required placeholder="teammate@example.com" aria-label="Teammate email"><button type="submit">Invite</button></form><p>Keep working. Invitations are optional.</p></article></section>`;
+    return `<section class="gw-controls"><h4>Controls</h4><article class="widget repo-widget"><div class="widget-head">⌘ Project Repos</div><div class="repo-list">${(owner.repos||[]).map(url=>`<div class="repo-row"><span>${escape(url.replace('https://github.com/',''))}</span><button class="tiny" data-g="remove-repo" data-url="${escape(url)}" aria-label="Remove repository ${escape(url)}"${locked?' disabled':''}>${cancelIcon}</button></div>`).join('') || '<p>No Repos attached.</p>'}</div><form class="gw-repo-form"><input type="url" name="url" required placeholder="https://github.com/owner/repo" aria-label="Repository git URL"${locked?' disabled':''}><button type="submit" aria-label="Attach repository"${locked?' disabled':''}>${clip}</button></form></article><article class="widget"><div class="widget-head">◎ Project members</div><div class="member-row">${avatar('you')}<span>You <small>· owner</small></span><button class="tiny" data-g="invite" aria-label="Invite member"${locked?' disabled':''}>${inviteIcon}</button></div>${owner.invited?`<p>${escape(owner.invited)} · invitation pending</p>`:''}<form class="gw-invite-form" hidden><input type="email" name="email" required placeholder="teammate@example.com" aria-label="Teammate email"><button type="submit" aria-label="Send invitation">${sendIcon}</button></form><p>Keep working. Invitations are optional.</p></article></section>`;
   }
   function dropzoneMarkup(locked) {
-    return `<div class="dropzone gw-dropzone" tabindex="0" role="group" aria-label="Add Artifacts: drop or paste files"><strong>Add Artifacts</strong><span>Drop or paste files here, or <button data-g="upload"${locked?' disabled':''}>browse</button></span></div>`;
+    return `<div class="dropzone gw-dropzone" tabindex="0" role="group" aria-label="Add Artifacts: drop or paste files"><strong>Add Artifacts</strong><span>Drop or paste files here <button data-g="upload" aria-label="Browse files to add Artifacts"${locked?' disabled':''}>${uploadIcon}</button></span></div>`;
   }
   function descriptionMarkup(owner,locked) {
     if(owner.editingDescription)return `<form class="gw-description-editor"><textarea name="description" required aria-label="Project description">${escape(owner.descriptionDraft)}</textarea><button type="submit" class="primary" aria-label="Save description">${sendIcon}</button></form>`;
@@ -299,15 +309,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if(owner.editor) {renderEditor();return;}
     if(owner.tab==='work') {
       body.innerHTML=`${descriptionMarkup(owner,locked)}
-        ${owner.id==='project' && owner.phase==='fresh'?`<form class="gw-intent"><button class="primary" type="submit">Get Started</button></form>`:''}
+        ${owner.id==='project' && owner.phase==='fresh'?`<form class="gw-intent gw-start-action"><span>Get Started</span><button class="primary" type="submit" aria-label="Get Started">${nextIcon}</button></form>`:''}
         ${owner.id==='project' && owner.phase==='setup'?questionMarkup(owner,'How should changes be validated?',['Tests + CI + review','Tests + manual checks','Agent proposes per Thread'],'validation'):''}
-        ${owner.id==='project' && owner.phase==='setup'?controlsMarkup(owner,locked)+dropzoneMarkup(locked):''}
         ${owner.question && owner.id!=='project'?questionMarkup(owner,'Who should this first-run flow serve first?',['First-time solo users','An existing team'],'answer'):''}
-        ${owner.id!=='project'?`<details class="gw-work-checklist" open><summary>${owner.incomplete?'Planning checklist':'Completed checklist · +186 / −42'}</summary>${WorkbenchConcept.checklist({complete:!owner.incomplete,ready:true})}</details>`:''}
         <section class="gw-comments"><h4>Comments <small>Attachments stay with their message</small></h4>${owner.comments.map(commentMarkup).join('')}</section>
         <form class="gw-composer"><textarea name="comment" aria-label="New Comment" placeholder="Write an instruction, or paste an image or file..."${locked?' disabled':''}>${escape(owner.draft)}</textarea><div class="gw-pending"></div><div class="gw-compose-actions"><button type="button" data-g="attach" aria-label="Attach files to this Comment; pasted images and files work too"${locked?' disabled':''}>${clip}</button><button type="submit" class="primary" aria-label="Send Comment"${locked?' disabled':''}>${sendIcon}</button></div></form>
-        ${owner.id==='project' && owner.phase==='ready'?controlsMarkup(owner,locked):''}
-        ${owner.id!=='project' || owner.phase!=='setup'?dropzoneMarkup(locked):''}`;
+        ${owner.id!=='project'?`<details class="gw-work-checklist" open><summary>${owner.incomplete?'Planning checklist':'Completed checklist · +186 / −42'}</summary>${WorkbenchConcept.checklist({complete:!owner.incomplete,ready:true})}</details>`:''}
+        ${owner.id==='project' && owner.phase!=='fresh'?controlsMarkup(owner,locked):''}
+        ${dropzoneMarkup(locked)}`;
       renderPending();
     } else if(owner.tab==='more') {
       body.innerHTML=`<div class="gw-file-heading"><h4>All Artifacts · ${owner.artifacts.length}</h4><button data-g="add" class="gw-icon-action" aria-label="Add Artifact">${plus}</button></div><label>Find an Artifact<input type="search" class="gw-list-search" placeholder="Search files and images"></label>${fileList(owner.artifacts)}`;
@@ -399,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function renderEditor() {
     const {mode,name,content}=current().editor;
-    $('.gw-body').innerHTML=`<form class="gw-artifact-editor"><h4>${mode==='paste'?'Paste an Artifact':'New Artifact'}</h4><label>File name<input name="name" value="${escape(name)}" required maxlength="120"${readonly()?' disabled':''}></label><label>Content<textarea name="content" placeholder="${mode==='paste'?'Paste text here, or paste an image/file directly.':'Write a document...'}" required${readonly()?' disabled':''}>${escape(content)}</textarea></label><button class="primary" type="submit"${readonly()?' disabled':''}>Add Artifact</button><button type="button" data-g="cancel-editor">Cancel</button></form>`;
+    $('.gw-body').innerHTML=`<form class="gw-artifact-editor"><h4>${mode==='paste'?'Paste an Artifact':'New Artifact'}</h4><label>File name<input name="name" value="${escape(name)}" required maxlength="120"${readonly()?' disabled':''}></label><label>Content<textarea name="content" placeholder="${mode==='paste'?'Paste text here, or paste an image/file directly.':'Write a document...'}" required${readonly()?' disabled':''}>${escape(content)}</textarea></label><button class="primary" type="submit" aria-label="Add Artifact"${readonly()?' disabled':''}>${saveIcon}</button><button type="button" data-g="cancel-editor" aria-label="Cancel Artifact editing">${cancelIcon}</button></form>`;
   }
   root.addEventListener('click',event=>{
     if(event.target.closest('.gw-header') && matchMedia('(hover: none)').matches)$('.gw-header').classList.add('gw-header-expanded');
@@ -419,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const button=event.target.closest('[data-g]');
     if(!button) {
       const card=event.target.closest('.gw-card');
-      if(card && !event.target.closest('button,summary,details,input,textarea,form,a,.gw-carousel')){open(card.dataset.thread);return;}
+      if(card && !card.classList.contains('gw-new-card') && !event.target.closest('button,summary,input,textarea,form,a')){open(card.dataset.thread);return;}
       if(!state.top && !event.target.closest('.gw-detail,.gw-header,.gw-card'))close();
       return;
     }
@@ -434,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(action==='older'){state.showOlder=!state.showOlder;renderGrid();return;}
     if(action==='carousel'){
       const card=button.closest('.gw-card'),carousel=$('.gw-carousel',card),t=state.threads.find(t=>t.id===id);
-      t.widgetIndex=(t.widgetIndex+Number(button.dataset.dir)+carousel.children.length)%carousel.children.length;
+      t.widgetIndex=button.dataset.index===undefined?(t.widgetIndex+Number(button.dataset.dir)+carousel.children.length)%carousel.children.length:Number(button.dataset.index);
       carousel.scrollTo({left:carousel.clientWidth*t.widgetIndex,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
       return;
     }
@@ -630,8 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(event.target.matches('.gw-carousel')){
       const el=event.target,t=state.threads.find(t=>t.id===el.closest('[data-thread]').dataset.thread);
       t.widgetIndex=Math.round(el.scrollLeft/el.clientWidth);
-      const counter=$('.gw-carousel-controls span',el.closest('.gw-card'));
-      if(counter)counter.textContent=`${t.widgetIndex+1} / ${el.children.length}`;
+      all('.gw-carousel-dot',el.closest('.gw-card')).forEach((dot,i)=>dot.setAttribute('aria-current',String(i===t.widgetIndex)));
     }
   },true);
   let lastWidth;

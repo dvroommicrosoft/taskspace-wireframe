@@ -9,7 +9,7 @@ proposal through three contrasts: **Tenants become Projects**, **Threads, not
 Tasks**, and **Recognizable From a Distance**. Projects make the incoming
 Tenant concept work-centric and provide a home for artifacts spanning Threads.
 The companion [visual walkthrough](public/workbench-journey.html) now leads
-with an abbreviated, seven-screen grid-first journey. The earlier independent
+with an abbreviated, eight-screen grid-first journey. The earlier independent
 three-column snapshots live at [their own URL](public/workbench-earlier.html),
 not in a hidden subtree of the current page. It does not connect
 to agents, git hosts, invitation services, or a scheduler.
@@ -54,6 +54,9 @@ not silently presented as current requirements.
   workspace; Restore returns to the floating pane. Both use a borderless icon.
   Folder outlines include the slanted edge; the square + joins the content border.
   The collapsed Project folder has a single bottom border.
+  Tabs stay the same height when selected, overlap at their rounded slants,
+  and place the active tab in front with white content and the pane's gray fill.
+  The active tab opens directly into the content without a dividing line.
 - Promote on a Thread Artifact adds the same file object to Project Artifacts;
   it does not copy the file or remove the Thread reference. Its icon then becomes
   Demote, which removes only the Project reference. The same operation is available
@@ -69,7 +72,10 @@ not silently presented as current requirements.
   blocked work leads with a Question, completed work with directory diff totals
   and an illustrative PR link. Checklist rows stay single-line with a faded
   truncation. Widget ordering varies, and carousel controls appear on hover or
-  keyboard focus only when multiple widgets exist.
+  keyboard focus only when multiple widgets exist. Controls attach just below
+  the card: previous/next arrows flank clickable position dots, with the current
+  dot white. Clicking the card's content opens its Thread; embedded controls
+  retain their own actions.
 - Artifact indicators are bounded, overlapping dots with no visible count:
   orange for new/unread, white for older/unread, gray for read. Each dot opens
   its individual Artifact and has a custom name/status hover description. Sleep appears on
@@ -77,21 +83,30 @@ not silently presented as current requirements.
 - The fixed-height titlebar has no background or bottom border. It reveals Project
   navigation and a horizontally scrollable, width-limited member strip, active first,
   the existing activity report, icon filters, and search on hover/focus. Its
-  category multi-button is centered. Search fills the available space from that
+  category multi-button is centered. Back/Workbench and Account/Settings plus
+  its divider remain visible at rest. Search fills the available space from that
   button group to the divider before Account/Settings, with the magnifier at its
   inside right edge. At rest only the selected member, selected filter, and search
-  magnifier remain.
+  magnifier remain alongside that persistent navigation. The revealed search
+  input prompts "Search across <project name> Threads...".
   The member activity gutter stays visible. On touch, tapping the header reveals
   controls without changing the height reserved for it.
 - New Thread is docked to the left canvas edge, aligned with the card grid's top.
   It is fully exposed without cards and partly tucked away when cards exist;
   hover or keyboard focus reveals it. It has a violet outline and +, with a faint
-  violet background.
+  violet background. The bold + moves from the exposed edge into the button's
+  center as the button expands.
 - Content surfaces retain the earlier neutral gray/black/white palette.
   Violet is restrained to selection and primary actions; Questions use orange.
   Accent backgrounds are weaker than outlines. Diffs use normal green/red.
   Labels, outlines, icons, and accessible descriptions supplement color.
 - Every Question offers a freeform answer in addition to suggested choices.
+- Comments and their composer follow Questions, before checklists and controls.
+  Repository attachment, member invitation, file upload/promotion, and form
+  submission/cancel actions use icons with custom hover/focus descriptions.
+- Another-member view uses an orange avatar selection and gutter, plus an inset
+  orange glow around the content area only, excluding the titlebar. Editing
+  stays disabled and browsing does not mark the other member's Artifacts read.
 - Widgets remain presentations and interactions (Questions, checklists,
   controls), not a reason to call every file an Attachment.
 - The prototype holds files locally in memory, limits individual files to
@@ -100,11 +115,12 @@ not silently presented as current requirements.
   Reload clears local changes. The historical root demo remains
   unchanged.
 
-The seven independent snapshots show Top context with inline New Project,
+The eight independent snapshots show Top context with inline New Project,
 an empty Project, onboarding Question plus repo/invite controls, the first
 Thread alongside the Facilitator's original next-steps Comment, progressed
 Thread detail, an editable new Thread card, and the twelve-card recent grid
-with two older Threads behind its divider. Three visible mobile examples use
+with two older Threads behind its divider, then a read-only view of Mira's work.
+Three visible mobile examples use
 the same renderer and independent state, with animated swipe/tap navigation
 between Project details, the Thread list, and Thread detail. Only the active
 screen is displayed; no Project dock or list sits behind a mobile detail screen.

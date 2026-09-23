@@ -20,7 +20,8 @@ textarea{resize:vertical;min-height:70px}
 .nav{position:sticky;top:0;z-index:100;background:var(--bg);border-block:1px solid var(--line)}
 .nav .wrap{display:flex;gap:25px;overflow:auto;white-space:nowrap;padding:17px 0;font-size:12px}
 .intro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:42px 0 56px}
-.intro-card{border:1px solid var(--line);padding:24px;border-radius:12px;background:var(--surface)}
+.intro-card{border:1px solid var(--lime);padding:24px;border-radius:12px;background:var(--surface)}
+.intro-icon{display:block;width:44px;height:44px;margin-bottom:22px;color:var(--lime)}
 .intro-card h3{font-size:16px;font-weight:500;margin:16px 0 10px}
 .intro-card p{font-size:13px;color:var(--muted);margin:0}
 .rule-num,.eyebrow{font:10px monospace;letter-spacing:1px;color:var(--muted)}
