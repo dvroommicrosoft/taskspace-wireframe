@@ -127,7 +127,7 @@
       .map {
         position: relative;
         min-width: 0;
-        overflow: auto;
+        overflow: hidden;
         border: 1px solid var(--line);
         border-radius: 10px;
         background:
@@ -146,17 +146,19 @@
         position: relative;
         display: grid;
         grid-template-columns:
-          minmax(190px, 0.72fr)
-          58px
-          minmax(340px, 1.45fr)
-          96px
-          minmax(220px, 0.82fr);
+          minmax(0, .95fr)
+          24px
+          minmax(0, 1.4fr)
+          28px
+          minmax(0, 1fr);
         grid-template-rows: 22px minmax(52px, auto) minmax(132px, auto) minmax(94px, auto) minmax(88px, auto);
         column-gap: 0;
         row-gap: 24px;
         align-items: center;
-        min-width: 980px;
-        margin: 24px;
+        margin: 18px;
+      }
+      .map[data-state="target"] .map-layout {
+        grid-template-rows: 22px 52px minmax(150px, auto) minmax(100px, auto) 76px 76px;
       }
       .map-zone {
         min-width: 0;
@@ -172,14 +174,17 @@
       }
       .map-zone.laptop {
         grid-column: 1;
-        grid-row: 4 / 6;
+        grid-row: 4;
         align-self: center;
         display: flex;
         flex-direction: column;
         gap: 10px;
         padding: 10px;
       }
+      .map-zone.laptop .map-card { width: 100%; }
+      .map-zone.laptop .map-zone-title { order: 2; }
       .map-zone.cloud { grid-column: 3 / 6; grid-row: 1 / 6; border-color: #566a60; background: #15221b44; }
+      .map[data-state="target"] .map-zone.cloud { grid-row: 1 / 7; }
       .map-zone-title { grid-row: 1; grid-column: 1 / -1; }
       .map-actor[data-part="prod-user"] { grid-column: 1; grid-row: 2; }
       .map-actor[data-part="dev-user"] { grid-column: 1; grid-row: 3; }
@@ -187,28 +192,37 @@
       .cloud [data-part="domain"] {
         grid-column: 1;
         grid-row: 5;
-        width: 72%;
+        width: 100%;
         justify-self: center;
       }
+      .map[data-state="target"] .cloud [data-part="domain"] { grid-row: 6; }
       .cloud .deprecated {
         grid-column: 1;
         grid-row: 4;
-        width: 82%;
+        width: 100%;
         justify-self: center;
       }
       .cloud .control-stack {
         grid-column: 1;
-        grid-row: 2 / 4;
-        width: 92%;
+        grid-row: 3;
+        width: 100%;
         min-width: 0;
         justify-self: center;
         align-self: center;
       }
       .cloud [data-part="sandbox"] {
         grid-column: 1;
-        grid-row: 4;
+        grid-row: 5;
         width: 80%;
         justify-self: center;
+      }
+      .cloud [data-part="aca"] {
+        grid-column: 1;
+        grid-row: 4;
+        width: 70%;
+        justify-self: center;
+        border-color: var(--violet);
+        background: var(--platform);
       }
       .map-zone-title {
         width: fit-content;
@@ -264,7 +278,7 @@
       .map-card.database { background: #261f35; border-color: #786293; }
       .map-store {
         margin-top: 18px;
-        width: 68%;
+        width: 70%;
         margin-left: auto;
         margin-right: auto;
         min-height: 44px;
@@ -298,8 +312,29 @@
         pointer-events: none;
       }
       @media (max-width: 760px) {
-        .map-layout { margin: 16px; }
+        .map-layout { margin: 12px; }
         .map-title { position: sticky; left: 0; }
+      }
+      @media (max-width: 600px) {
+        .map-layout {
+          grid-template-columns: minmax(0, .95fr) 12px minmax(0, 1.4fr) 14px minmax(0, 1fr);
+          margin: 10px;
+        }
+        .map-zone { padding: 4px; }
+        .map-zone.laptop { padding: 4px; }
+        .map-card { padding: 6px 3px; }
+        .map-card strong { flex-direction: column; gap: 4px; font-size: 11px; }
+        .map-card .type-icon { width: 14px; height: 14px; }
+        .map-card.map-actor { padding: 0; }
+        .map-card.map-actor strong { padding: 5px 3px; }
+        .map-store { padding: 6px 2px; }
+        .map-store strong { font-size: 10px; }
+        .cloud [data-part="aca"] { width: 76%; }
+      }
+      @media (max-width: 360px) {
+        .map-card { padding-inline: 1px; }
+        .map-card strong { font-size: 10px; }
+        .map-store strong { font-size: 10px; }
       }
 
       .summary-caption {
@@ -465,6 +500,8 @@
       [data-icon="network"] { color: #39c5cf; }
       [data-icon="key"] { color: #ffa657; }
       [data-icon="azure"] { color: #54aeff; }
+      .map-card[data-part="prod-user"],
+      .map-card[data-part="hosted"] { color: var(--violet); }
 
       .node.new {
         border: 2px solid var(--good);
@@ -643,12 +680,20 @@
         font-size: 11px;
         line-height: 1.45;
       }
+      .service-paths {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        align-items: start;
+      }
+      .service-path { display: grid; gap: 12px; min-width: 0; }
+      .vertical-arrow.runtime-link { color: #39c5cf; }
+      .vertical-arrow.runtime-link::after { color: #39c5cf; }
+      @media (max-width: 520px) {
+        .service-paths { grid-template-columns: 1fr; }
+      }
 
       @media (max-width: 900px) {
-        .map-layout {
-          grid-template-columns: 190px 44px 340px 68px 220px;
-        }
-
         main {
           width: min(100% - 24px, 620px);
           padding-top: 28px;
@@ -733,11 +778,12 @@
       </symbol>
     </svg>
     <main>
-      <h1>ACA Sandbox Architecture: separate control and data planes</h1>
+      <h1>ACA Sandbox Architecture: one controller for lifecycle and runtime</h1>
       <p class="intro">
-        Move durable sandbox lifecycle ownership into an independent controller, use a direct
-        server↔sandbox RPC path for runtime operations, and deliver secrets through ACA-managed
-        injection instead of sandbox files.
+        Local and hosted Workbench use one Sandbox Controller for lifecycle and runtime operations.
+        The controller owns durable lifecycle coordination and relays volatile authenticated streams
+        to sandbox bridges, xDS-style. Agent state stays in sandboxes; secret delivery uses
+        ACA-managed injection instead of sandbox files.
       </p>
       <div class="legend" aria-label="Diagram legend">
         <span><i class="old-key"></i> Replaced dependency or mechanism</span>
@@ -753,11 +799,11 @@
           laptops the same way we use them from the prod Workbench deployment.
         </p>
         <div class="route-legend" aria-label="Summary arrow colors">
-          <span><i class="dev"></i> dev</span>
-          <span><i class="prod"></i> prod</span>
+          <span><i class="dev"></i> dev · lifecycle + runtime</span>
+          <span><i class="prod"></i> prod · lifecycle + runtime</span>
           <span><i class="optional"></i> optional DB</span>
           <span><i class="lifecycle"></i> lifecycle</span>
-          <span><i class="runtime"></i> controller-authorized runtime RPC</span>
+          <span><i class="runtime"></i> transient runtime stream</span>
           <span><i class="retire">×</i> replaced</span>
         </div>
 
@@ -821,11 +867,14 @@
                 </div>
                 <div class="control-stack">
                   <div class="map-card controller" data-part="control" data-icon="control">
-                    <strong>Sandbox Control Plane</strong>
+                    <strong>Sandbox Controller</strong>
                   </div>
                   <div class="map-card map-store" data-part="controller-db" data-icon="storage">
                     <strong>Controller PostgreSQL</strong>
                   </div>
+                </div>
+                <div class="map-card" data-part="aca" data-icon="azure">
+                  <strong>Microsoft ACA APIs</strong>
                 </div>
                 <div class="map-card compute" data-part="sandbox" data-icon="compute">
                   <strong>ACA Sandbox</strong>
@@ -932,26 +981,34 @@
                 const x2 = left ? destination.x : destination.x + destination.w;
                 const y1 = source.y + source.h * port;
                 const y2 = destination.y + destination.h * .5;
-                const lane = x1 + ((left ? leftGutterEdge : x2) - x1) * laneFraction;
+                const localEdge = layout.querySelector(".laptop").getBoundingClientRect().right - origin.left;
+                const lane = left
+                  ? localEdge + (leftGutterEdge - localEdge) * laneFraction
+                  : x1 + (x2 - x1) * laneFraction;
                 line(`M${x1} ${y1}H${lane}V${y2}H${x2}`, color, dashed);
               }
               inward(wb, domain, "left", .88, "blue", true, .75);
               inward(hosted, domain, "right", .88, "violet", false, .24);
               if (target) {
-                inward(wb, control, "left", .18, "green", false, .25);
-                inward(hosted, control, "right", .18, "green", false, .78);
-                inward(wb, sandbox, "left", .54, "cyan", false, .5);
-                inward(hosted, sandbox, "right", .54, "cyan", false, .5);
+                inward(wb, control, "left", .18, "blue", false, .25);
+                inward(hosted, control, "right", .18, "violet", false, .78);
                 const store = box("controller-db");
-                const storeX = control.x + control.w * .3;
+                const aca = box("aca");
+                const storeX = control.x + control.w * .5;
                 line(`M${storeX} ${control.y + control.h}V${store.y}`, "green");
-                const outer = Math.max(control.x + control.w, sandbox.x + sandbox.w) + 18;
-                const entry = sandbox.x + sandbox.w - 18;
-                const channelY = store.y + store.h + 18;
+                const lifecycleX = control.x + control.w * .06;
+                const runtimeX = control.x + control.w * .96;
+                const channelY = store.y + store.h + 12;
                 line(
-                  `M${control.x + control.w} ${control.y + control.h * .78}` +
-                    `H${outer}V${channelY}H${entry}V${sandbox.y}`,
+                  `M${lifecycleX} ${control.y + control.h}` +
+                    `V${channelY}H${aca.x + aca.w * .3}V${aca.y}`,
                   "green"
+                );
+                line(`M${aca.x + aca.w * .5} ${aca.y + aca.h}V${sandbox.y}`, "green");
+                line(
+                  `M${runtimeX} ${control.y + control.h}` +
+                    `V${sandbox.y + sandbox.h * .5}H${sandbox.x + sandbox.w}`,
+                  "cyan"
                 );
               } else {
                 inward(wb, control, "left", .5, "blue", false, .25);
@@ -970,118 +1027,20 @@
           Local development defaults to PGlite; the dashed database route is opt-in.
           Workbench PostgreSQL stores domain data; Controller PostgreSQL stores lifecycle coordination only.
           <strong>No Agent runs locally, and neither database stores Agent transcripts or sandbox files.</strong>
-          Both Workbench servers are replaceable. In the proposed target, one Sandbox Service
-          abstraction owns identity, allocation, lifecycle and authorization through the
-          controller. The controller returns a short-lived capability and selected endpoint; the
-          client then opens a direct runtime channel without making the controller proxy Agent
-          traffic or sandbox files.
+          Both Workbench servers are replaceable and contact only Sandbox Controller for sandbox
+          lifecycle and runtime operations. It calls Microsoft ACA control/data-plane APIs for
+          lifecycle and maintains authenticated runtime streams to sandbox bridges, xDS-style.
+          Runtime frames are relayed transiently—not stored in Controller PostgreSQL, logs or queues.
+          This is one service, not a controller plus a separate gateway.
         </p>
       </section>
 
       <section>
-        <h2>1. Why a separate sandbox control plane</h2>
+        <h2>1. Runtime streams through the same controller</h2>
         <p class="section-note">
-          Sandbox lifecycle is durable infrastructure coordination. It should not live inside the
-          replaceable Workbench application process.
-        </p>
-
-        <div class="comparison">
-          <figure>
-            <figcaption>Before — Workbench owns application and infrastructure lifecycle</figcaption>
-            <div class="diagram">
-              <div class="boundary server">
-                <div class="boundary-label" data-icon="server">Workbench server · replaceable application process</div>
-                <div class="node">User API, tasks and conversations</div>
-                <div class="node replaced">
-                  Sandbox create / attach / stop / cleanup decisions
-                </div>
-                <div class="node replaced">
-                  In-flight provider calls and recovery coordinated by this process
-                </div>
-              </div>
-
-              <div class="vertical-arrow bad-link">
-                Workbench calls the provider directly
-              </div>
-
-              <div class="boundary platform">
-                <div class="boundary-label" data-icon="azure">Microsoft-managed ACA control plane</div>
-                <div class="node">Create · inspect · exec · stop · delete</div>
-              </div>
-
-              <div class="vertical-arrow bad-link">
-                Provider allocation and cleanup are coupled to server availability
-              </div>
-
-              <div class="boundary sandbox">
-                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
-                <div class="node">Agent runtime, checkout and sandbox disk</div>
-              </div>
-
-              <div class="callout bad">
-                A Workbench redeploy can interrupt lifecycle decisions, lose in-process ownership,
-                and make recovery depend on reconstructing provider state from partial evidence.
-              </div>
-            </div>
-          </figure>
-
-          <figure>
-            <figcaption>After — durable, fenced lifecycle controller</figcaption>
-            <div class="diagram">
-              <div class="boundary server">
-                <div class="boundary-label" data-icon="server">Workbench server · replaceable application process</div>
-                <div class="node">User API, tasks and conversations</div>
-              </div>
-
-              <div class="vertical-arrow good-link">
-                Authenticated lifecycle commands and status reads
-              </div>
-
-              <div class="boundary controller">
-                <div class="boundary-label" data-icon="server">Independent sandbox controller service</div>
-                <div class="node new">
-                  Durable commands, receipts, generations and fences
-                </div>
-                <div class="node new">Outbox, reconciliation and cleanup ownership</div>
-                <div class="node new">Separate controller PostgreSQL database</div>
-              </div>
-
-              <div class="vertical-arrow good-link">
-                Provider-neutral operation → Azure adapter
-              </div>
-
-              <div class="boundary platform">
-                <div class="boundary-label" data-icon="azure">Microsoft-managed ACA control plane</div>
-                <div class="node">Create · inspect · stop · delete</div>
-              </div>
-
-              <div class="vertical-arrow good-link">Exact fenced allocation</div>
-
-              <div class="boundary sandbox">
-                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
-                <div class="node">Agent runtime, checkout and sandbox disk</div>
-              </div>
-
-              <div class="callout good">
-                Workbench can redeploy without becoming the owner of an unfinished Azure
-                operation. The controller retains exact, durable cleanup authority.
-              </div>
-            </div>
-          </figure>
-        </div>
-
-        <p class="caption">
-          The controller stores infrastructure coordination only: locators, operation identities,
-          fences, receipts and cleanup work. Agent transcripts, prompts, credentials and repository
-          data remain outside it.
-        </p>
-      </section>
-
-      <section>
-        <h2>2. Runtime operations</h2>
-        <p class="section-note">
-          Replace repeated ACA <code>exec</code> calls with an authenticated RPC channel hosted by
-          the sandbox runtime.
+          Workbench sends both lifecycle and runtime operations to Sandbox Controller.
+          The controller uses ACA APIs for lifecycle and relays runtime frames over authenticated
+          sandbox-bridge streams, xDS-style, rather than repeated ACA <code>exec</code> calls.
         </p>
 
         <div class="comparison">
@@ -1121,70 +1080,72 @@
           </figure>
 
           <figure>
-            <figcaption>After — controller for lifecycle, direct RPC for runtime data</figcaption>
+            <figcaption>After — one controller, two southbound paths</figcaption>
             <div class="diagram">
               <div class="boundary server">
-                <div class="boundary-label" data-icon="server">Workbench server · Azure Container App</div>
-                <div class="node new">Typed, authenticated Sandbox RPC client</div>
-                <div class="node new">Sandbox lifecycle client</div>
-              </div>
-
-              <div class="row">
-                <div class="node">Lifecycle commands</div>
-                <div class="arrow">→</div>
-                <div class="node new">Sandbox controller</div>
+                <div class="boundary-label" data-icon="server">Local or cloud-hosted Workbench</div>
+                <div class="node new" data-icon="network">One authenticated Sandbox Controller client</div>
               </div>
 
               <div class="vertical-arrow good-link">
-                Controller serializes and fences lifecycle operations
+                Lifecycle requests + runtime operations
               </div>
 
-              <div class="boundary platform">
-                <div class="boundary-label" data-icon="azure">Microsoft-managed ACA operation plane</div>
-                <div class="node">
-                  Controller creates, inspects, stops, reconciles and deletes the allocation
+              <div class="boundary controller">
+                <div class="boundary-label" data-icon="control">Sandbox Controller · one service</div>
+                <div class="node new" data-icon="control">Authorize, select and fence the owning sandbox</div>
+                <div class="node new" data-icon="storage">Controller PostgreSQL: lifecycle coordination only</div>
+                <div class="node new" data-icon="network">Maintain and relay volatile runtime streams</div>
+              </div>
+
+              <div class="service-paths">
+                <div class="service-path">
+                  <div class="vertical-arrow good-link">Lifecycle</div>
+                  <div class="boundary platform">
+                    <div class="boundary-label" data-icon="azure">Microsoft ACA control/data-plane APIs</div>
+                    <div class="node" data-icon="control">Create · inspect · stop · reconcile · delete</div>
+                  </div>
+                  <div class="side-note">
+                    These APIs manage the sandbox allocation. Runtime frames do not enter
+                    the ACA exec queue.
+                  </div>
                 </div>
-              </div>
-
-              <div class="vertical-arrow good-link">
-                Exact allocated sandbox + authorized runtime locator returned to Workbench
-              </div>
-
-              <div class="boundary sandbox">
-                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
-                <div class="node new">Sandbox runtime RPC server</div>
-                <div class="vertical-arrow good-link">Routes by protocol and path</div>
-                <div class="split">
-                  <div class="node">Copilot SDK proxy</div>
-                  <div class="node new">Storage / control handlers</div>
+                <div class="service-path">
+                  <div class="vertical-arrow runtime-link">Authenticated runtime stream ↔</div>
+                  <div class="boundary sandbox">
+                    <div class="boundary-label" data-icon="compute">ACA sandbox</div>
+                    <div class="node new" data-icon="network">Sandbox bridge</div>
+                    <div class="node" data-icon="compute">Agent runtime + operation handlers</div>
+                    <div class="node" data-icon="storage">Files, state and transcripts</div>
+                  </div>
                 </div>
-                <div class="node">Sandbox disk and state</div>
               </div>
 
               <div class="side-note">
-                Runtime data path: Workbench opens authenticated RPC to the controller-selected
-                sandbox. The traffic does not proxy through the controller or ACA exec.
+                xDS-style: the controller maintains authenticated, sandbox-bound streams and relays
+                requests and responses in memory. Connections are replaceable; runtime frames are
+                not stored in PostgreSQL, transcripts, logs or durable queues.
               </div>
 
               <div class="callout good">
-                The controller remains the lifecycle authority. Only passive reads and routine
-                runtime commands bypass ACA exec.
+                Workbench never opens a sandbox connection or receives a connect-directly
+                capability. Lifecycle authority and runtime mediation live in the same service;
+                there is no second gateway.
               </div>
             </div>
           </figure>
         </div>
 
         <p class="caption">
-          #572 is the first data-plane slice of this model: it adds authenticated storage-control
-          RPC to the existing sandbox runtime bridge. “Direct” describes only the runtime data
-          path: the controller first allocates, fences and authorizes the sandbox, while Workbench
-          then sends runtime traffic to that exact sandbox without turning the controller into a
-          transcript or storage proxy.
+          The sandbox bridge is the runtime endpoint behind the controller, not an endpoint given
+          to Workbench. Both development and production use Workbench ↔ Sandbox Controller ↔
+          sandbox bridge. Only the controller selects the fenced allocation and maintains the
+          southbound stream. Runtime traffic is transient; durable Agent state remains sandbox-owned.
         </p>
       </section>
 
       <section>
-        <h2>3. Secret delivery</h2>
+        <h2>2. Secret delivery through the Sandbox Controller</h2>
         <p class="section-note">
           Stop staging credentials as files that must later be removed through the same unreliable
           exec path.
@@ -1227,16 +1188,28 @@
           </figure>
 
           <figure>
-            <figcaption>After — controller binds infrastructure; secrets never enter it</figcaption>
+            <figcaption>After — controller-mediated bootstrap; no secret persistence</figcaption>
             <div class="diagram">
+              <div class="boundary server">
+                <div class="boundary-label" data-icon="server">Owning Workbench</div>
+                <div class="node">Authorizes the acting GitHub user</div>
+                <div class="node" data-icon="key">
+                  Remains the source of current actor-scoped credentials
+                </div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Actor authority and one bootstrap response route
+              </div>
+
               <div class="boundary controller">
-                <div class="boundary-label" data-icon="server">Sandbox controller</div>
+                <div class="boundary-label" data-icon="control">Sandbox Controller · one service</div>
                 <div class="node new">
                   Creates sandbox with approved egress policy and secret references
                 </div>
                 <div class="side-note" style="margin-top: 8px">
-                  Stores references and lifecycle metadata only—never actor credentials or
-                  decrypted bootstrap payloads.
+                  Lifecycle storage holds references and coordination metadata only.
+                  Credentials and bootstrap payloads are never persisted or logged.
                 </div>
               </div>
 
@@ -1266,15 +1239,18 @@
                 ACA injects capability headers after traffic leaves the VM
               </div>
 
-              <div class="boundary server">
-                <div class="boundary-label" data-icon="server">Workbench credential broker</div>
+              <div class="boundary controller">
+                <div class="boundary-label" data-icon="control">Same Sandbox Controller · bootstrap mediation</div>
                 <div class="node new">
                   Validates one-use capability, actor ownership and sandbox placement
+                </div>
+                <div class="node" data-icon="key">
+                  Obtains current actor credentials from the owning Workbench and relays them in memory
                 </div>
               </div>
 
               <div class="vertical-arrow good-link">
-                Returns current credentials once to the validated launcher
+                Controller returns credentials once to the validated launcher
               </div>
 
               <div class="boundary sandbox">
@@ -1287,7 +1263,8 @@
 
               <div class="callout good">
                 Secret delivery no longer depends on writing and later deleting files through ACA
-                exec. Rotation and access remain controlled outside the sandbox filesystem.
+                exec. The same controller mediates bootstrap without a second gateway or durable
+                credential cache; the owning Workbench remains the actor credential source.
               </div>
             </div>
           </figure>
@@ -1296,7 +1273,9 @@
         <p class="caption">
           The credential-bootstrap work keeps the capability, nonce and locator out of command
           text, URLs, files and diagnostics. ACA injects them only on the exact approved outbound
-          request; the launcher then passes credentials directly to the intended child process.
+          request to Sandbox Controller. The controller validates the request and transiently
+          relays the authorized bootstrap response; the launcher passes credentials only to the
+          intended child process. Bootstrap capabilities are not Workbench-to-sandbox connection grants.
         </p>
       </section>
     </main>
