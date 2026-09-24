@@ -351,9 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderBody() {
     const owner=current(),body=$('.gw-body'),locked=readonly();
     if(owner.editor) {renderEditor();return;}
+    if(owner.tab==='work' && owner.id==='project' && owner.phase==='fresh'){
+      body.innerHTML=`${descriptionMarkup(owner,locked)}<div class="gw-get-started"><form class="gw-intent"><button class="primary" type="submit"${locked?' disabled':''}>Get Started</button></form>${dropzoneMarkup(locked)}</div>`;
+      return;
+    }
     if(owner.tab==='work') {
       body.innerHTML=`${descriptionMarkup(owner,locked)}
-        ${owner.id==='project' && owner.phase==='fresh'?`<form class="gw-intent"><button class="primary" type="submit">Get Started</button></form>`:''}
         ${owner.id==='project' && owner.phase==='setup'?questionMarkup(owner,'How should changes be validated?',['Tests + CI + review','Tests + manual checks','Agent proposes per Thread'],'validation'):''}
         ${owner.question && owner.id!=='project'?questionMarkup(owner,'Who should this first-run flow serve first?',['First-time solo users','An existing team'],'answer'):''}
         ${owner.id==='project' && owner.phase==='fresh'?'':`<section class="gw-comments"><h4>Comments</h4>${owner.comments.map(commentMarkup).join('')}</section>

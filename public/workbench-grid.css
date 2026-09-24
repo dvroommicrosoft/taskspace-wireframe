@@ -237,6 +237,12 @@
 .gw-dropzone button{font-size:11px;padding:2px 4px;background:none;border:0;color:var(--lime)}
 .gw-intent{margin:20px 0 30px}
 .gw-intent button{display:block;margin:20px auto}
+.gw-body:has(>.gw-get-started){display:flex;flex-direction:column}
+.gw-body:has(>.gw-get-started)>*{flex-shrink:0}
+.gw-get-started{margin-block:auto}
+.gw-get-started .gw-intent{margin:0 0 24px}
+.gw-get-started .gw-intent button{margin:0 auto}
+.gw-get-started .gw-dropzone{margin:0}
 .gw-file-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px}
 .gw-file-heading h4{overflow-wrap:anywhere;margin:0}
 .gw-file-heading small{font:9px monospace;color:var(--muted)}

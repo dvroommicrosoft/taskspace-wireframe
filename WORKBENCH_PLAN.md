@@ -42,6 +42,8 @@ not silently presented as current requirements.
   start with Project context expanded; Get Started exposes onboarding widgets.
   Get Started remains a labeled primary button until pressed. Before that,
   the Project has no visible Comments section or Comment composer.
+  Get Started and Add Artifacts are vertically centered together in the space
+  below the Project description until Get Started is pressed.
 - The Project description appears once. Hover or focus reveals an insertion-bar
   edit icon, and an inline editor saves changes in place.
 - Folder-shaped tabs sit above the content container, with the first tab flush
