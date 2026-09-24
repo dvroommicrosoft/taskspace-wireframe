@@ -748,15 +748,16 @@
       <section class="summary">
         <h2>Architecture at a glance</h2>
         <p class="section-note">
-          Default today: GitHub cloud sandboxes for development and production.
-          Proposed target: a durable controller and ACA compute—not an agreed adoption.
+          Github Sandboxes are not a production level service and offer poor reliability. They
+          must be replaced with public Azure services that can be used seamlessly from developer
+          laptops the same way we use them from the prod Workbench deployment.
         </p>
         <div class="route-legend" aria-label="Summary arrow colors">
           <span><i class="dev"></i> dev</span>
           <span><i class="prod"></i> prod</span>
           <span><i class="optional"></i> optional DB</span>
           <span><i class="lifecycle"></i> lifecycle</span>
-          <span><i class="runtime"></i> runtime RPC</span>
+          <span><i class="runtime"></i> controller-authorized runtime RPC</span>
           <span><i class="retire">×</i> replaced</span>
         </div>
 
@@ -969,8 +970,11 @@
           Local development defaults to PGlite; the dashed database route is opt-in.
           Workbench PostgreSQL stores domain data; Controller PostgreSQL stores lifecycle coordination only.
           <strong>No Agent runs locally, and neither database stores Agent transcripts or sandbox files.</strong>
-          Both Workbench servers are replaceable. In the proposed target, the controller owns lifecycle
-          and selects the sandbox that each server reaches directly for runtime RPC.
+          Both Workbench servers are replaceable. In the proposed target, one Sandbox Service
+          abstraction owns identity, allocation, lifecycle and authorization through the
+          controller. The controller returns a short-lived capability and selected endpoint; the
+          client then opens a direct runtime channel without making the controller proxy Agent
+          traffic or sandbox files.
         </p>
       </section>
 
