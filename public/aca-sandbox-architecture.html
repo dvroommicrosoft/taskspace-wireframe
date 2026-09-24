@@ -689,8 +689,58 @@
       .service-path { display: grid; gap: 12px; min-width: 0; }
       .vertical-arrow.runtime-link { color: #39c5cf; }
       .vertical-arrow.runtime-link::after { color: #39c5cf; }
+      .runtime-topology {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+          "lifecycle runtime"
+          "control runtime"
+          "allocation runtime"
+          "sandbox sandbox";
+        gap: 12px 14px;
+        align-items: stretch;
+      }
+      .runtime-topology .lifecycle-route { grid-area: lifecycle; }
+      .runtime-topology .control-plane { grid-area: control; }
+      .runtime-topology .allocation-route { grid-area: allocation; }
+      .runtime-topology .runtime-lane { grid-area: runtime; }
+      .runtime-topology .sandbox-instance { grid-area: sandbox; }
+      .runtime-lane,
+      .allocation-route {
+        min-height: 74px;
+        display: grid;
+        grid-template-rows: auto minmax(30px, 1fr) auto;
+        justify-items: center;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.25;
+        font-weight: 700;
+      }
+      .runtime-lane { color: #39c5cf; }
+      .allocation-route { color: var(--good); }
+      .route-stem {
+        width: 2px;
+        min-height: 30px;
+        margin: 5px 0 2px;
+        background: currentColor;
+      }
+      .route-tip {
+        color: currentColor;
+        font-size: 16px;
+        line-height: 1;
+      }
       @media (max-width: 520px) {
         .service-paths { grid-template-columns: 1fr; }
+        .runtime-topology {
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "lifecycle"
+            "control"
+            "allocation"
+            "runtime"
+            "sandbox";
+        }
+        .runtime-lane { min-height: 110px; }
       }
 
       @media (max-width: 900px) {
@@ -1023,7 +1073,7 @@
           Workbench PostgreSQL stores domain data; Controller PostgreSQL stores lifecycle coordination only.
           <strong>No Agent runs locally, and neither database stores Agent transcripts or sandbox files.</strong>
           Both Workbench servers are replaceable and contact only Sandbox Controller for sandbox
-          lifecycle and runtime operations. It calls Microsoft ACA control/data-plane APIs for
+          lifecycle and runtime operations. It calls Azure ACA Sandbox Control for
           lifecycle and maintains authenticated runtime streams to sandbox bridges, xDS-style.
           Runtime frames are relayed transiently—not stored in Controller PostgreSQL, logs or queues.
           This is one service, not a controller plus a separate gateway.
@@ -1093,26 +1143,27 @@
                 <div class="node new" data-icon="network">Maintain and relay volatile runtime streams</div>
               </div>
 
-              <div class="service-paths">
-                <div class="service-path">
-                  <div class="vertical-arrow good-link">Lifecycle</div>
-                  <div class="boundary platform">
-                    <div class="boundary-label" data-icon="azure">Microsoft ACA control/data-plane APIs</div>
-                    <div class="node" data-icon="control">Create · inspect · stop · reconcile · delete</div>
-                  </div>
-                  <div class="side-note">
-                    These APIs manage the sandbox allocation. Runtime frames do not enter
-                    the ACA exec queue.
-                  </div>
+              <div class="runtime-topology">
+                <div class="vertical-arrow good-link lifecycle-route">Lifecycle</div>
+                <div class="boundary platform control-plane">
+                  <div class="boundary-label" data-icon="azure">Azure ACA Sandbox Control</div>
+                  <div class="node" data-icon="control">Create · inspect · stop · reconcile · delete</div>
                 </div>
-                <div class="service-path">
-                  <div class="vertical-arrow runtime-link">Authenticated runtime stream ↔</div>
-                  <div class="boundary sandbox">
-                    <div class="boundary-label" data-icon="compute">ACA sandbox</div>
-                    <div class="node new" data-icon="network">Sandbox bridge</div>
-                    <div class="node" data-icon="compute">Agent runtime + operation handlers</div>
-                    <div class="node" data-icon="storage">Files, state and transcripts</div>
-                  </div>
+                <div class="allocation-route">
+                  <span>Provision and reconcile</span>
+                  <span class="route-stem" aria-hidden="true"></span>
+                  <span class="route-tip" aria-hidden="true">▼</span>
+                </div>
+                <div class="runtime-lane">
+                  <span>Authenticated runtime stream ↔</span>
+                  <span class="route-stem" aria-hidden="true"></span>
+                  <span class="route-tip" aria-hidden="true">▼</span>
+                </div>
+                <div class="boundary sandbox sandbox-instance">
+                  <div class="boundary-label" data-icon="compute">Sandbox Instance</div>
+                  <div class="node new" data-icon="network">Sandbox bridge</div>
+                  <div class="node" data-icon="compute">Agent runtime + operation handlers</div>
+                  <div class="node" data-icon="storage">Files, state and transcripts</div>
                 </div>
               </div>
 
