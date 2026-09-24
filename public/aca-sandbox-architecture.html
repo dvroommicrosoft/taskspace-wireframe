@@ -172,7 +172,7 @@
       }
       .map-zone.laptop {
         grid-column: 1;
-        grid-row: 1 / 6;
+        grid-row: 4 / 6;
         align-self: center;
         display: flex;
         flex-direction: column;
@@ -181,6 +181,8 @@
       }
       .map-zone.cloud { grid-column: 3 / 6; grid-row: 1 / 6; border-color: #566a60; background: #15221b44; }
       .map-zone-title { grid-row: 1; grid-column: 1 / -1; }
+      .map-actor[data-part="prod-user"] { grid-column: 1; grid-row: 2; }
+      .map-actor[data-part="dev-user"] { grid-column: 1; grid-row: 3; }
       .cloud [data-part="hosted"] { grid-column: 3; grid-row: 4; }
       .cloud [data-part="domain"] {
         grid-column: 1;
@@ -762,14 +764,14 @@
           <figure class="map" data-state="today" aria-label="Default current product: development and production both use GitHub cloud sandboxes">
             <figcaption class="map-title">Today</figcaption>
             <div class="map-layout">
+              <div class="map-card map-actor" data-part="prod-user" data-icon="user">
+                <strong>Prod user</strong>
+              </div>
+              <div class="map-card map-actor" data-part="dev-user" data-icon="user">
+                <strong>Dev user</strong>
+              </div>
               <div class="map-zone laptop">
                 <div class="map-zone-title">Laptop</div>
-                <div class="map-card map-actor" data-part="prod-user" data-icon="user">
-                  <strong>Prod user</strong>
-                </div>
-                <div class="map-card map-actor" data-part="dev-user" data-icon="user">
-                  <strong>Dev user</strong>
-                </div>
                 <div class="map-card" data-part="workbench" data-icon="server">
                   <strong>Local Workbench dev server</strong>
                 </div>
@@ -796,14 +798,14 @@
           <figure class="map" data-state="target" aria-label="Target unified sandbox controller architecture">
             <figcaption class="map-title">Proposed Target</figcaption>
             <div class="map-layout">
+              <div class="map-card map-actor" data-part="prod-user" data-icon="user">
+                <strong>Prod user</strong>
+              </div>
+              <div class="map-card map-actor" data-part="dev-user" data-icon="user">
+                <strong>Dev user</strong>
+              </div>
               <div class="map-zone laptop">
                 <div class="map-zone-title">Laptop</div>
-                <div class="map-card map-actor" data-part="prod-user" data-icon="user">
-                  <strong>Prod user</strong>
-                </div>
-                <div class="map-card map-actor" data-part="dev-user" data-icon="user">
-                  <strong>Dev user</strong>
-                </div>
                 <div class="map-card" data-part="workbench" data-icon="server">
                   <strong>Local Workbench dev server</strong>
                 </div>
