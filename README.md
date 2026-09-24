@@ -61,7 +61,7 @@ wireframes:
   Examples initialize progressively near the viewport. The earlier 25-step
   three-column journey has its own [comparison page](public/workbench-earlier.html)
   and is not rendered by the current page.
-  The **Projects, Threads, and Widgets** concept also includes member-filtered
+  The **Projects, Threads, and Cards** concept also includes member-filtered
   Thread views, global search, personal sleep, read-only view-as modes,
   assignment controls, generated SVG icons, attachment promotion, aligned
   gutters, and interactive activity-timeline explainers.

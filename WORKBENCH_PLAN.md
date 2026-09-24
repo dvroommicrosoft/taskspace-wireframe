@@ -1,13 +1,15 @@
-# Projects, Threads, and Widgets
+# Projects, Threads, and Cards
 
 **Reimagining the Workbench UI format and Information Architecture**
 
 This is the product plan for **Workbench**, not a description of the existing
 implementation. **Wireframes** means the On Deck demo in this repository.
 The audience already knows Workbench, not these wireframes. Introduce the
-proposal through three contrasts: **Tenants become Projects**, **Threads, not
-Tasks**, and **Recognizable From a Distance**. Projects make the incoming
+proposal through three contrasts: **Tenants become Projects**, **No bookkeeping**,
+and **Recognizable From a Distance**. Projects make the incoming
 Tenant concept work-centric and provide a home for artifacts spanning Threads.
+Recent, automatic archival, and Sleeping replace manual task bookkeeping.
+The card grid provides a zoom level for managing parallel work with minimal effort.
 The companion [visual walkthrough](public/workbench-journey.html) now leads
 with an abbreviated, eight-screen grid-first journey. The earlier independent
 three-column snapshots live at [their own URL](public/workbench-earlier.html),
@@ -741,7 +743,7 @@ This is a proposed mobile interaction design, chosen for this iteration:
   `workbench-concepts.js` and `.css` implement the richer concept controls,
   with dedicated logo and colored-avatar SVG assets; keep these files
   together when opening the document directly.
-- Title the page **Projects, Threads, and Widgets**, with the subheader
+- Title the page **Projects, Threads, and Cards**, with the subheader
   **Reimagining the Workbench UI format and Information Architecture**.
 - Use 25 numbered before/after snapshots, organized into six journey chapters,
   followed by a seventh section with a dedicated mobile experience study.
