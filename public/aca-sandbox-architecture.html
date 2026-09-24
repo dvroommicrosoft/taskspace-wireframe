@@ -1,0 +1,1293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ACA Sandbox Architecture — Before and After</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --page: #0d1117;
+        --surface: #161b22;
+        --surface-raised: #1f2630;
+        --ink: #f0f6fc;
+        --muted: #9da7b3;
+        --line: #30363d;
+        --server: #102a43;
+        --sandbox: #28230f;
+        --platform: #261b3a;
+        --blue: #58a6ff;
+        --violet: #bc8cff;
+        --amber: #e3b341;
+        --controller: #2dd4bf;
+        --controller-bg: #0d302d;
+        --policy: #f778ba;
+        --policy-bg: #35162b;
+        --bad: #ff7b72;
+        --bad-bg: #3d171a;
+        --good: #56d364;
+        --good-bg: #12351f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 15% 0%, #152238 0, transparent 34rem),
+          var(--page);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      }
+
+      main {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 42px 0 56px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+        letter-spacing: -0.02em;
+      }
+
+      .intro {
+        margin: 0 0 38px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+        max-width: 100ch;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: -20px 0 34px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .legend i {
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--line);
+        border-radius: 4px;
+      }
+
+      .legend .new-key {
+        border-color: var(--good);
+      }
+
+      .legend .old-key {
+        border-color: var(--bad);
+      }
+
+      .summary {
+        margin: 0 0 48px;
+      }
+
+      .summary h2 {
+        margin-bottom: 6px;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+        margin-top: 18px;
+      }
+      .route-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+      .route-legend span { display: inline-flex; align-items: center; gap: 6px; }
+      .route-legend i { width: 22px; border-top: 2px solid currentColor; }
+      .route-legend .dev { color: var(--blue); }
+      .route-legend .prod { color: var(--violet); }
+      .route-legend .lifecycle { color: var(--good); }
+      .route-legend .runtime { color: #39c5cf; }
+      .route-legend .optional { color: var(--blue); border-top-style: dashed; }
+      .route-legend .retire { color: var(--bad); font-size: 17px; font-style: normal; border: 0; text-align: center; }
+
+      .map {
+        position: relative;
+        min-width: 0;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background:
+          linear-gradient(rgba(88, 166, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(88, 166, 255, 0.025) 1px, transparent 1px),
+          #11151d;
+        background-size: 24px 24px;
+      }
+
+      .map-title {
+        font-size: 14px;
+        font-weight: 750;
+      }
+
+      .map-layout {
+        position: relative;
+        display: grid;
+        grid-template-columns:
+          minmax(190px, 0.72fr)
+          58px
+          minmax(340px, 1.45fr)
+          96px
+          minmax(220px, 0.82fr);
+        grid-template-rows: 22px minmax(52px, auto) minmax(132px, auto) minmax(94px, auto) minmax(88px, auto);
+        column-gap: 0;
+        row-gap: 24px;
+        align-items: center;
+        min-width: 980px;
+        margin: 24px;
+      }
+      .map-zone {
+        min-width: 0;
+        align-self: stretch;
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-template-rows: subgrid;
+        align-items: center;
+        padding: 7px;
+        border: 1px dashed #41658a;
+        border-radius: 6px;
+        background: #10203555;
+      }
+      .map-zone.laptop { grid-column: 1; grid-row: 4 / 6; }
+      .map-zone.cloud { grid-column: 3 / 6; grid-row: 1 / 6; border-color: #566a60; background: #15221b44; }
+      .map-zone-title { grid-row: 1; grid-column: 1 / -1; }
+      .laptop [data-part="workbench"] { grid-row: 2; }
+      .map-actor[data-part="prod-user"] { grid-column: 1; grid-row: 2; }
+      .map-actor[data-part="dev-user"] { grid-column: 1; grid-row: 3; }
+      .cloud [data-part="hosted"] { grid-column: 3; grid-row: 4; }
+      .cloud [data-part="domain"] {
+        grid-column: 1;
+        grid-row: 5;
+        width: 72%;
+        justify-self: center;
+      }
+      .cloud .deprecated {
+        grid-column: 1;
+        grid-row: 4;
+        width: 82%;
+        justify-self: center;
+      }
+      .cloud .control-stack {
+        grid-column: 1;
+        grid-row: 2 / 4;
+        width: 92%;
+        min-width: 0;
+        justify-self: center;
+        align-self: center;
+      }
+      .cloud [data-part="sandbox"] {
+        grid-column: 1;
+        grid-row: 4;
+        width: 80%;
+        justify-self: center;
+      }
+      .map-zone-title {
+        width: fit-content;
+        max-width: 100%;
+        margin: 0;
+        color: var(--blue);
+        font-size: 9px;
+        font-weight: 750;
+        line-height: 1.2;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+      }
+      .cloud .map-zone-title { color: #b5cbbd; }
+      .map-card {
+        position: relative;
+        min-width: 0;
+        min-height: 56px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 10px;
+        border: 1px solid #526376;
+        border-radius: 6px;
+        background: #182431;
+        text-align: center;
+        line-height: 1.3;
+      }
+      .map-card strong {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-size: 14px;
+      }
+      .map-card.map-actor {
+        min-height: 48px;
+        border: 0;
+        background: transparent;
+      }
+      .map-card.map-actor strong {
+        padding: 7px 12px;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        background: #11151d;
+      }
+      .map-card[data-part="workbench"], .map-card[data-part="hosted"] { min-height: 76px; }
+      .map-card[data-part="dev-user"], .map-card[data-part="workbench"] { border-color: var(--blue); }
+      .map-card[data-part="prod-user"], .map-card[data-part="hosted"] { border-color: var(--violet); }
+      .map-card[data-part="dev-user"], .map-card[data-part="prod-user"] { min-height: 44px; }
+      .map-card.compute { background: #292615; border-color: #8a7638; }
+      .map-card.controller { border: 2px solid var(--good); background: #15311e; }
+      .map-card.deprecated { min-height: 94px; border: 2px solid var(--bad); background: #2d1b29; }
+      .map-card.database { background: #261f35; border-color: #786293; }
+      .map-store {
+        margin-top: 18px;
+        width: 68%;
+        margin-left: auto;
+        margin-right: auto;
+        min-height: 44px;
+        padding: 8px;
+        border: 1px solid #40844b;
+        border-radius: 5px;
+        background: #0e2115;
+      }
+      .map-store strong { font-size: 12px; }
+      .map-card.deprecated strong { position: relative; z-index: 1; text-shadow: 0 1px 4px #11151d; }
+      .retirement-x {
+        position: absolute;
+        inset: 7px;
+        width: calc(100% - 14px);
+        height: calc(100% - 14px);
+        opacity: .65;
+      }
+      .retirement-x path {
+        fill: none;
+        stroke: var(--bad);
+        stroke-width: 5;
+        stroke-linecap: round;
+        vector-effect: non-scaling-stroke;
+      }
+      .map-wires {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        pointer-events: none;
+      }
+      @media (max-width: 760px) {
+        .map-layout { margin: 16px; }
+        .map-title { position: sticky; left: 0; }
+      }
+
+      .summary-caption {
+        margin: 14px 2px 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .summary-caption strong {
+        color: var(--ink);
+      }
+
+      section + section {
+        margin-top: 50px;
+        padding-top: 42px;
+        border-top: 1px solid var(--line);
+      }
+
+      h2 {
+        margin: 0 0 6px;
+        font-size: 20px;
+      }
+
+      .section-note {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .comparison {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto 1fr;
+        gap: 0 24px;
+      }
+
+      .comparison > figure {
+        display: grid;
+        grid-row: span 2;
+        grid-template-rows: subgrid;
+        row-gap: 0;
+        min-width: 0;
+      }
+
+      figure {
+        margin: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(13, 17, 23, 0.84);
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+      }
+
+      figcaption {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+        font-size: 14px;
+        font-weight: 650;
+        line-height: 1.45;
+      }
+
+      .diagram {
+        min-height: 330px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .boundary {
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 10px;
+        position: relative;
+      }
+
+      .boundary.server {
+        background: var(--server);
+      }
+
+      .boundary.platform {
+        border-color: var(--violet);
+        background: var(--platform);
+      }
+
+      .boundary.platform > .boundary-label {
+        color: var(--violet);
+      }
+
+      .boundary.controller {
+        border-color: var(--controller);
+        background: var(--controller-bg);
+      }
+
+      .boundary.controller > .boundary-label {
+        color: var(--controller);
+      }
+
+      .boundary.policy {
+        border-color: var(--policy);
+        background: var(--policy-bg);
+      }
+
+      .boundary.policy > .boundary-label {
+        color: var(--policy);
+      }
+
+      .boundary.sandbox {
+        background: var(--sandbox);
+      }
+
+      .boundary-label {
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .node {
+        padding: 8px 10px;
+        border: 1px solid #6e7681;
+        border-radius: 6px;
+        background: var(--surface-raised);
+        text-align: center;
+        font-size: 13px;
+        line-height: 1.3;
+        position: relative;
+      }
+      .node,
+      .boundary-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .boundary-label {
+        justify-content: flex-start;
+      }
+      .type-icon {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .map-card .type-icon {
+        width: 19px;
+        height: 19px;
+      }
+      [data-icon="user"] { color: var(--blue); }
+      [data-icon="compute"] { color: var(--amber); }
+      [data-icon="storage"] { color: var(--violet); }
+      [data-icon="control"] { color: var(--good); }
+      [data-icon="server"] { color: #79c0ff; }
+      [data-icon="network"] { color: #39c5cf; }
+      [data-icon="key"] { color: #ffa657; }
+      [data-icon="azure"] { color: #54aeff; }
+
+      .node.new {
+        border: 2px solid var(--good);
+        box-shadow: 0 0 0 1px rgba(86, 211, 100, 0.12);
+      }
+
+      .node.replaced {
+        border: 2px solid var(--bad);
+        box-shadow: 0 0 0 1px rgba(255, 123, 114, 0.1);
+      }
+
+      .node.new::after,
+      .node.replaced::after {
+        position: absolute;
+        top: -9px;
+        right: 7px;
+        padding: 1px 5px;
+        border-radius: 999px;
+        background: var(--page);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .node.new::after {
+        content: "new";
+        color: var(--good);
+      }
+
+      .node.replaced::after {
+        content: "replace";
+        color: var(--bad);
+      }
+
+      .node + .node {
+        margin-top: 7px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        align-items: center;
+        gap: 8px;
+      }
+
+      .arrow {
+        color: var(--muted);
+        text-align: center;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .vertical-arrow {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.25;
+        font-weight: 650;
+      }
+
+      .vertical-arrow::after {
+        content: "▼";
+        display: block;
+        margin-top: 3px;
+        color: var(--blue);
+        font-size: 14px;
+      }
+
+      .vertical-arrow.bad-link::after {
+        color: var(--bad);
+      }
+
+      .vertical-arrow.good-link::after {
+        color: var(--good);
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        position: relative;
+      }
+
+      .split::before {
+        content: "";
+        position: absolute;
+        top: -9px;
+        left: 25%;
+        right: 25%;
+        border-top: 1px solid var(--good);
+      }
+
+      .split .node::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        height: 9px;
+        border-left: 1px solid var(--good);
+      }
+
+      .row > .node,
+      .split > .node {
+        margin-top: 0;
+      }
+
+      .split {
+        margin-top: 12px;
+        margin-bottom: 8px;
+      }
+
+      .callout {
+        margin-top: 0;
+        padding: 9px 11px;
+        border-radius: 6px;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .callout.bad {
+        border: 1px solid #ff8182;
+        background: var(--bad-bg);
+        color: var(--bad);
+      }
+
+      .callout.good {
+        border: 1px solid #4ac26b;
+        background: var(--good-bg);
+        color: var(--good);
+      }
+
+      .file {
+        font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+      }
+
+      code {
+        padding: 1px 5px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: var(--surface-raised);
+        color: #d2a8ff;
+      }
+
+      .strike {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+
+      .caption {
+        margin: 12px 2px 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .small {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .node strong {
+        color: var(--ink);
+      }
+
+      .side-note {
+        padding: 8px 10px;
+        border-left: 3px solid var(--violet);
+        background: rgba(188, 140, 255, 0.08);
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      @media (max-width: 900px) {
+        .map-layout {
+          grid-template-columns: 190px 44px 340px 68px 220px;
+        }
+
+        main {
+          width: min(100% - 24px, 620px);
+          padding-top: 28px;
+        }
+
+        .comparison {
+          grid-template-columns: 1fr;
+          grid-template-rows: none;
+          gap: 18px;
+        }
+
+        .comparison > figure {
+          display: block;
+          grid-row: auto;
+        }
+
+        .diagram {
+          min-height: auto;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .diagram {
+          padding: 14px;
+        }
+
+        .node {
+          padding: 10px 8px;
+        }
+
+        .intro {
+          margin-bottom: 32px;
+        }
+
+        .legend {
+          gap: 10px 16px;
+          margin-top: -14px;
+        }
+
+        section + section {
+          margin-top: 36px;
+          padding-top: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"></circle>
+        <path d="M4 21a8 8 0 0 1 16 0"></path>
+      </symbol>
+      <symbol id="icon-server" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="6" rx="2"></rect>
+        <rect x="3" y="14" width="18" height="6" rx="2"></rect>
+        <path d="M7 7h.01M7 17h.01M11 7h7M11 17h7"></path>
+      </symbol>
+      <symbol id="icon-control" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19 12h3M2 12h3M12 2v3M12 19v3M17 7l2-2M5 19l2-2M17 17l2 2M5 5l2 2"></path>
+      </symbol>
+      <symbol id="icon-compute" viewBox="0 0 24 24">
+        <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+        <path d="M9 9h6v6H9zM9 2v3M15 2v3M9 19v3M15 19v3M19 9h3M19 15h3M2 9h3M2 15h3"></path>
+      </symbol>
+      <symbol id="icon-storage" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="5" rx="8" ry="3"></ellipse>
+        <path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"></path>
+      </symbol>
+      <symbol id="icon-network" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="2"></circle>
+        <circle cx="19" cy="5" r="2"></circle>
+        <circle cx="19" cy="19" r="2"></circle>
+        <path d="m7 11 10-5M7 13l10 5"></path>
+      </symbol>
+      <symbol id="icon-key" viewBox="0 0 24 24">
+        <circle cx="8" cy="15" r="4"></circle>
+        <path d="m11 12 9-9M16 7l2 2M14 9l2 2"></path>
+      </symbol>
+      <symbol id="icon-azure" viewBox="0 0 24 24">
+        <path d="M7 18h11a4 4 0 0 0 .7-7.9A7 7 0 0 0 5.3 8.4 5 5 0 0 0 7 18Z"></path>
+      </symbol>
+    </svg>
+    <main>
+      <h1>ACA Sandbox Architecture: separate control and data planes</h1>
+      <p class="intro">
+        Move durable sandbox lifecycle ownership into an independent controller, use a direct
+        server↔sandbox RPC path for runtime operations, and deliver secrets through ACA-managed
+        injection instead of sandbox files.
+      </p>
+      <div class="legend" aria-label="Diagram legend">
+        <span><i class="old-key"></i> Replaced dependency or mechanism</span>
+        <span><i class="new-key"></i> New mechanism</span>
+        <span><i></i> Existing component retained</span>
+      </div>
+
+      <section class="summary">
+        <h2>Architecture at a glance</h2>
+        <p class="section-note">
+          Default today: GitHub cloud sandboxes for development and production.
+          Proposed target: a durable controller and ACA compute—not an agreed adoption.
+        </p>
+        <div class="route-legend" aria-label="Summary arrow colors">
+          <span><i class="dev"></i> dev</span>
+          <span><i class="prod"></i> prod</span>
+          <span><i class="optional"></i> optional DB</span>
+          <span><i class="lifecycle"></i> lifecycle</span>
+          <span><i class="runtime"></i> runtime RPC</span>
+          <span><i class="retire">×</i> replaced</span>
+        </div>
+
+        <div class="summary-grid">
+          <figure class="map" data-state="today" aria-label="Default current product: development and production both use GitHub cloud sandboxes">
+            <figcaption class="map-title">Today</figcaption>
+            <div class="map-layout">
+              <div class="map-card map-actor" data-part="prod-user" data-icon="user">
+                <strong>Prod user</strong>
+              </div>
+              <div class="map-card map-actor" data-part="dev-user" data-icon="user">
+                <strong>Dev user</strong>
+              </div>
+              <div class="map-zone laptop">
+                <div class="map-zone-title">Laptop</div>
+                <div class="map-card" data-part="workbench" data-icon="server">
+                  <strong>Local Workbench dev server</strong>
+                </div>
+              </div>
+              <div class="map-zone cloud">
+                <div class="map-zone-title">Cloud</div>
+                <div class="map-card" data-part="hosted" data-icon="server">
+                  <strong>Cloud-hosted Workbench</strong>
+                </div>
+                <div class="map-card database" data-part="domain" data-icon="storage">
+                  <strong>Workbench PostgreSQL</strong>
+                </div>
+                <div class="map-card deprecated" data-part="control" data-icon="compute">
+                  <strong>GitHub cloud sandboxes</strong>
+                  <svg class="retirement-x" viewBox="0 0 58 68" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M5 5L53 63M53 5L5 63" />
+                  </svg>
+                </div>
+              </div>
+              <svg class="map-wires" aria-hidden="true"></svg>
+            </div>
+          </figure>
+
+          <figure class="map" data-state="target" aria-label="Target unified sandbox controller architecture">
+            <figcaption class="map-title">Proposed Target</figcaption>
+            <div class="map-layout">
+              <div class="map-card map-actor" data-part="prod-user" data-icon="user">
+                <strong>Prod user</strong>
+              </div>
+              <div class="map-card map-actor" data-part="dev-user" data-icon="user">
+                <strong>Dev user</strong>
+              </div>
+              <div class="map-zone laptop">
+                <div class="map-zone-title">Laptop</div>
+                <div class="map-card" data-part="workbench" data-icon="server">
+                  <strong>Local Workbench dev server</strong>
+                </div>
+              </div>
+              <div class="map-zone cloud">
+                <div class="map-zone-title">Cloud</div>
+                <div class="map-card" data-part="hosted" data-icon="server">
+                  <strong>Cloud-hosted Workbench</strong>
+                </div>
+                <div class="map-card database" data-part="domain" data-icon="storage">
+                  <strong>Workbench PostgreSQL</strong>
+                </div>
+                <div class="control-stack">
+                  <div class="map-card controller" data-part="control" data-icon="control">
+                    <strong>Sandbox Control Plane</strong>
+                  </div>
+                  <div class="map-card map-store" data-part="controller-db" data-icon="storage">
+                    <strong>Controller PostgreSQL</strong>
+                  </div>
+                </div>
+                <div class="map-card compute" data-part="sandbox" data-icon="compute">
+                  <strong>ACA Sandbox</strong>
+                </div>
+              </div>
+              <svg class="map-wires" aria-hidden="true"></svg>
+            </div>
+          </figure>
+        </div>
+        <script>
+          (() => {
+            const ns = "http://www.w3.org/2000/svg";
+            const colors = { blue: "#58a6ff", green: "#56d364", violet: "#bc8cff", cyan: "#39c5cf" };
+            const iconFor = (element) => {
+              if (element.dataset.icon) return element.dataset.icon;
+              const text = element.textContent.toLowerCase();
+              if (/user/.test(text)) return "user";
+              if (/postgres|database|disk|storage|state|file|transcript/.test(text)) return "storage";
+              if (/secret|credential|capability|auth/.test(text)) return "key";
+              if (/controller|lifecycle|provider|reconcil|fence|cleanup/.test(text)) return "control";
+              if (/sandbox|runtime|agent|launcher|copilot|compute|shell|checkout/.test(text)) return "compute";
+              if (/rpc|route|channel|proxy|traffic|request/.test(text)) return "network";
+              return "server";
+            };
+            function injectIcons() {
+              document.querySelectorAll(".map-card, .node, .boundary-label").forEach((element) => {
+                if (element.querySelector(":scope > .type-icon")) return;
+                const icon = iconFor(element);
+                element.dataset.icon = icon;
+                const svg = document.createElementNS(ns, "svg");
+                svg.setAttribute("class", "type-icon");
+                svg.setAttribute("aria-hidden", "true");
+                const use = document.createElementNS(ns, "use");
+                use.setAttribute("href", `#icon-${icon}`);
+                svg.append(use);
+                const target = element.matches(".map-card") ? element.querySelector("strong") : element;
+                target?.prepend(svg);
+              });
+            }
+            injectIcons();
+            addEventListener("DOMContentLoaded", injectIcons, { once: true });
+            function draw(map) {
+              const layout = map.querySelector(".map-layout");
+              const svg = map.querySelector(".map-wires");
+              const origin = layout.getBoundingClientRect();
+              const box = (part) => {
+                const element = layout.querySelector(`[data-part="${part}"]`);
+                const visibleElement = element.matches(".map-actor")
+                  ? element.querySelector("strong")
+                  : element;
+                const r = visibleElement.getBoundingClientRect();
+                return { x: r.x - origin.x, y: r.y - origin.y, w: r.width, h: r.height };
+              };
+              const target = map.dataset.state === "target";
+              const devUser = box("dev-user"), prodUser = box("prod-user"), wb = box("workbench");
+              const control = box("control"), sandbox = target ? box("sandbox") : null;
+              const hosted = box("hosted"), domain = box("domain");
+              svg.replaceChildren();
+              svg.setAttribute("viewBox", `0 0 ${origin.width} ${origin.height}`);
+              function element(tag, attrs, parent = svg) {
+                const node = document.createElementNS(ns, tag);
+                for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+                parent.append(node);
+                return node;
+              }
+              const defs = element("defs", {});
+              for (const [name, color] of Object.entries(colors)) {
+                const marker = element("marker", {
+                  id: `${map.dataset.state}-${name}`, markerWidth: 7, markerHeight: 7,
+                  refX: 7, refY: 3.5, orient: "auto", markerUnits: "userSpaceOnUse"
+                }, defs);
+                element("path", { d: "M0 0L7 3.5L0 7Z", fill: color }, marker);
+              }
+              function line(d, color, dashed = false) {
+                element("path", {
+                  d, fill: "none", stroke: colors[color], "stroke-width": 2,
+                  "stroke-dasharray": dashed ? "6 4" : "none",
+                  "stroke-linejoin": "round",
+                  class: "wire-route",
+                  "marker-end": `url(#${map.dataset.state}-${color})`
+                });
+              }
+              const devX = devUser.x + devUser.w * .5;
+              line(`M${devX} ${devUser.y + devUser.h}V${wb.y}`, "blue");
+              const prodLane = hosted.x + hosted.w * .6;
+              line(
+                `M${prodUser.x + prodUser.w} ${prodUser.y + prodUser.h * .5}` +
+                  `H${prodLane}V${hosted.y}`,
+                "violet"
+              );
+
+              const leftGutterEdge = layout.querySelector(".cloud").getBoundingClientRect().left - origin.left;
+              function inward(
+                source,
+                destination,
+                side,
+                port,
+                color,
+                dashed = false,
+                laneFraction = .5
+              ) {
+                const left = side === "left";
+                const x1 = left ? source.x + source.w : source.x;
+                const x2 = left ? destination.x : destination.x + destination.w;
+                const y1 = source.y + source.h * port;
+                const y2 = destination.y + destination.h * .5;
+                const lane = x1 + ((left ? leftGutterEdge : x2) - x1) * laneFraction;
+                line(`M${x1} ${y1}H${lane}V${y2}H${x2}`, color, dashed);
+              }
+              inward(wb, domain, "left", .88, "blue", true, .75);
+              inward(hosted, domain, "right", .88, "violet", false, .24);
+              if (target) {
+                inward(wb, control, "left", .18, "green", false, .25);
+                inward(hosted, control, "right", .18, "green", false, .78);
+                inward(wb, sandbox, "left", .54, "cyan", false, .5);
+                inward(hosted, sandbox, "right", .54, "cyan", false, .5);
+                const store = box("controller-db");
+                const storeX = control.x + control.w * .3;
+                line(`M${storeX} ${control.y + control.h}V${store.y}`, "green");
+                const outer = Math.max(control.x + control.w, sandbox.x + sandbox.w) + 18;
+                const entry = sandbox.x + sandbox.w - 18;
+                const channelY = store.y + store.h + 18;
+                line(
+                  `M${control.x + control.w} ${control.y + control.h * .78}` +
+                    `H${outer}V${channelY}H${entry}V${sandbox.y}`,
+                  "green"
+                );
+              } else {
+                inward(wb, control, "left", .5, "blue", false, .25);
+                inward(hosted, control, "right", .5, "violet", false, .52);
+              }
+            }
+            document.querySelectorAll(".map").forEach((map) => {
+              new ResizeObserver(() => draw(map)).observe(map.querySelector(".map-layout"));
+              draw(map);
+            });
+          })();
+        </script>
+
+        <p class="summary-caption">
+          Dev user and Prod user are browser entry points on the same laptop.
+          Local development defaults to PGlite; the dashed database route is opt-in.
+          Workbench PostgreSQL stores domain data; Controller PostgreSQL stores lifecycle coordination only.
+          <strong>No Agent runs locally, and neither database stores Agent transcripts or sandbox files.</strong>
+          Both Workbench servers are replaceable. In the proposed target, the controller owns lifecycle
+          and selects the sandbox that each server reaches directly for runtime RPC.
+        </p>
+      </section>
+
+      <section>
+        <h2>1. Why a separate sandbox control plane</h2>
+        <p class="section-note">
+          Sandbox lifecycle is durable infrastructure coordination. It should not live inside the
+          replaceable Workbench application process.
+        </p>
+
+        <div class="comparison">
+          <figure>
+            <figcaption>Before — Workbench owns application and infrastructure lifecycle</figcaption>
+            <div class="diagram">
+              <div class="boundary server">
+                <div class="boundary-label" data-icon="server">Workbench server · replaceable application process</div>
+                <div class="node">User API, tasks and conversations</div>
+                <div class="node replaced">
+                  Sandbox create / attach / stop / cleanup decisions
+                </div>
+                <div class="node replaced">
+                  In-flight provider calls and recovery coordinated by this process
+                </div>
+              </div>
+
+              <div class="vertical-arrow bad-link">
+                Workbench calls the provider directly
+              </div>
+
+              <div class="boundary platform">
+                <div class="boundary-label" data-icon="azure">Microsoft-managed ACA control plane</div>
+                <div class="node">Create · inspect · exec · stop · delete</div>
+              </div>
+
+              <div class="vertical-arrow bad-link">
+                Provider allocation and cleanup are coupled to server availability
+              </div>
+
+              <div class="boundary sandbox">
+                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
+                <div class="node">Agent runtime, checkout and sandbox disk</div>
+              </div>
+
+              <div class="callout bad">
+                A Workbench redeploy can interrupt lifecycle decisions, lose in-process ownership,
+                and make recovery depend on reconstructing provider state from partial evidence.
+              </div>
+            </div>
+          </figure>
+
+          <figure>
+            <figcaption>After — durable, fenced lifecycle controller</figcaption>
+            <div class="diagram">
+              <div class="boundary server">
+                <div class="boundary-label" data-icon="server">Workbench server · replaceable application process</div>
+                <div class="node">User API, tasks and conversations</div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Authenticated lifecycle commands and status reads
+              </div>
+
+              <div class="boundary controller">
+                <div class="boundary-label" data-icon="server">Independent sandbox controller service</div>
+                <div class="node new">
+                  Durable commands, receipts, generations and fences
+                </div>
+                <div class="node new">Outbox, reconciliation and cleanup ownership</div>
+                <div class="node new">Separate controller PostgreSQL database</div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Provider-neutral operation → Azure adapter
+              </div>
+
+              <div class="boundary platform">
+                <div class="boundary-label" data-icon="azure">Microsoft-managed ACA control plane</div>
+                <div class="node">Create · inspect · stop · delete</div>
+              </div>
+
+              <div class="vertical-arrow good-link">Exact fenced allocation</div>
+
+              <div class="boundary sandbox">
+                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
+                <div class="node">Agent runtime, checkout and sandbox disk</div>
+              </div>
+
+              <div class="callout good">
+                Workbench can redeploy without becoming the owner of an unfinished Azure
+                operation. The controller retains exact, durable cleanup authority.
+              </div>
+            </div>
+          </figure>
+        </div>
+
+        <p class="caption">
+          The controller stores infrastructure coordination only: locators, operation identities,
+          fences, receipts and cleanup work. Agent transcripts, prompts, credentials and repository
+          data remain outside it.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Runtime operations</h2>
+        <p class="section-note">
+          Replace repeated ACA <code>exec</code> calls with an authenticated RPC channel hosted by
+          the sandbox runtime.
+        </p>
+
+        <div class="comparison">
+          <figure>
+            <figcaption>Before — every operation competes for ACA exec</figcaption>
+            <div class="diagram">
+              <div class="boundary server">
+                <div class="boundary-label" data-icon="server">Workbench server · Azure Container App</div>
+                <div class="node">Conversation hydration, storage reads, setup and repair</div>
+              </div>
+
+              <div class="vertical-arrow bad-link">
+                Every storage/control operation calls ACA native exec
+              </div>
+
+              <div class="boundary platform">
+                <div class="boundary-label" data-icon="azure">Microsoft-managed ACA operation plane</div>
+                <div class="node replaced">Serialized create / exec / stop / resume queue</div>
+                <div class="node replaced">Contention returns <strong>409 sandbox_busy</strong></div>
+              </div>
+
+              <div class="vertical-arrow bad-link">
+                ACA starts a shell process for each request
+              </div>
+
+              <div class="boundary sandbox">
+                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
+                <div class="node">Agent runtime</div>
+                <div class="node">Sandbox disk and state</div>
+              </div>
+
+              <div class="callout bad">
+                Runtime work and passive server reads contend for the same operation plane. A
+                healthy sandbox can appear unavailable.
+              </div>
+            </div>
+          </figure>
+
+          <figure>
+            <figcaption>After — controller for lifecycle, direct RPC for runtime data</figcaption>
+            <div class="diagram">
+              <div class="boundary server">
+                <div class="boundary-label" data-icon="server">Workbench server · Azure Container App</div>
+                <div class="node new">Typed, authenticated Sandbox RPC client</div>
+                <div class="node new">Sandbox lifecycle client</div>
+              </div>
+
+              <div class="row">
+                <div class="node">Lifecycle commands</div>
+                <div class="arrow">→</div>
+                <div class="node new">Sandbox controller</div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Controller serializes and fences lifecycle operations
+              </div>
+
+              <div class="boundary platform">
+                <div class="boundary-label" data-icon="azure">Microsoft-managed ACA operation plane</div>
+                <div class="node">
+                  Controller creates, inspects, stops, reconciles and deletes the allocation
+                </div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Exact allocated sandbox + authorized runtime locator returned to Workbench
+              </div>
+
+              <div class="boundary sandbox">
+                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
+                <div class="node new">Sandbox runtime RPC server</div>
+                <div class="vertical-arrow good-link">Routes by protocol and path</div>
+                <div class="split">
+                  <div class="node">Copilot SDK proxy</div>
+                  <div class="node new">Storage / control handlers</div>
+                </div>
+                <div class="node">Sandbox disk and state</div>
+              </div>
+
+              <div class="side-note">
+                Runtime data path: Workbench opens authenticated RPC to the controller-selected
+                sandbox. The traffic does not proxy through the controller or ACA exec.
+              </div>
+
+              <div class="callout good">
+                The controller remains the lifecycle authority. Only passive reads and routine
+                runtime commands bypass ACA exec.
+              </div>
+            </div>
+          </figure>
+        </div>
+
+        <p class="caption">
+          #572 is the first data-plane slice of this model: it adds authenticated storage-control
+          RPC to the existing sandbox runtime bridge. “Direct” describes only the runtime data
+          path: the controller first allocates, fences and authorizes the sandbox, while Workbench
+          then sends runtime traffic to that exact sandbox without turning the controller into a
+          transcript or storage proxy.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Secret delivery</h2>
+        <p class="section-note">
+          Stop staging credentials as files that must later be removed through the same unreliable
+          exec path.
+        </p>
+
+        <div class="comparison">
+          <figure>
+            <figcaption>Before — secrets staged on sandbox disk</figcaption>
+            <div class="diagram">
+              <div class="boundary server">
+                <div class="boundary-label" data-icon="server">Workbench server</div>
+                <div class="node">Receives actor-scoped credentials</div>
+              </div>
+
+              <div class="vertical-arrow bad-link">
+                ACA exec writes credentials into the sandbox
+              </div>
+
+              <div class="boundary sandbox">
+                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
+                <div class="node file replaced">/tmp/... credential files</div>
+                <div class="node">Launcher reads secret into process environment</div>
+                <div class="node file replaced">Later exec: rm /tmp/...</div>
+              </div>
+
+              <div class="vertical-arrow bad-link">
+                Cleanup makes another call through the same busy queue
+              </div>
+
+              <div class="boundary platform">
+                <div class="boundary-label" data-icon="azure">Cleanup dependency</div>
+                <div class="node replaced">DELETE still requires ACA exec availability</div>
+              </div>
+
+              <div class="callout bad">
+                If the operation plane is busy or the server redeploys mid-flow, cleanup is delayed
+                or uncertain and secret material can remain on disk.
+              </div>
+            </div>
+          </figure>
+
+          <figure>
+            <figcaption>After — controller binds infrastructure; secrets never enter it</figcaption>
+            <div class="diagram">
+              <div class="boundary controller">
+                <div class="boundary-label" data-icon="server">Sandbox controller</div>
+                <div class="node new">
+                  Creates sandbox with approved egress policy and secret references
+                </div>
+                <div class="side-note" style="margin-top: 8px">
+                  Stores references and lifecycle metadata only—never actor credentials or
+                  decrypted bootstrap payloads.
+                </div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Fenced lifecycle allocation and ACA policy binding
+              </div>
+
+              <div class="boundary policy">
+                <div class="boundary-label" data-icon="azure">ACA Sandbox Secrets / egress policy</div>
+                <div class="node new">
+                  Holds group secret references and an exact host/path/POST injection rule
+                </div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Policy is attached to the allocated sandbox
+              </div>
+
+              <div class="boundary sandbox">
+                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
+                <div class="node new">
+                  Root-owned launcher makes one fixed HTTPS bootstrap request
+                </div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                ACA injects capability headers after traffic leaves the VM
+              </div>
+
+              <div class="boundary server">
+                <div class="boundary-label" data-icon="server">Workbench credential broker</div>
+                <div class="node new">
+                  Validates one-use capability, actor ownership and sandbox placement
+                </div>
+              </div>
+
+              <div class="vertical-arrow good-link">
+                Returns current credentials once to the validated launcher
+              </div>
+
+              <div class="boundary sandbox">
+                <div class="boundary-label" data-icon="storage">ACA sandbox compute</div>
+                <div class="node new">
+                  Secret enters only the newly spawned process environment
+                </div>
+                <div class="node file new">No credential file in /tmp</div>
+              </div>
+
+              <div class="callout good">
+                Secret delivery no longer depends on writing and later deleting files through ACA
+                exec. Rotation and access remain controlled outside the sandbox filesystem.
+              </div>
+            </div>
+          </figure>
+        </div>
+
+        <p class="caption">
+          The credential-bootstrap work keeps the capability, nonce and locator out of command
+          text, URLs, files and diagnostics. ACA injects them only on the exact approved outbound
+          request; the launcher then passes credentials directly to the intended child process.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
