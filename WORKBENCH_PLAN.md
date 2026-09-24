@@ -11,7 +11,7 @@ Tenant concept work-centric and provide a home for artifacts spanning Threads.
 Recent, automatic archival, and Sleeping replace manual task bookkeeping.
 The card grid provides a zoom level for managing parallel work with minimal effort.
 The companion [visual walkthrough](public/workbench-journey.html) now leads
-with an abbreviated, eight-screen grid-first journey. The earlier independent
+with an abbreviated, nine-screen grid-first journey. The earlier independent
 three-column snapshots live at [their own URL](public/workbench-earlier.html),
 not in a hidden subtree of the current page. It does not connect
 to agents, git hosts, invitation services, or a scheduler.
@@ -72,12 +72,16 @@ not silently presented as current requirements.
   it does not copy the file or remove the Thread reference. Its icon then becomes
   Demote, which removes only the Project reference. The same operation is available
   when viewing the shared Artifact from Project context.
+  The promotion example opens a Thread's plan.md tab and explains the shared
+  reference and reversible demotion. Promotion actions appear only in open file
+  tabs; file references in Comments simply open the file.
 - **Artifacts** are curated files directly attached to Projects or Threads.
   **Attachments** are files attached to Comments/messages, not another name
   for all files. Both user and agent Comments can show attachments. The
   composer supports a paperclip picker and pasted images/files; ordinary
   pasted text stays Comment text. Save as Artifact retains the original
-  attachment on its Comment and adds it to the curated collection.
+  attachment on its Comment and adds it to the curated collection. Open the
+  attachment's file tab to access this action.
 - Cards have a title/control row and a horizontally scrollable widget carousel,
   not separate descriptions, status rows, or footers. Checklists lead most cards;
   blocked work leads with a Question, completed work with directory diff totals
@@ -148,10 +152,10 @@ not silently presented as current requirements.
   Reload clears local changes. The historical root demo remains
   unchanged.
 
-The eight independent snapshots show Top context with inline New Project,
+The nine independent snapshots show Top context with inline New Project,
 an empty Project, onboarding Question plus repo/invite controls, the first
 Thread alongside the Facilitator's original next-steps Comment, progressed
-Thread detail, an editable new Thread card, and the twelve-card recent grid
+Thread detail, Artifact promotion, an editable new Thread card, and the twelve-card recent grid
 with two older Threads behind its divider, then a read-only view of Mira's work.
 Three visible mobile examples use
 the same renderer and independent state, with animated swipe/tap navigation

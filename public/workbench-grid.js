@@ -6,9 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ['setup','03','Questions and controls arrive in the work.','The familiar Question, repository, and invitation widgets live inside Project context. Artifacts can be dropped or pasted below the controls.'],
     ['first','04','The first Thread starts moving.','The Facilitator has completed onboarding. The first card appears while Project context remains open.'],
     ['thread','05','Open the work already in progress.','A Thread opens beside its card. Review its checklist, Comments, and curated Artifacts without an extra side panel.'],
-    ['new','06','Start another subject.','The new card is editable immediately. Save its description to start a Thread; existing work continues alongside it.'],
-    ['full','07','A grid that grows with the Project.','Steer agents directly from the card view: scroll within a carousel slide to add instructions or attach context below its widget, without opening the Thread. The same Comment and draft appear in Thread details. Scroll the grid to the wavy divider to reveal older Threads.'],
-    ['member','08','See the work through a teammate’s view.','Mira is selected. Orange marks her avatar and the edges of the content, while the titlebar stays neutral. Browse her Threads and Artifacts read-only; your private agents remain available only in your own view.']
+    ['promotion','06','Make a Thread Artifact shared Project context.','The plan.md Artifact tab is open. Use its double-chevron Promote icon to reference this same Artifact from the Project, without copying it or removing it from the Thread. Open the Project folder to find it there. The icon becomes Demote, which removes only the Project reference. Comment file references only open files; promotion lives in the open file tab.'],
+    ['new','07','Start another subject.','The new card is editable immediately. Save its description to start a Thread; existing work continues alongside it.'],
+    ['full','08','A grid that grows with the Project.','Steer agents directly from the card view: scroll within a carousel slide to add instructions or attach context below its widget, without opening the Thread. The same Comment and draft appear in Thread details. Scroll the grid to the wavy divider to reveal older Threads.'],
+    ['member','09','See the work through a teammate’s view.','Mira is selected. Orange marks her avatar and the edges of the content, while the titlebar stays neutral. Browse her Threads and Artifacts read-only; your private agents remain available only in your own view.']
   ];
   document.querySelector('#grid-journey').innerHTML=moments.map(([mode,n,title,copy])=>`<article class="gw-moment" id="grid-${mode}"><header class="gw-moment-heading"><span>${n}</span><div><h3>${title}</h3><p>${copy}</p></div></header><div class="grid-workbench" data-grid-mode="${mode}" id="${mode==='full'?'grid-workbench':`workspace-${mode}`}"></div></article>`).join('');
   document.querySelector('#grid-mobile-examples').innerHTML=[['first','Project context'],['thread','Thread detail'],['full','Browse the work']].map(([mode,name],i)=>`<article class="mobile-study"><h3>${i+1} / ${name}</h3><div class="grid-workbench gw-phone" data-grid-mode="${mode}" id="workspace-mobile-${i}"></div></article>`).join('');
@@ -93,10 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
         {id:`c${++serial}`,author:'Thread agent',text:'I have gathered the initial notes. Save them as an Artifact if they should become part of the curated work.',attachments:[doc('session-notes.md','# Session notes\n\nThe grid helps monitoring. Details should preserve focus and drafts.')]}
       ]
     })).map((t,i)=>({...t,artifacts:t.artifacts.slice(0,mode==='first'?1:mode==='full'?3+i%5:4).map((f,j)=>({...f,unread:j<2,fresh:j===0}))}));
-    if(['first','thread','new'].includes(mode))threads.splice(mode==='first'?1:2);
+    if(['first','thread','promotion','new'].includes(mode))threads.splice(mode==='first'?1:2);
     if(mode==='new')threads.unshift(subject('draft-thread','', '',{isNew:true,question:false}));
     state={project:preservedProject || project,threads,active:['empty','setup','first'].includes(mode)?'project':mode==='thread'?'thread-0':null,filter:'Recent',member:'you',query:'',full:false,top:mode==='top',showOlder:false,mobileView:mode==='thread'?2:['empty','setup','first'].includes(mode)?0:1,lastThread:threads[0]?.id};
     if(mode==='member'){state.member='mira';state.active='thread-3';state.lastThread='thread-3';state.mobileView=2;}
+    if(mode==='promotion'){
+      state.active=threads[0].id;state.mobileView=2;
+      threads[0].tab=threads[0].artifacts[0].id;
+      threads[0].artifacts[0].unread=false;
+      threads[0].comments.push({id:`c${++serial}`,author:'Thread agent',text:'The plan is ready to share across the Project. Open its Artifact tab to promote it.',attachments:[threads[0].artifacts[0]]});
+    }
     renderShell();
   }
   const current = () => !state.active || state.active==='project' ? state.project : state.threads.find(t=>t.id===state.active);
@@ -318,8 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syncMobile();
   }
   function commentMarkup(comment) {
-    const owner=current();
-    return `<article class="comment gw-comment ${comment.author==='You'?'':'agent-comment'}"><div class="comment-head">${comment.author==='You'?avatar('you'):'<span class="activity-dot"></span>'}${escape(comment.author)}${comment.author==='You'?'<span class="status">Received</span>':''}</div><div>${markdown(comment.text)}</div><div class="gw-comment-files">${comment.attachments.map(f=>`<div><button data-g="attachment" data-id="${f.id}">${f.kind==='image'?`<img src="${escape(f.url)}" alt="">`:'▤'}<span>${escape(f.name)}</span></button><button data-g="promote" data-id="${f.id}" aria-label="${owner.artifacts.some(a=>a.id===f.id)?'Saved':'Save'} ${escape(f.name)} as a curated Artifact"${readonly() || owner.artifacts.some(a=>a.id===f.id)?' disabled':''}>${owner.artifacts.some(a=>a.id===f.id)?saveIcon:rankIcon}</button></div>`).join('')}</div></article>`;
+    return `<article class="comment gw-comment ${comment.author==='You'?'':'agent-comment'}"><div class="comment-head">${comment.author==='You'?avatar('you'):'<span class="activity-dot"></span>'}${escape(comment.author)}${comment.author==='You'?'<span class="status">Received</span>':''}</div><div>${markdown(comment.text)}</div><div class="gw-comment-files">${comment.attachments.map(f=>`<div><button data-g="attachment" data-id="${f.id}">${f.kind==='image'?`<img src="${escape(f.url)}" alt="">`:'▤'}<span>${escape(f.name)}</span></button></div>`).join('')}</div></article>`;
   }
   function controlsMarkup(owner,locked) {
     return `<section class="gw-controls"><h4>Controls</h4><article class="widget repo-widget"><div class="widget-head">⌘ Project Repos</div><div class="repo-list">${(owner.repos||[]).map(url=>`<div class="repo-row"><span>${escape(url.replace('https://github.com/',''))}</span><button class="tiny" data-g="remove-repo" data-url="${escape(url)}" aria-label="Remove repository ${escape(url)}"${locked?' disabled':''}>${cancelIcon}</button></div>`).join('') || '<p>No Repos attached.</p>'}</div><form class="gw-repo-form"><input type="url" name="url" required placeholder="https://github.com/owner/repo" aria-label="Repository git URL"${locked?' disabled':''}><button type="submit" aria-label="Attach repository"${locked?' disabled':''}>${clip}</button></form></article><article class="widget"><div class="widget-head">◎ Project members</div><div class="member-row">${avatar('you')}<span>You <small>· owner</small></span><button class="tiny" data-g="invite" aria-label="Invite member"${locked?' disabled':''}>${inviteIcon}</button></div>${owner.invited?`<p>${escape(owner.invited)} · invitation pending</p>`:''}<form class="gw-invite-form" hidden><input type="email" name="email" required placeholder="teammate@example.com" aria-label="Teammate email"><button type="submit" aria-label="Send invitation">${sendIcon}</button></form><p>Keep working. Invitations are optional.</p></article></section>`;
@@ -339,7 +345,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<button data-g="project-artifact" data-id="${file.id}" class="gw-icon-action ${promoted?'gw-demote':''}" aria-label="${promoted?'Demote: remove Project reference; keep Thread Artifact':'Promote to Project artifact: share a reference, not a copy'}"${readonly()?' disabled':''}>${rankIcon}</button>`;
   }
   function artifactActions(file) {
-    return `<span class="gw-artifact-actions">${projectArtifactButton(file)}<button data-g="expand" class="gw-icon-action" aria-label="${state.full?'Restore pane size':'Expand Artifact'}">${state.full?restoreIcon:expandIcon}</button></span>`;
+    const attachment=file && !current().artifacts.some(f=>f.id===file.id);
+    const promote=attachment?`<button data-g="promote" data-id="${file.id}" class="gw-icon-action" aria-label="Save ${escape(file.name)} as a curated Artifact"${readonly()?' disabled':''}>${rankIcon}</button>`:projectArtifactButton(file);
+    return `<span class="gw-artifact-actions">${promote}<button data-g="expand" class="gw-icon-action" aria-label="${state.full?'Restore pane size':'Expand Artifact'}">${state.full?restoreIcon:expandIcon}</button></span>`;
   }
   function pendingMarkup(owner) {
     return owner.pending.map(f=>`<span>${escape(f.name)}<button type="button" data-g="remove-pending" data-id="${f.id}" aria-label="Remove ${escape(f.name)} from the draft"${readonly(owner)?' disabled':''}>×</button></span>`).join('');
